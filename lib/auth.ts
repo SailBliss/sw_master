@@ -23,8 +23,8 @@ function getJwtSecret(): Uint8Array {
 }
 
 function getBaseUrl(): string {
-  const url = process.env.NEXT_PUBLIC_BASE_URL
-  if (!url) throw new Error('Missing env var: NEXT_PUBLIC_BASE_URL')
+  const url = process.env.NEXT_PUBLIC_SITE_URL
+  if (!url) throw new Error('Missing env var: NEXT_PUBLIC_SITE_URL')
   return url
 }
 
