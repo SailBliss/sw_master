@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const BUCKET_RECEIPTS = 'recipts'
 const BUCKET_SCREENSHOTS = 'post_screenshots'
