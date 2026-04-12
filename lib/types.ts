@@ -5,6 +5,7 @@ export type DirectoryProfile = {
   business_name: string;
   description: string | null;
   category: string | null;
+  city: string | null;
   business_phone: string;
   instagram_handle: string | null;
   website_url: string | null;
