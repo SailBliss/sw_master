@@ -66,3 +66,80 @@ export type SubmissionResult = {
   message: string;
   applicationId?: string;
 };
+
+// ---------------------------------------------------------------------------
+// M3 — Panel de administración
+// ---------------------------------------------------------------------------
+
+// Solicitud completa para revisión en el panel. Resultado de un JOIN entre
+// applications, entrepreneurs, business_profiles y products.
+export type AdminApplication = {
+  id: string;
+  status: 'pendiente' | 'aprobado' | 'rechazado';
+  amount_cop: number;
+  submitted_at: string;
+  reviewed_at: string | null;
+  notes: string | null;
+  receipt_path: string;
+  post_screenshot_path: string | null;
+  entrepreneur: {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+    cedula: string;
+    fb_profile_url: string | null;
+  };
+  business_profile: {
+    id: string;
+    business_name: string | null;
+    category: string | null;
+    description: string | null;
+    business_phone: string | null;
+    instagram_handle: string | null;
+    website_url: string | null;
+    directory_image_path: string | null;
+    offers_discount: boolean;
+    discount_details: string | null;
+  };
+  product: {
+    id: string;
+    name: string;
+    price_cop: number;
+    duration_days: number | null;
+  };
+};
+
+// Perfil completo para gestión administrativa. Agrega datos de entrepreneurs,
+// business_profiles, memberships y applications en una sola vista.
+export type AdminProfile = {
+  entrepreneur_id: string;
+  cedula: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  fb_profile_url: string | null;
+  business_name: string | null;
+  category: string | null;
+  description: string | null;
+  business_phone: string | null;
+  instagram_handle: string | null;
+  website_url: string | null;
+  other_socials: string | null;
+  directory_image_path: string | null;
+  offers_discount: boolean;
+  discount_details: string | null;
+  membership_status: 'active' | 'inactive' | null;
+  membership_start: string | null;
+  membership_end: string | null;
+  application_status: 'pendiente' | 'aprobado' | 'rechazado' | null;
+};
+
+// Membresía próxima a vencer o ya vencida. days_remaining es negativo si venció.
+export type MembershipAlert = {
+  entrepreneur_id: string;
+  full_name: string | null;
+  business_name: string | null;
+  membership_end: string;
+  days_remaining: number;
+};
