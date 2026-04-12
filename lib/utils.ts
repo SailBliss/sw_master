@@ -1,5 +1,7 @@
-// Converts a string to a URL-safe slug, handling accents and special characters
-export function slugify(text: string): string {
+// Converts text to a URL-safe slug, handling accents and special characters.
+// Accepts nullable input to avoid runtime crashes from unexpected DB values.
+export function slugify(text: string | null | undefined): string {
+  if (!text) return ''
   return text
     .toLowerCase()
     .replace(/[áàäâã]/g, 'a')
@@ -19,3 +21,14 @@ export function formatPhone(phone: string): string {
   const normalized = digits.startsWith('57') ? digits : `57${digits}`;
   return `https://wa.me/${normalized}`;
 }
+
+export const CATEGORIES: string[] = [
+  'Moda y accesorios',
+  'Salud y bienestar',
+  'Alimentación',
+  'Belleza y cuidado personal',
+  'Hogar y decoración',
+  'Educación y servicios',
+  'Tecnología',
+  'Arte y entretenimiento',
+]
