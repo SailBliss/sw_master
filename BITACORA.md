@@ -154,3 +154,27 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 - `lib/email.ts` — agrega `sendMagicLinkEmail({ to, magicLinkUrl })` con plantilla HTML y botón de acceso
 **Decisiones tomadas:** la respuesta de `/solicitar-acceso` es siempre 200 con el mismo mensaje, sin importar si el email existe — evita enumeración de usuarios. `useSearchParams()` se aisló en un sub-componente `InvalidLinkBanner` envuelto en `<Suspense>` porque Next.js 15+ lanza error de prerender si se usa directamente en el componente raíz de la página. Los errores de tipo `NEXT_REDIRECT` se re-lanzan en el catch del auth route porque Next.js los implementa como excepciones especiales — tragarlos cancelaría el redirect silenciosamente.
 **Cómo probarlo:** `npm run dev` → `/admin/login` muestra el formulario. POST a `/api/admin/solicitar-acceso` con email no registrado → 200 con mensaje genérico. Con email registrado → llega email con link. Clic en link → GET `/api/admin/auth?token=...` → cookie seteada → redirect a `/admin`. Segundo clic en el mismo link → redirect a `/admin/login?error=invalid`.
+
+---
+
+## M3 — Panel de administración: Membresías y Dashboard
+
+### Tarea — Página de membresías (`/admin/membresias`)
+
+**Qué hace:** muestra alertas de membresías vencidas o por vencer (< 7 días) y una tabla completa de todas las membresías ordenada activas primero.
+**Por qué existe:** permite a la admin identificar de un vistazo qué empresarias necesitan renovación o tienen membresías problemáticas.
+**Archivos creados o modificados:**
+- `app/admin/(panel)/membresias/page.tsx` — reemplaza el placeholder con la implementación completa
+**Decisiones tomadas:** las queries `getMembershipAlerts()` y `getAdminProfiles()` se ejecutan en paralelo con `Promise.all`. Los días restantes en la tabla se calculan en el componente (no en la capa de datos) porque `AdminProfile` ya tiene `membership_end` y no vale la pena duplicar la lógica de `daysFromNow` en `admin-data.ts`. El badge de días en la tabla usa color pero no repite el texto narrativo — la columna "Días restantes" muestra el número directamente, reservando el texto narrativo solo para las cards de alerta.
+**Cómo probarlo:** `npm run dev` → `/admin/membresias`. Sección 1 muestra cards si hay membresías activas próximas a vencer. Sección 2 muestra tabla completa ordenada.
+
+---
+
+### Tarea — Dashboard del panel (`/admin`)
+
+**Qué hace:** muestra 4 métricas clave (solicitudes pendientes, perfiles totales, perfiles activos, alertas), un saludo con la fecha en español, accesos rápidos y un banner de alerta si hay solicitudes pendientes.
+**Por qué existe:** es la primera pantalla tras el login — debe dar contexto inmediato sobre el estado del directorio sin necesidad de navegar.
+**Archivos creados o modificados:**
+- `app/admin/(panel)/page.tsx` — reemplaza el placeholder con el dashboard completo
+**Decisiones tomadas:** las 4 queries (`getAdminApplications('pendiente')`, `getAdminApplications()`, `getAdminProfiles()`, `getMembershipAlerts()`) se ejecutan en paralelo con `Promise.all`. `activeProfiles` se calcula en JS filtrando el resultado de `getAdminProfiles()` — evita una quinta query. El banner de solicitudes pendientes solo aparece si `pendingCount > 0`, condición evaluada en el servidor. La fecha se formatea con `toLocaleDateString('es-CO', ...)` directamente en el Server Component para garantizar consistencia de locale sin depender del cliente.
+**Cómo probarlo:** `npm run dev` → `/admin`. Verificar que el saludo muestra la fecha correcta en español. Si hay solicitudes pendientes, aparece el banner amarillo. Las 4 métricas deben reflejar el estado real de la base de datos.
