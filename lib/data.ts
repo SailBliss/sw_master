@@ -138,9 +138,6 @@ export async function getProfiles(filters?: ProfileFilters): Promise<DirectoryPr
 
     const { data, error } = await query
 
-    console.log('raw data length:', data?.length)
-    console.log('first row:', JSON.stringify(data?.[0]))
-
     if (error) {
       throw new Error(`Failed to fetch profiles: ${error.message}`)
     }
@@ -176,10 +173,6 @@ export async function getProfileBySlug(slug: string): Promise<DirectoryProfile |
     if (!slug || !slug.trim()) return null
 
     const profiles = await getProfiles()
-
-    console.log('slug:', slug)
-    console.log('total:', profiles.length)
-    profiles.forEach((p) => console.log('available:', p.slug))
 
     return profiles.find((profile) => profile.slug === slug) ?? null
   } catch (error) {
