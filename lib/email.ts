@@ -98,6 +98,37 @@ export async function notifyEntrepreneurApproved(data: {
   await sendEmail(data.to, subject, html)
 }
 
+export async function sendMagicLinkEmail(data: {
+  to: string
+  magicLinkUrl: string
+}): Promise<void> {
+  const subject = `Tu link de acceso al panel de SW Mujeres`
+  const html = `
+    <div style="font-family: sans-serif; color: #333; max-width: 600px;">
+      <h2 style="color: #7c3aed;">Acceso al panel de administración</h2>
+      <p>Hola, recibimos una solicitud de acceso al panel de SW Mujeres.</p>
+      <p>Haz clic en el botón para ingresar. Este link es válido por <strong>15 minutos</strong> y solo puede usarse una vez.</p>
+      <div style="margin: 32px 0; text-align: center;">
+        <a
+          href="${data.magicLinkUrl}"
+          style="background-color: #7c3aed; color: #fff; padding: 14px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;"
+        >
+          Ingresar al panel
+        </a>
+      </div>
+      <p style="font-size: 13px; color: #888;">
+        Si no solicitaste este link, ignora este mensaje. Tu cuenta permanece segura.
+      </p>
+      <p style="font-size: 13px; color: #aaa;">
+        O copia y pega esta URL en tu navegador:<br />
+        <a href="${data.magicLinkUrl}" style="color: #7c3aed;">${data.magicLinkUrl}</a>
+      </p>
+    </div>
+  `
+
+  await sendEmail(data.to, subject, html)
+}
+
 export async function notifyEntrepreneurRejected(data: {
   to: string
   entrepreneurName: string
