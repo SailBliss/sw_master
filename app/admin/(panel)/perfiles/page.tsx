@@ -69,11 +69,11 @@ export default async function AdminPerfilesPage({
           name="q"
           defaultValue={q ?? ''}
           placeholder="Buscar por empresaria o negocio…"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
         <button
           type="submit"
-          className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 transition-colors"
+          className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
         >
           Buscar
         </button>
@@ -138,7 +138,7 @@ export default async function AdminPerfilesPage({
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/perfiles/${p.entrepreneur_id}`}
-                      className="text-violet-600 hover:text-violet-800 font-medium"
+                      className="text-pink-500 hover:text-pink-700 font-medium"
                     >
                       Editar →
                     </Link>

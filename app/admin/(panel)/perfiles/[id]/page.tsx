@@ -186,7 +186,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="full_name"
                 defaultValue={profile.full_name ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -197,7 +197,7 @@ export default async function AdminPerfilDetailPage({
                 type="email"
                 name="email"
                 defaultValue={profile.email ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -208,7 +208,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="phone"
                 defaultValue={profile.phone ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -219,7 +219,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="fb_profile_url"
                 defaultValue={profile.fb_profile_url ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
           </div>
@@ -241,7 +241,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="business_name"
                 defaultValue={profile.business_name ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -251,7 +251,7 @@ export default async function AdminPerfilDetailPage({
               <select
                 name="category"
                 defaultValue={profile.category ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               >
                 <option value="">Seleccionar…</option>
                 {CATEGORIES.map((cat) => (
@@ -270,7 +270,7 @@ export default async function AdminPerfilDetailPage({
                 defaultValue={profile.description ?? ''}
                 maxLength={300}
                 rows={4}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"
               />
             </div>
             <div>
@@ -281,7 +281,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="business_phone"
                 defaultValue={profile.business_phone ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -293,7 +293,7 @@ export default async function AdminPerfilDetailPage({
                 name="instagram_handle"
                 defaultValue={profile.instagram_handle ?? ''}
                 placeholder="minegocio"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -304,7 +304,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="website_url"
                 defaultValue={profile.website_url ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div>
@@ -315,7 +315,7 @@ export default async function AdminPerfilDetailPage({
                 type="text"
                 name="other_socials"
                 defaultValue={profile.other_socials ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
             <div className="sm:col-span-2 space-y-3">
@@ -325,7 +325,7 @@ export default async function AdminPerfilDetailPage({
                   id="offers_discount"
                   name="offers_discount"
                   defaultChecked={profile.offers_discount}
-                  className="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                  className="h-4 w-4 rounded border-gray-300 text-pink-500 focus:ring-pink-500"
                 />
                 <label htmlFor="offers_discount" className="text-sm font-medium text-gray-700">
                   Ofrece descuento a miembros SW
@@ -340,7 +340,7 @@ export default async function AdminPerfilDetailPage({
                     type="text"
                     name="discount_details"
                     defaultValue={profile.discount_details ?? ''}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                   />
                 </div>
               )}
@@ -369,7 +369,7 @@ export default async function AdminPerfilDetailPage({
                   />
                 </div>
               ) : (
-                <div className="h-24 w-24 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 text-2xl font-bold border border-violet-200">
+                <div className="h-24 w-24 rounded-lg bg-pink-100 flex items-center justify-center text-pink-500 text-2xl font-bold border border-pink-200">
                   {initials}
                 </div>
               )}
@@ -383,7 +383,7 @@ export default async function AdminPerfilDetailPage({
                 type="file"
                 name="directory_image"
                 accept="image/*"
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100"
               />
               <p className="text-xs text-gray-400">
                 La nueva imagen reemplaza la anterior. Solo imágenes.
@@ -396,7 +396,7 @@ export default async function AdminPerfilDetailPage({
         <div className="flex justify-end">
           <button
             type="submit"
-            className="rounded-lg bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700 transition-colors"
+            className="rounded-lg bg-pink-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
           >
             Guardar cambios
           </button>

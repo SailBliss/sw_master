@@ -49,7 +49,7 @@ type Step3State = {
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
 const baseInput =
-  'w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-colors'
+  'w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-colors'
 const normalBorder = 'border-gray-300'
 const errorBorder = 'border-red-400'
 
@@ -95,7 +95,7 @@ function StepIndicator({ current }: { current: number }) {
             {i > 0 && (
               <div
                 className={`w-10 sm:w-16 h-0.5 ${
-                  step <= current ? 'bg-violet-500' : 'bg-gray-200'
+                  step <= current ? 'bg-pink-500' : 'bg-gray-200'
                 }`}
               />
             )}
@@ -103,9 +103,9 @@ function StepIndicator({ current }: { current: number }) {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all ${
                   isDone
-                    ? 'bg-violet-500 border-violet-500 text-white'
+                    ? 'bg-pink-500 border-pink-500 text-white'
                     : isActive
-                    ? 'bg-violet-600 border-violet-600 text-white shadow-md shadow-violet-200'
+                    ? 'bg-pink-500 border-pink-500 text-white shadow-md shadow-pink-200'
                     : 'bg-white border-gray-300 text-gray-400'
                 }`}
               >
@@ -113,7 +113,7 @@ function StepIndicator({ current }: { current: number }) {
               </div>
               <span
                 className={`text-xs hidden sm:block ${
-                  isActive ? 'text-violet-700 font-medium' : 'text-gray-400'
+                  isActive ? 'text-pink-600 font-medium' : 'text-gray-400'
                 }`}
               >
                 {label}
@@ -313,8 +313,8 @@ function Step2Form({
             onClick={() => onChange('offers_discount', true)}
             className={`flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${
               data.offers_discount
-                ? 'bg-violet-600 border-violet-600 text-white'
-                : 'bg-white border-gray-300 text-gray-600 hover:border-violet-300'
+                ? 'bg-pink-500 border-pink-500 text-white'
+                : 'bg-white border-gray-300 text-gray-600 hover:border-pink-200'
             }`}
           >
             Sí
@@ -324,8 +324,8 @@ function Step2Form({
             onClick={() => onChange('offers_discount', false)}
             className={`flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${
               !data.offers_discount
-                ? 'bg-violet-600 border-violet-600 text-white'
-                : 'bg-white border-gray-300 text-gray-600 hover:border-violet-300'
+                ? 'bg-pink-500 border-pink-500 text-white'
+                : 'bg-white border-gray-300 text-gray-600 hover:border-pink-200'
             }`}
           >
             No
@@ -405,15 +405,15 @@ function Step3Form({
                   onClick={() => onChange('product_id', product.id)}
                   className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${
                     isSelected
-                      ? 'border-violet-500 bg-violet-50'
-                      : 'border-gray-200 bg-white hover:border-violet-300'
+                      ? 'border-pink-500 bg-pink-50'
+                      : 'border-gray-200 bg-white hover:border-pink-200'
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-800">{product.name}</span>
                     <span
                       className={`text-sm font-semibold ${
-                        product.price_cop === 0 ? 'text-violet-600' : 'text-gray-800'
+                        product.price_cop === 0 ? 'text-pink-500' : 'text-gray-800'
                       }`}
                     >
                       {priceLabel}
@@ -447,7 +447,7 @@ function Step3Form({
           type="file"
           accept="image/*,application/pdf"
           onChange={(e) => onChange('receipt', e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 cursor-pointer"
+          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer"
         />
         {data.receipt && (
           <p className="text-xs text-gray-500 mt-1">
@@ -462,7 +462,7 @@ function Step3Form({
           type="file"
           accept="image/*"
           onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 cursor-pointer"
+          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer"
         />
         {data.post_screenshot && (
           <p className="text-xs text-gray-500 mt-1">
@@ -482,7 +482,7 @@ function Step3Form({
             type="checkbox"
             checked={data.consent_accepted}
             onChange={(e) => onChange('consent_accepted', e.target.checked)}
-            className="mt-0.5 w-4 h-4 rounded accent-violet-600 shrink-0"
+            className="mt-0.5 w-4 h-4 rounded accent-pink-500 shrink-0"
           />
           <span className="text-sm leading-snug">
             Acepto los términos de uso y autorizo a SW Mujeres a publicar mi información en el
@@ -690,7 +690,7 @@ export default function InscripcionPage() {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
         <div className="max-w-md w-full text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center mx-auto text-2xl">
+          <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mx-auto text-2xl">
             ✓
           </div>
           <h1 className="text-2xl font-bold text-gray-900">¡Solicitud recibida!</h1>
@@ -776,7 +776,7 @@ export default function InscripcionPage() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="px-6 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors"
+                className="px-6 py-2 bg-pink-500 text-white text-sm font-semibold rounded-lg hover:bg-pink-600 transition-colors"
               >
                 Continuar →
               </button>
@@ -785,7 +785,7 @@ export default function InscripcionPage() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting || productsLoading}
-                className="px-6 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-pink-500 text-white text-sm font-semibold rounded-lg hover:bg-pink-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {submitting ? 'Enviando...' : 'Enviar solicitud'}
               </button>

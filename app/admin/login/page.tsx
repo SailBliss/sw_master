@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo / nombre */}
         <div className="text-center mb-8">
-          <span className="inline-block text-2xl font-bold tracking-tight text-violet-700">
+          <span className="inline-block text-2xl font-bold tracking-tight text-pink-600">
             SW Mujeres
           </span>
           <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest">
@@ -100,7 +100,7 @@ export default function AdminLoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
                     placeholder="tu@correo.com"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
                   />
                 </div>
 
@@ -111,7 +111,7 @@ export default function AdminLoginPage() {
                 <button
                   type="submit"
                   disabled={loading || !email.trim()}
-                  className="w-full rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Enviando…' : 'Enviar código'}
                 </button>
@@ -146,7 +146,7 @@ export default function AdminLoginPage() {
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                     disabled={loading}
                     placeholder="123456"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50 tracking-widest text-center text-lg"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50 tracking-widest text-center text-lg"
                   />
                 </div>
 
@@ -157,7 +157,7 @@ export default function AdminLoginPage() {
                 <button
                   type="submit"
                   disabled={loading || code.length !== 6}
-                  className="w-full rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Verificando…' : 'Entrar'}
                 </button>
