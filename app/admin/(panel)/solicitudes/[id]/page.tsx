@@ -126,7 +126,7 @@ export default async function AdminSolicitudDetailPage({
             <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Perfil de Facebook</dt>
             <dd className="mt-1 text-sm">
               {ent.fb_profile_url ? (
-                <a href={ent.fb_profile_url} target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:underline break-all">
+                <a href={ent.fb_profile_url} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline break-all">
                   {ent.fb_profile_url}
                 </a>
               ) : (
@@ -154,7 +154,7 @@ export default async function AdminSolicitudDetailPage({
             <div className="sm:col-span-2">
               <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sitio web</dt>
               <dd className="mt-1 text-sm">
-                <a href={bp.website_url} target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:underline break-all">
+                <a href={bp.website_url} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline break-all">
                   {bp.website_url}
                 </a>
               </dd>

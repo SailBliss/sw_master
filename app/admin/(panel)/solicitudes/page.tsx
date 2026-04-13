@@ -82,7 +82,7 @@ export default async function AdminSolicitudesPage({
               href={tab.href}
               className={`flex items-center gap-1.5 pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
                 isActive
-                  ? 'border-violet-600 text-violet-600'
+                  ? 'border-pink-500 text-pink-500'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -134,7 +134,7 @@ export default async function AdminSolicitudesPage({
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/solicitudes/${s.id}`}
-                      className="text-violet-600 hover:text-violet-800 font-medium"
+                      className="text-pink-500 hover:text-pink-700 font-medium"
                     >
                       Ver detalle →
                     </Link>

@@ -57,7 +57,7 @@ function ProfileCard({ profile }: { profile: DirectoryProfile }) {
             className="w-12 h-12 rounded-full object-cover shrink-0"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold shrink-0">
+          <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-sm font-semibold shrink-0">
             {getInitials(profile.business_name)}
           </div>
         )}
@@ -74,7 +74,7 @@ function ProfileCard({ profile }: { profile: DirectoryProfile }) {
       )}
 
       <div className="mt-auto">
-        <span className="inline-flex items-center gap-1 text-xs font-medium bg-violet-50 text-violet-700 px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 text-xs font-medium bg-pink-50 text-pink-600 px-2 py-0.5 rounded-full">
           ✓ SW Verificada
         </span>
       </div>
@@ -124,11 +124,11 @@ export default async function DirectorioPage({
             name="q"
             defaultValue={q}
             placeholder="Buscar emprendimiento o descripción..."
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
           />
           <button
             type="submit"
-            className="bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors"
+            className="bg-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-pink-600 transition-colors"
           >
             Buscar
           </button>
@@ -155,8 +155,8 @@ export default async function DirectorioPage({
                 href={href}
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                   isActive
-                    ? 'bg-violet-600 text-white border-violet-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-violet-400 hover:text-violet-700'
+                    ? 'bg-pink-500 text-white border-pink-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-pink-300 hover:text-pink-600'
                 }`}
               >
                 {cat}
@@ -172,8 +172,8 @@ export default async function DirectorioPage({
             href={buildUrl({ q: q || undefined, categoria: categoria || undefined })}
             className={`px-3 py-1 rounded-full text-sm border transition-colors ${
               !ciudad
-                ? 'bg-violet-600 text-white border-violet-600'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-violet-400 hover:text-violet-700'
+                ? 'bg-pink-500 text-white border-pink-500'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-pink-300 hover:text-pink-600'
             }`}
           >
             Todas
@@ -189,8 +189,8 @@ export default async function DirectorioPage({
                 href={href}
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                   isActive
-                    ? 'bg-violet-600 text-white border-violet-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-violet-400 hover:text-violet-700'
+                    ? 'bg-pink-500 text-white border-pink-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-pink-300 hover:text-pink-600'
                 }`}
               >
                 {cit}
@@ -214,7 +214,7 @@ export default async function DirectorioPage({
             </p>
             <a
               href="/directorio"
-              className="inline-block text-violet-600 hover:underline text-sm"
+              className="inline-block text-pink-500 hover:underline text-sm"
             >
               Ver todos los emprendimientos
             </a>
