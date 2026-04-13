@@ -134,6 +134,35 @@ export async function sendMagicLinkEmail(data: {
   }
 }
 
+export async function sendOtpEmail(data: {
+  to: string
+  code: string
+}): Promise<void> {
+  const subject = `Tu código de acceso SW — ${data.code}`
+  const html = `
+    <div style="font-family: sans-serif; color: #333; max-width: 600px;">
+      <h2 style="color: #7c3aed;">Acceso al panel de administración</h2>
+      <p>Tu código de acceso es:</p>
+      <div style="margin: 24px 0; text-align: center;">
+        <span style="font-size: 48px; font-weight: bold; letter-spacing: 12px; color: #7c3aed;">
+          ${data.code}
+        </span>
+      </div>
+      <p style="color: #555;">Válido por <strong>10 minutos</strong>. Solo puede usarse una vez.</p>
+      <p style="font-size: 13px; color: #888; margin-top: 24px;">
+        Si no solicitaste este código, ignora este mensaje. Tu cuenta permanece segura.
+      </p>
+    </div>
+  `
+
+  try {
+    await sendEmail(data.to, subject, html)
+  } catch (err) {
+    console.error('NODEMAILER ERROR:', err)
+    throw err
+  }
+}
+
 export async function notifyEntrepreneurRejected(data: {
   to: string
   entrepreneurName: string

@@ -1,8 +1,7 @@
 // lib/auth.ts — Lógica de autenticación del panel de administración.
-// Magic links + JWT. SOLO importar desde API routes o Server Components.
+// OTP de 6 dígitos + JWT. SOLO importar desde API routes o Server Components.
 // Nunca desde Client Components.
 
-import crypto from 'crypto'
 import { SignJWT, jwtVerify } from 'jose'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
@@ -20,12 +19,6 @@ function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET
   if (!secret) throw new Error('Missing env var: JWT_SECRET')
   return new TextEncoder().encode(secret)
-}
-
-function getBaseUrl(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL
-  if (!url) throw new Error('Missing env var: NEXT_PUBLIC_SITE_URL')
-  return url
 }
 
 // ---------------------------------------------------------------------------
@@ -51,54 +44,54 @@ export async function isEmailAllowed(email: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
-// createMagicLink
+// createOtp
 // ---------------------------------------------------------------------------
 
 /**
- * Genera un magic link de un solo uso válido por 15 minutos.
- * Inserta el token en admin_magic_links y devuelve la URL completa.
+ * Genera un código OTP de 6 dígitos válido por 10 minutos.
+ * Inserta el código en admin_magic_links (campo token) y lo devuelve.
  */
-export async function createMagicLink(email: string): Promise<string> {
-  const token = crypto.randomBytes(32).toString('hex')
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
+export async function createOtp(email: string): Promise<string> {
+  const code = Math.floor(100000 + Math.random() * 900000).toString()
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
   const { error } = await supabaseAdmin.from('admin_magic_links').insert({
     email: email.toLowerCase().trim(),
-    token,
+    token: code,
     expires_at: expiresAt,
   })
 
   if (error) {
-    throw new Error(`Error al crear magic link: ${error.message}`)
+    throw new Error(`Error al crear OTP: ${error.message}`)
   }
 
-  const baseUrl = getBaseUrl()
-  return `${baseUrl}/admin/auth?token=${token}`
+  return code
 }
 
 // ---------------------------------------------------------------------------
-// verifyMagicLink
+// verifyOtp
 // ---------------------------------------------------------------------------
 
 /**
- * Valida un token de magic link.
- * Devuelve el email si el token es válido y lo marca como usado.
- * Devuelve null si el token no existe, ya fue usado, o expiró.
+ * Valida un código OTP para el email dado.
+ * Devuelve true si el código es válido y lo marca como usado.
+ * Devuelve false si no existe, ya fue usado, o expiró.
  */
-export async function verifyMagicLink(token: string): Promise<string | null> {
+export async function verifyOtp(email: string, code: string): Promise<boolean> {
   const { data, error } = await supabaseAdmin
     .from('admin_magic_links')
-    .select('id, email, used_at, expires_at')
-    .eq('token', token)
+    .select('id, used_at, expires_at')
+    .eq('email', email.toLowerCase().trim())
+    .eq('token', code)
     .maybeSingle()
 
   if (error) {
-    throw new Error(`Error al verificar magic link: ${error.message}`)
+    throw new Error(`Error al verificar OTP: ${error.message}`)
   }
 
-  if (!data) return null
-  if (data.used_at !== null) return null
-  if (new Date(data.expires_at) < new Date()) return null
+  if (!data) return false
+  if (data.used_at !== null) return false
+  if (new Date(data.expires_at) < new Date()) return false
 
   // Marcar como usado
   const { error: updateError } = await supabaseAdmin
@@ -107,10 +100,10 @@ export async function verifyMagicLink(token: string): Promise<string | null> {
     .eq('id', data.id)
 
   if (updateError) {
-    throw new Error(`Error al marcar token como usado: ${updateError.message}`)
+    throw new Error(`Error al marcar OTP como usado: ${updateError.message}`)
   }
 
-  return data.email
+  return true
 }
 
 // ---------------------------------------------------------------------------
