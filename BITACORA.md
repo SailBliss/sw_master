@@ -178,3 +178,18 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 - `app/admin/(panel)/page.tsx` — reemplaza el placeholder con el dashboard completo
 **Decisiones tomadas:** las 4 queries (`getAdminApplications('pendiente')`, `getAdminApplications()`, `getAdminProfiles()`, `getMembershipAlerts()`) se ejecutan en paralelo con `Promise.all`. `activeProfiles` se calcula en JS filtrando el resultado de `getAdminProfiles()` — evita una quinta query. El banner de solicitudes pendientes solo aparece si `pendingCount > 0`, condición evaluada en el servidor. La fecha se formatea con `toLocaleDateString('es-CO', ...)` directamente en el Server Component para garantizar consistencia de locale sin depender del cliente.
 **Cómo probarlo:** `npm run dev` → `/admin`. Verificar que el saludo muestra la fecha correcta en español. Si hay solicitudes pendientes, aparece el banner amarillo. Las 4 métricas deben reflejar el estado real de la base de datos.
+
+---
+## Migración de magic links a OTP de 6 dígitos
+
+**Qué hace:** reemplaza el flujo de autenticación admin de magic links por un código OTP de 6 dígitos enviado al correo, con un formulario de dos pasos en `/admin/login`.
+**Por qué existe:** los magic links requieren que el admin salte entre el cliente de correo y el navegador con el estado de sesión activo, lo que es frágil en móvil. Un OTP de 6 dígitos es más simple y funciona en cualquier dispositivo.
+**Archivos creados o modificados:**
+- `lib/auth.ts` — reemplazado: se eliminaron `createMagicLink` y `verifyMagicLink`; se agregaron `createOtp` y `verifyOtp`. Se mantuvieron `isEmailAllowed`, `createSession`, `verifySession` y `SESSION_COOKIE_NAME`.
+- `lib/email.ts` — se agregó `sendOtpEmail({ to, code })`. Las funciones existentes se mantienen intactas.
+- `app/api/admin/solicitar-acceso/route.ts` — reemplazado: ahora llama `createOtp` + `sendOtpEmail` en vez de `createMagicLink` + `sendMagicLinkEmail`.
+- `app/api/admin/verificar-otp/route.ts` — creado nuevo: valida el OTP, crea la sesión JWT y setea la cookie `sw_admin_session`.
+- `app/admin/login/page.tsx` — reemplazado: formulario de dos pasos (email → código OTP).
+- `app/api/admin/auth/route.ts` — eliminado: ya no se necesita (era el callback de magic links).
+**Decisiones tomadas:** se reutiliza la tabla `admin_magic_links` guardando el código de 6 dígitos en el campo `token` — evita crear una nueva tabla. El OTP expira en 10 minutos (antes los magic links duraban 15). La ruta `verificar-otp` devuelve `{ ok: true }` y deja que el cliente haga `window.location.href = '/admin'` en vez de usar `redirect()` del servidor — esto garantiza que la cookie ya esté seteada en el navegador antes de la navegación; `redirect()` en route handlers ocurre en el mismo response y puede causar race conditions con la cookie en algunos browsers. El input del código filtra caracteres no numéricos en el `onChange` para evitar que el usuario ingrese letras.
+**Cómo probarlo:** `npm run dev` → `/admin/login`. Ingresar un email que esté en `admin_allowlist`. Verificar que llega el email con el código. Ingresar el código de 6 dígitos. Verificar redirect a `/admin`. Probar con código incorrecto — debe mostrar "Código inválido o expirado".

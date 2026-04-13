@@ -1,13 +1,9 @@
-// Recibe un email y, si está en admin_allowlist, genera y envía un magic link.
+// Recibe un email y, si está en admin_allowlist, genera y envía un OTP de 6 dígitos.
 // Siempre responde con el mismo mensaje genérico para no revelar si el email existe.
 
 import { NextRequest, NextResponse } from 'next/server'
-import { isEmailAllowed, createMagicLink } from '@/lib/auth'
-import { sendMagicLinkEmail } from '@/lib/email'
-
-const GENERIC_OK = {
-  message: 'Si tu correo está registrado, recibirás un link de acceso en breve.',
-}
+import { isEmailAllowed, createOtp } from '@/lib/auth'
+import { sendOtpEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: unknown
@@ -38,13 +34,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Respuesta idéntica si el email no está permitido — evita enumeración de usuarios.
     if (!allowed) {
-      return NextResponse.json(GENERIC_OK, { status: 200 })
+      return NextResponse.json({ ok: true }, { status: 200 })
     }
 
-    const magicLinkUrl = await createMagicLink(email)
-    await sendMagicLinkEmail({ to: email, magicLinkUrl })
+    const code = await createOtp(email)
+    await sendOtpEmail({ to: email, code })
 
-    return NextResponse.json(GENERIC_OK, { status: 200 })
+    return NextResponse.json({ ok: true }, { status: 200 })
   } catch (err) {
     console.error('[POST /api/admin/solicitar-acceso] Error interno:', err)
     return NextResponse.json({ error: 'Error interno del servidor.' }, { status: 500 })
