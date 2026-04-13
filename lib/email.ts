@@ -126,7 +126,12 @@ export async function sendMagicLinkEmail(data: {
     </div>
   `
 
-  await sendEmail(data.to, subject, html)
+  try {
+    await sendEmail(data.to, subject, html)
+  } catch (err) {
+    console.error('NODEMAILER ERROR:', err)
+    throw err
+  }
 }
 
 export async function notifyEntrepreneurRejected(data: {
