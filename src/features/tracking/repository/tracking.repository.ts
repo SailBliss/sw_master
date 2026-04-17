@@ -17,7 +17,7 @@ export async function insertClick(profileId: string, type: ContactClickType): Pr
   if (error) throw new Error(`Error al registrar click: ${error.message}`)
 }
 
-export async function getStatsByToken(token: string): Promise<(ProfileStats & { businessName: string; profileId: string }) | null> {
+export async function getStatsByToken(token: string): Promise<(ProfileStats & { businessName: string }) | null> {
   const { data: profile, error: profileError } = await supabaseAdmin
     .from('business_profiles')
     .select('id, business_name')
@@ -104,27 +104,43 @@ export async function getTimeSeriesStats(profileId: string): Promise<TimeSeriesP
 }
 
 export async function getDirectoryAverages(): Promise<DirectoryAverages> {
-  // Count distinct active profiles
-  const { data: profiles, error: profErr } = await supabaseAdmin
+  // Get business_profile IDs for active memberships
+  const { data: activeMemberships, error: profErr } = await supabaseAdmin
     .from('memberships')
     .select('entrepreneur_id')
     .eq('status', 'active')
 
-  if (profErr) throw new Error(`Error al obtener perfiles activos: ${profErr.message}`)
-  const activeCount = profiles?.length ?? 0
-  if (activeCount === 0) return { avgViews: 0, avgClicks: 0 }
+  if (profErr) throw new Error(`Error al obtener membresías activas: ${profErr.message}`)
+  if (!activeMemberships || activeMemberships.length === 0) return { avgViews: 0, avgClicks: 0 }
+
+  // Get business_profile IDs for those entrepreneurs
+  const entrepreneurIds = activeMemberships.map((m) => m.entrepreneur_id as string)
+  const { data: bps, error: bpErr } = await supabaseAdmin
+    .from('business_profiles')
+    .select('id')
+    .in('entrepreneur_id', entrepreneurIds)
+
+  if (bpErr) throw new Error(`Error al obtener perfiles activos: ${bpErr.message}`)
+  const profileIds = (bps ?? []).map((bp) => bp.id as string)
+  if (profileIds.length === 0) return { avgViews: 0, avgClicks: 0 }
 
   const [{ count: totalViews, error: vErr }, { count: totalClicks, error: cErr }] =
     await Promise.all([
-      supabaseAdmin.from('profile_views').select('*', { count: 'exact', head: true }),
-      supabaseAdmin.from('contact_clicks').select('*', { count: 'exact', head: true }),
+      supabaseAdmin
+        .from('profile_views')
+        .select('*', { count: 'exact', head: true })
+        .in('profile_id', profileIds),
+      supabaseAdmin
+        .from('contact_clicks')
+        .select('*', { count: 'exact', head: true })
+        .in('profile_id', profileIds),
     ])
 
   if (vErr) throw new Error(`Error al contar vistas: ${vErr.message}`)
   if (cErr) throw new Error(`Error al contar clicks: ${cErr.message}`)
 
   return {
-    avgViews: Math.round((totalViews ?? 0) / activeCount),
-    avgClicks: Math.round((totalClicks ?? 0) / activeCount),
+    avgViews: Math.round((totalViews ?? 0) / profileIds.length),
+    avgClicks: Math.round((totalClicks ?? 0) / profileIds.length),
   }
 }
