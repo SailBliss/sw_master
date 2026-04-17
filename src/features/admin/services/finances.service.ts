@@ -84,10 +84,11 @@ export const financesService = {
   },
 
   async getFullSummary(): Promise<FinancesSummary> {
-    const [ledger, memberships, settings] = await Promise.all([
-      getLedger(),
-      getMembershipPayments(),
-      getAccountSettings(),
+    const settings = await getAccountSettings()
+    const fromDate = settings.opening_date
+    const [ledger, memberships] = await Promise.all([
+      getLedger(fromDate),
+      getMembershipPayments(fromDate),
     ])
     const entries = toFinancialEntries(ledger, memberships)
     const totalIngresos = entries
@@ -106,9 +107,11 @@ export const financesService = {
   },
 
   async getMonthlyGroups(): Promise<MonthlyGroup[]> {
+    const settings = await getAccountSettings()
+    const fromDate = settings.opening_date
     const [ledger, memberships] = await Promise.all([
-      getLedger(),
-      getMembershipPayments(),
+      getLedger(fromDate),
+      getMembershipPayments(fromDate),
     ])
     const entries = toFinancialEntries(ledger, memberships)
     const map = new Map<string, MonthlyGroup>()
