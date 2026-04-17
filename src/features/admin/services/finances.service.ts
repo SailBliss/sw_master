@@ -33,7 +33,7 @@ export const financesService = {
     return getLedger()
   },
 
-  async addEntry(entry: Omit<LedgerEntry, 'id' | 'created_at'>): Promise<void> {
+  async addEntry(entry: Omit<LedgerEntry, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
     return addEntry(entry)
   },
 
@@ -48,10 +48,10 @@ export const financesService = {
   async getFullSummary(): Promise<FinancesSummary> {
     const [entries, settings] = await Promise.all([getLedger(), getAccountSettings()])
     const totalIngresos = entries
-      .filter((e) => e.type === 'ingreso')
+      .filter((e) => e.direction === 'income')
       .reduce((sum, e) => sum + e.amount_cop, 0)
     const totalEgresos = entries
-      .filter((e) => e.type === 'egreso')
+      .filter((e) => e.direction === 'expense')
       .reduce((sum, e) => sum + e.amount_cop, 0)
     return {
       openingBalance: settings.opening_balance_cop,
@@ -67,7 +67,7 @@ export const financesService = {
     const map = new Map<string, MonthlyGroup>()
 
     for (const entry of entries) {
-      const d = new Date(entry.created_at)
+      const d = new Date(entry.entry_date + 'T12:00:00') // mediodía para evitar desfase UTC
       const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
       if (!map.has(month)) {
         map.set(month, {
@@ -80,11 +80,10 @@ export const financesService = {
       }
       const group = map.get(month)!
       group.entries.push(entry)
-      if (entry.type === 'ingreso') group.ingresos += entry.amount_cop
+      if (entry.direction === 'income') group.ingresos += entry.amount_cop
       else group.egresos += entry.amount_cop
     }
 
-    // Ordenar de más reciente a más antiguo
     return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month))
   },
 }

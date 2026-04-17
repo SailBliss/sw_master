@@ -2,9 +2,11 @@ import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
 
 export type LedgerEntry = {
   id: string
-  type: 'ingreso' | 'egreso'
+  direction: 'income' | 'expense'
   amount_cop: number
   description: string | null
+  counterparty: string | null
+  entry_date: string
   created_at: string
 }
 
@@ -16,15 +18,14 @@ export type AccountSettings = {
 export async function getLedger(): Promise<LedgerEntry[]> {
   const { data, error } = await supabaseAdmin
     .from('ledger_entries')
-    .select('id, type, amount_cop, description, created_at')
-    .order('created_at', { ascending: false })
-    .returns<LedgerEntry[]>()
+    .select('id, direction, amount_cop, description, counterparty, entry_date, created_at')
+    .order('entry_date', { ascending: false })
 
   if (error) throw new Error(`Error al obtener ledger: ${error.message}`)
-  return data ?? []
+  return (data ?? []) as LedgerEntry[]
 }
 
-export async function addEntry(entry: Omit<LedgerEntry, 'id' | 'created_at'>): Promise<void> {
+export async function addEntry(entry: Omit<LedgerEntry, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
   const { error } = await supabaseAdmin
     .from('ledger_entries')
     .insert(entry)
@@ -46,8 +47,13 @@ export async function getAccountSettings(): Promise<AccountSettings> {
     .from('account_settings')
     .select('opening_balance_cop, opening_date')
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (error) throw new Error(`Error al obtener configuración de cuenta: ${error.message}`)
-  return data as AccountSettings
+
+  // Si no existe fila aún, devolver valores neutros para no romper el resumen
+  return {
+    opening_balance_cop: data?.opening_balance_cop ?? 0,
+    opening_date: data?.opening_date ?? new Date().toISOString().split('T')[0],
+  }
 }
