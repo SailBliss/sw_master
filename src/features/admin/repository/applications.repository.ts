@@ -248,9 +248,9 @@ export async function approveApplication(
 ): Promise<void> {
   const { data: appRow, error: readError } = await supabaseAdmin
     .from('applications')
-    .select('amount_cop')
+    .select('amount_cop, entrepreneurs ( full_name )')
     .eq('id', applicationId)
-    .single<{ amount_cop: number }>()
+    .single<{ amount_cop: number; entrepreneurs: { full_name: string | null } | null }>()
 
   if (readError) throw new Error(readError.message)
 
@@ -288,6 +288,22 @@ export async function approveApplication(
     })
 
   if (periodError) throw new Error(`Error al registrar período: ${periodError.message}`)
+
+  // Solo registrar ingreso si la membresía tiene costo (plan gratuito = $0, no genera entrada)
+  if (appRow.amount_cop > 0) {
+    const today = new Date().toISOString().split('T')[0]
+    const { error: ledgerError } = await supabaseAdmin
+      .from('ledger_entries')
+      .insert({
+        entry_date: today,
+        direction: 'income',
+        amount_cop: appRow.amount_cop,
+        description: 'Pago membresía',
+        counterparty: one(appRow.entrepreneurs)?.full_name ?? null,
+      })
+
+    if (ledgerError) throw new Error(`Error al registrar ingreso en ledger: ${ledgerError.message}`)
+  }
 }
 
 // ---------------------------------------------------------------------------
