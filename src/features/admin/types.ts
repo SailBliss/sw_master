@@ -56,6 +56,7 @@ export type AdminProfile = {
   membership_start: string | null
   membership_end: string | null
   application_status: 'pendiente' | 'aprobado' | 'rechazado' | null
+  stats_token: string | null
 }
 
 export type MembershipAlert = {
