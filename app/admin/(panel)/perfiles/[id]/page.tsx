@@ -3,9 +3,10 @@
 import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Image from 'next/image'
-import { getAdminProfileById, updateProfile, toggleMembership } from '@/lib/admin-data'
-import { supabaseAdmin } from '@/lib/supabase-admin'
-import { CATEGORIES } from '@/lib/utils'
+import { adminProfilesService } from '@src/features/admin/services/profiles.admin.service'
+import { membershipsService } from '@src/features/admin/services/memberships.service'
+import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
+import { CATEGORIES } from '@src/shared/utils/categories'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -87,7 +88,7 @@ async function updateProfileAction(formData: FormData) {
     directory_image_path = path
   }
 
-  await updateProfile(entrepreneurId, {
+  await adminProfilesService.update(entrepreneurId, {
     full_name,
     email,
     phone,
@@ -114,7 +115,7 @@ async function toggleMembershipAction(formData: FormData) {
   const entrepreneurId = formData.get('entrepreneur_id') as string
   const newStatus = formData.get('new_status') as 'active' | 'inactive'
 
-  await toggleMembership(entrepreneurId, newStatus)
+  await membershipsService.toggle(entrepreneurId, newStatus)
 
   revalidatePath('/admin/perfiles')
   revalidatePath('/directorio')
@@ -131,7 +132,7 @@ export default async function AdminPerfilDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const profile = await getAdminProfileById(id)
+  const profile = await adminProfilesService.getById(id)
   if (!profile) notFound()
 
   // Resolve image URL if exists
