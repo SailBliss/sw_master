@@ -1,22 +1,23 @@
 'use client'
 
 // Página de finanzas del panel admin.
-// Muestra: 3 tarjetas de resumen (ingresos, egresos, balance),
-// formulario para nueva entrada, y el ledger agrupado por mes con opción de eliminar.
-// Es Client Component para manejar el formulario y el delete sin recargar la página.
+// Muestra: 3 tarjetas de resumen, formulario de nueva entrada manual, y el ledger
+// agrupado por mes combinando ledger_entries (egresos + entradas manuales) y
+// membership_periods (pagos de membresía). Las entradas de membresía no se pueden
+// eliminar desde acá — son de solo lectura.
 
 import { useEffect, useState, useCallback } from 'react'
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
-type LedgerEntry = {
+type FinancialEntry = {
   id: string
+  source: 'ledger' | 'membership'
   direction: 'income' | 'expense'
   amount_cop: number
-  description: string | null
+  description: string
   counterparty: string | null
-  entry_date: string
-  created_at: string
+  date: string
 }
 
 type FinancesSummary = {
@@ -32,11 +33,10 @@ type MonthlyGroup = {
   label: string
   ingresos: number
   egresos: number
-  entries: LedgerEntry[]
+  entries: FinancialEntry[]
 }
 
 type FinancesData = {
-  ledger: LedgerEntry[]
   summary: FinancesSummary
   monthlyGroups: MonthlyGroup[]
 }
@@ -53,14 +53,14 @@ function formatCOP(amount: number): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-CO', {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('es-CO', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
   })
 }
 
-// ─── Componente de tarjeta de resumen ────────────────────────────────────────
+// ─── Tarjeta de resumen ───────────────────────────────────────────────────────
 
 function SummaryCard({
   label,
@@ -87,7 +87,7 @@ function SummaryCard({
   )
 }
 
-// ─── Formulario de nueva entrada ─────────────────────────────────────────────
+// ─── Formulario de nueva entrada manual ──────────────────────────────────────
 
 function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
   const [direction, setDirection] = useState<'income' | 'expense'>('income')
@@ -105,6 +105,10 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
       setError('Ingresa un monto válido mayor a 0')
       return
     }
+    if (!description.trim()) {
+      setError('La descripción es obligatoria')
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/finanzas', {
@@ -113,8 +117,8 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
         body: JSON.stringify({
           direction,
           amount_cop: parsed,
-          description: description || null,
-          counterparty: counterparty || null,
+          description: description.trim(),
+          counterparty: counterparty.trim() || null,
         }),
       })
       if (!res.ok) {
@@ -135,10 +139,9 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-5">
-      <h2 className="mb-4 text-base font-semibold text-gray-800">Nueva entrada</h2>
+      <h2 className="mb-4 text-base font-semibold text-gray-800">Nueva entrada manual</h2>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {/* Tipo */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Tipo</label>
           <select
@@ -151,7 +154,6 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
           </select>
         </div>
 
-        {/* Monto */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Monto (COP)</label>
           <input
@@ -164,12 +166,11 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
           />
         </div>
 
-        {/* Contraparte */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Contraparte</label>
           <input
             type="text"
-            placeholder="Quién pagó / a quién se pagó"
+            placeholder="Quién pagó / a quién"
             value={counterparty}
             onChange={(e) => setCounterparty(e.target.value)}
             maxLength={200}
@@ -177,12 +178,11 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
           />
         </div>
 
-        {/* Descripción — fila completa */}
         <div className="sm:col-span-3">
           <label className="mb-1 block text-sm font-medium text-gray-700">Descripción</label>
           <input
             type="text"
-            placeholder="Opcional"
+            placeholder="Ej: Dominio anual, Micrófono…"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={200}
@@ -212,7 +212,7 @@ function EntryRow({
   entry,
   onDelete,
 }: {
-  entry: LedgerEntry
+  entry: FinancialEntry
   onDelete: (id: string) => void
 }) {
   const [confirming, setConfirming] = useState(false)
@@ -231,7 +231,7 @@ function EntryRow({
 
   return (
     <tr className="border-b border-gray-100 text-sm hover:bg-gray-50">
-      <td className="py-3 pr-4 text-gray-500">{formatDate(entry.entry_date)}</td>
+      <td className="py-3 pr-4 text-gray-500">{formatDate(entry.date)}</td>
       <td className="py-3 pr-4">
         <span
           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -242,43 +242,56 @@ function EntryRow({
         >
           {entry.direction === 'income' ? '▲ Ingreso' : '▼ Egreso'}
         </span>
+        {entry.source === 'membership' && (
+          <span className="ml-1 inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-600">
+            membresía
+          </span>
+        )}
       </td>
       <td className="py-3 pr-4 text-gray-700">
-        {entry.counterparty && <span className="font-medium">{entry.counterparty}</span>}
-        {entry.counterparty && entry.description && <span className="text-gray-400"> · </span>}
-        {entry.description ?? (!entry.counterparty ? '—' : '')}
+        {entry.counterparty && (
+          <span className="font-medium">{entry.counterparty}</span>
+        )}
+        {entry.counterparty && entry.description && (
+          <span className="text-gray-400"> · </span>
+        )}
+        {entry.description}
       </td>
       <td
         className={`py-3 pr-4 text-right font-medium tabular-nums ${
           entry.direction === 'income' ? 'text-green-700' : 'text-red-600'
         }`}
       >
-        {entry.direction === 'income' ? '+' : '-'} {formatCOP(entry.amount_cop)}
+        {entry.direction === 'income' ? '+' : '−'} {formatCOP(entry.amount_cop)}
       </td>
       <td className="py-3 text-right">
-        {confirming ? (
-          <span className="inline-flex gap-2">
+        {entry.source === 'ledger' ? (
+          confirming ? (
+            <span className="inline-flex gap-2">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-xs text-red-600 hover:underline disabled:opacity-50"
+              >
+                {deleting ? 'Eliminando…' : 'Confirmar'}
+              </button>
+              <button
+                onClick={() => setConfirming(false)}
+                className="text-xs text-gray-400 hover:underline"
+              >
+                Cancelar
+              </button>
+            </span>
+          ) : (
             <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="text-xs text-red-600 hover:underline disabled:opacity-50"
+              onClick={() => setConfirming(true)}
+              className="text-xs text-gray-400 hover:text-red-500"
             >
-              {deleting ? 'Eliminando…' : 'Confirmar'}
+              Eliminar
             </button>
-            <button
-              onClick={() => setConfirming(false)}
-              className="text-xs text-gray-400 hover:underline"
-            >
-              Cancelar
-            </button>
-          </span>
+          )
         ) : (
-          <button
-            onClick={() => setConfirming(true)}
-            className="text-xs text-gray-400 hover:text-red-500"
-          >
-            Eliminar
-          </button>
+          <span className="text-xs text-gray-300">—</span>
         )}
       </td>
     </tr>
@@ -313,27 +326,27 @@ export default function AdminFinanzasPage() {
 
   function handleEntryDeleted(id: string) {
     if (!data) return
-    const updatedLedger = data.ledger.filter((e) => e.id !== id)
-    // Recalcular resumen localmente para respuesta inmediata
-    const totalIngresos = updatedLedger
-      .filter((e) => e.direction === 'income')
-      .reduce((s, e) => s + e.amount_cop, 0)
-    const totalEgresos = updatedLedger
-      .filter((e) => e.direction === 'expense')
-      .reduce((s, e) => s + e.amount_cop, 0)
+    const updatedGroups = data.monthlyGroups
+      .map((g) => ({
+        ...g,
+        entries: g.entries.filter((e) => e.id !== id),
+      }))
+      .filter((g) => g.entries.length > 0)
+
+    // Recalcular resumen
+    const allEntries = updatedGroups.flatMap((g) => g.entries)
+    const totalIngresos = allEntries.filter((e) => e.direction === 'income').reduce((s, e) => s + e.amount_cop, 0)
+    const totalEgresos = allEntries.filter((e) => e.direction === 'expense').reduce((s, e) => s + e.amount_cop, 0)
+
     setData({
       ...data,
-      ledger: updatedLedger,
+      monthlyGroups: updatedGroups,
       summary: {
         ...data.summary,
         totalIngresos,
         totalEgresos,
         balance: data.summary.openingBalance + totalIngresos - totalEgresos,
       },
-      monthlyGroups: data.monthlyGroups.map((g) => ({
-        ...g,
-        entries: g.entries.filter((e) => e.id !== id),
-      })).filter((g) => g.entries.length > 0),
     })
   }
 
@@ -361,16 +374,8 @@ export default function AdminFinanzasPage() {
 
       {/* ── Tarjetas de resumen ── */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard
-          label="Total ingresos"
-          amount={summary.totalIngresos}
-          color="green"
-        />
-        <SummaryCard
-          label="Total egresos"
-          amount={summary.totalEgresos}
-          color="red"
-        />
+        <SummaryCard label="Total ingresos" amount={summary.totalIngresos} color="green" />
+        <SummaryCard label="Total egresos" amount={summary.totalEgresos} color="red" />
         <SummaryCard
           label="Balance actual"
           amount={summary.balance}
@@ -388,7 +393,6 @@ export default function AdminFinanzasPage() {
       ) : (
         monthlyGroups.map((group) => (
           <div key={group.month} className="rounded-xl border border-gray-200 bg-white">
-            {/* Cabecera del mes */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
               <span className="font-semibold text-gray-800">{group.label}</span>
               <span className="text-sm text-gray-500">
@@ -398,7 +402,6 @@ export default function AdminFinanzasPage() {
               </span>
             </div>
 
-            {/* Tabla */}
             <div className="overflow-x-auto px-5">
               <table className="w-full">
                 <thead>
@@ -412,11 +415,7 @@ export default function AdminFinanzasPage() {
                 </thead>
                 <tbody>
                   {group.entries.map((entry) => (
-                    <EntryRow
-                      key={entry.id}
-                      entry={entry}
-                      onDelete={handleEntryDeleted}
-                    />
+                    <EntryRow key={entry.id} entry={entry} onDelete={handleEntryDeleted} />
                   ))}
                 </tbody>
               </table>
