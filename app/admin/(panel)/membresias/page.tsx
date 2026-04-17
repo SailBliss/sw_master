@@ -2,8 +2,9 @@
 // Lista de alertas de membresía + tabla completa de todas las membresías.
 
 import Link from 'next/link'
-import { getMembershipAlerts, getAdminProfiles } from '@/lib/admin-data'
-import type { MembershipAlert, AdminProfile } from '@/lib/types'
+import { membershipsService } from '@src/features/admin/services/memberships.service'
+import { adminProfilesService } from '@src/features/admin/services/profiles.admin.service'
+import type { MembershipAlert, AdminProfile } from '@src/features/admin/types'
 
 // ---------------------------------------------------------------------------
 // Helpers de formateo
@@ -74,8 +75,8 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' | null }) {
 
 export default async function MembresiasPage() {
   const [alerts, profiles] = await Promise.all([
-    getMembershipAlerts(),
-    getAdminProfiles(),
+    membershipsService.getAlerts(),
+    adminProfilesService.list(),
   ])
 
   // Activas primero, luego inactivas

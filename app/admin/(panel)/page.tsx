@@ -2,14 +2,16 @@
 // Dashboard del panel de administración. Muestra métricas clave y accesos rápidos.
 
 import Link from 'next/link'
-import { getAdminApplications, getAdminProfiles, getMembershipAlerts } from '@/lib/admin-data'
+import { applicationsService } from '@src/features/admin/services/applications.service'
+import { adminProfilesService } from '@src/features/admin/services/profiles.admin.service'
+import { membershipsService } from '@src/features/admin/services/memberships.service'
 
 export default async function AdminDashboardPage() {
   const [pending, all, profiles, alerts] = await Promise.all([
-    getAdminApplications('pendiente'),
-    getAdminApplications(),
-    getAdminProfiles(),
-    getMembershipAlerts(),
+    applicationsService.list('pendiente'),
+    applicationsService.list(),
+    adminProfilesService.list(),
+    membershipsService.getAlerts(),
   ])
 
   const pendingCount = pending.length

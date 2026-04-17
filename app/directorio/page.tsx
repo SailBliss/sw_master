@@ -1,6 +1,7 @@
-import { getProfiles } from '@/lib/data'
-import { slugify, CATEGORIES } from '@/lib/utils'
-import type { DirectoryProfile } from '@/lib/types'
+import { profilesService } from '@src/features/profiles/services/profiles.service'
+import { slugify } from '@src/shared/utils/slugify'
+import { CATEGORIES } from '@src/shared/utils/categories'
+import type { DirectoryProfile } from '@src/features/profiles/types'
 
 const CITIES = [
   'Medellín',
@@ -94,7 +95,7 @@ export default async function DirectorioPage({
   const categoria = params.categoria?.trim() ?? ''
   const ciudad = params.ciudad?.trim() ?? ''
 
-  const profiles = await getProfiles({
+  const profiles = await profilesService.findAll({
     q: q || undefined,
     categoria: categoria || undefined,
     ciudad: ciudad || undefined,
