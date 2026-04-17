@@ -21,12 +21,11 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const [ledger, summary, monthlyGroups] = await Promise.all([
-      financesService.getLedger(),
+    const [summary, monthlyGroups] = await Promise.all([
       financesService.getFullSummary(),
       financesService.getMonthlyGroups(),
     ])
-    return NextResponse.json({ ledger, summary, monthlyGroups })
+    return NextResponse.json({ summary, monthlyGroups })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error interno'
     console.error('[GET /api/finanzas]', message)
