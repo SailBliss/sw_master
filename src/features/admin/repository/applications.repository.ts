@@ -11,13 +11,6 @@ function one<T>(raw: T | T[] | null | undefined): T | null {
   return Array.isArray(raw) ? (raw[0] ?? null) : raw
 }
 
-/** Suma días a la fecha actual y devuelve ISO string. */
-function addDays(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
-  return d.toISOString()
-}
-
 // ---------------------------------------------------------------------------
 // Tipos de fila crudos devueltos por Supabase
 // ---------------------------------------------------------------------------
@@ -243,19 +236,10 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
 
 export async function approveApplication(
   applicationId: string,
-  entrepreneurId: string,
-  durationDays: number
+  _entrepreneurId: string,
+  _durationDays: number
 ): Promise<void> {
-  const { data: appRow, error: readError } = await supabaseAdmin
-    .from('applications')
-    .select('amount_cop, entrepreneurs ( full_name )')
-    .eq('id', applicationId)
-    .single<{ amount_cop: number; entrepreneurs: { full_name: string | null } | null }>()
-
-  if (readError) throw new Error(readError.message)
-
   const now = new Date().toISOString()
-  const endAt = addDays(durationDays)
 
   const { error: appError } = await supabaseAdmin
     .from('applications')
@@ -263,32 +247,6 @@ export async function approveApplication(
     .eq('id', applicationId)
 
   if (appError) throw new Error(`Error al aprobar solicitud: ${appError.message}`)
-
-  const { error: memError } = await supabaseAdmin
-    .from('memberships')
-    .update({
-      status: 'active',
-      start_at: now,
-      end_at: endAt,
-      last_application_id: applicationId,
-    })
-    .eq('entrepreneur_id', entrepreneurId)
-
-  if (memError) throw new Error(`Error al activar membresía: ${memError.message}`)
-
-  const { error: periodError } = await supabaseAdmin
-    .from('membership_periods')
-    .insert({
-      entrepreneur_id: entrepreneurId,
-      application_id: applicationId,
-      start_at: now,
-      end_at: endAt,
-      amount_cop: appRow.amount_cop,
-      paid_at: now,
-    })
-
-  if (periodError) throw new Error(`Error al registrar período: ${periodError.message}`)
-
 }
 
 // ---------------------------------------------------------------------------
