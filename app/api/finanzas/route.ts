@@ -29,6 +29,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ledger, summary, monthlyGroups })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error interno'
+    console.error('[GET /api/finanzas]', message)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -45,17 +46,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
-  const { type, amount_cop, description } = body as Partial<LedgerEntry>
+  const { direction, amount_cop, description, counterparty, entry_date } = body as Partial<LedgerEntry>
 
-  if (type !== 'ingreso' && type !== 'egreso') {
-    return NextResponse.json({ error: 'type debe ser ingreso o egreso' }, { status: 400 })
+  if (direction !== 'income' && direction !== 'expense') {
+    return NextResponse.json({ error: 'direction debe ser income o expense' }, { status: 400 })
   }
   if (!amount_cop || typeof amount_cop !== 'number' || amount_cop <= 0) {
     return NextResponse.json({ error: 'amount_cop debe ser un número mayor a 0' }, { status: 400 })
   }
 
   try {
-    await financesService.addEntry({ type, amount_cop, description: description ?? null })
+    await financesService.addEntry({
+      direction,
+      amount_cop,
+      description: description ?? null,
+      counterparty: counterparty ?? null,
+      entry_date: entry_date ?? new Date().toISOString().split('T')[0],
+    })
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error interno'

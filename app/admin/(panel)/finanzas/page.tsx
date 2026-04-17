@@ -11,9 +11,11 @@ import { useEffect, useState, useCallback } from 'react'
 
 type LedgerEntry = {
   id: string
-  type: 'ingreso' | 'egreso'
+  direction: 'income' | 'expense'
   amount_cop: number
   description: string | null
+  counterparty: string | null
+  entry_date: string
   created_at: string
 }
 
@@ -88,9 +90,10 @@ function SummaryCard({
 // ─── Formulario de nueva entrada ─────────────────────────────────────────────
 
 function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
-  const [type, setType] = useState<'ingreso' | 'egreso'>('ingreso')
+  const [direction, setDirection] = useState<'income' | 'expense'>('income')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
+  const [counterparty, setCounterparty] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -107,7 +110,12 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
       const res = await fetch('/api/finanzas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, amount_cop: parsed, description: description || null }),
+        body: JSON.stringify({
+          direction,
+          amount_cop: parsed,
+          description: description || null,
+          counterparty: counterparty || null,
+        }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -116,6 +124,7 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
       }
       setAmount('')
       setDescription('')
+      setCounterparty('')
       onSuccess()
     } catch {
       setError('Error de red. Intenta de nuevo.')
@@ -133,12 +142,12 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Tipo</label>
           <select
-            value={type}
-            onChange={(e) => setType(e.target.value as 'ingreso' | 'egreso')}
+            value={direction}
+            onChange={(e) => setDirection(e.target.value as 'income' | 'expense')}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="ingreso">Ingreso</option>
-            <option value="egreso">Egreso</option>
+            <option value="income">Ingreso</option>
+            <option value="expense">Egreso</option>
           </select>
         </div>
 
@@ -155,8 +164,21 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
           />
         </div>
 
-        {/* Descripción */}
+        {/* Contraparte */}
         <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Contraparte</label>
+          <input
+            type="text"
+            placeholder="Quién pagó / a quién se pagó"
+            value={counterparty}
+            onChange={(e) => setCounterparty(e.target.value)}
+            maxLength={200}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+
+        {/* Descripción — fila completa */}
+        <div className="sm:col-span-3">
           <label className="mb-1 block text-sm font-medium text-gray-700">Descripción</label>
           <input
             type="text"
@@ -209,25 +231,29 @@ function EntryRow({
 
   return (
     <tr className="border-b border-gray-100 text-sm hover:bg-gray-50">
-      <td className="py-3 pr-4 text-gray-500">{formatDate(entry.created_at)}</td>
+      <td className="py-3 pr-4 text-gray-500">{formatDate(entry.entry_date)}</td>
       <td className="py-3 pr-4">
         <span
           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-            entry.type === 'ingreso'
+            entry.direction === 'income'
               ? 'bg-green-100 text-green-700'
               : 'bg-red-100 text-red-700'
           }`}
         >
-          {entry.type === 'ingreso' ? '▲ Ingreso' : '▼ Egreso'}
+          {entry.direction === 'income' ? '▲ Ingreso' : '▼ Egreso'}
         </span>
       </td>
-      <td className="py-3 pr-4 text-gray-700">{entry.description ?? '—'}</td>
+      <td className="py-3 pr-4 text-gray-700">
+        {entry.counterparty && <span className="font-medium">{entry.counterparty}</span>}
+        {entry.counterparty && entry.description && <span className="text-gray-400"> · </span>}
+        {entry.description ?? (!entry.counterparty ? '—' : '')}
+      </td>
       <td
         className={`py-3 pr-4 text-right font-medium tabular-nums ${
-          entry.type === 'ingreso' ? 'text-green-700' : 'text-red-600'
+          entry.direction === 'income' ? 'text-green-700' : 'text-red-600'
         }`}
       >
-        {entry.type === 'ingreso' ? '+' : '-'} {formatCOP(entry.amount_cop)}
+        {entry.direction === 'income' ? '+' : '-'} {formatCOP(entry.amount_cop)}
       </td>
       <td className="py-3 text-right">
         {confirming ? (
@@ -290,10 +316,10 @@ export default function AdminFinanzasPage() {
     const updatedLedger = data.ledger.filter((e) => e.id !== id)
     // Recalcular resumen localmente para respuesta inmediata
     const totalIngresos = updatedLedger
-      .filter((e) => e.type === 'ingreso')
+      .filter((e) => e.direction === 'income')
       .reduce((s, e) => s + e.amount_cop, 0)
     const totalEgresos = updatedLedger
-      .filter((e) => e.type === 'egreso')
+      .filter((e) => e.direction === 'expense')
       .reduce((s, e) => s + e.amount_cop, 0)
     setData({
       ...data,
