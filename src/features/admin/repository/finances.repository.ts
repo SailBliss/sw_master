@@ -8,6 +8,11 @@ export type LedgerEntry = {
   created_at: string
 }
 
+export type AccountSettings = {
+  opening_balance_cop: number
+  opening_date: string
+}
+
 export async function getLedger(): Promise<LedgerEntry[]> {
   const { data, error } = await supabaseAdmin
     .from('ledger_entries')
@@ -25,4 +30,24 @@ export async function addEntry(entry: Omit<LedgerEntry, 'id' | 'created_at'>): P
     .insert(entry)
 
   if (error) throw new Error(`Error al insertar entrada: ${error.message}`)
+}
+
+export async function deleteEntry(id: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('ledger_entries')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw new Error(`Error al eliminar entrada: ${error.message}`)
+}
+
+export async function getAccountSettings(): Promise<AccountSettings> {
+  const { data, error } = await supabaseAdmin
+    .from('account_settings')
+    .select('opening_balance_cop, opening_date')
+    .limit(1)
+    .single()
+
+  if (error) throw new Error(`Error al obtener configuración de cuenta: ${error.message}`)
+  return data as AccountSettings
 }
