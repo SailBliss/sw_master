@@ -1,8 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { getAdminApplicationById, approveApplication, rejectApplication } from '@/lib/admin-data'
-import { notifyEntrepreneurApproved, notifyEntrepreneurRejected } from '@/lib/email'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { applicationsService } from '@src/features/admin/services/applications.service'
+import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
 
 // ---------------------------------------------------------------------------
 // Server Actions
@@ -17,8 +16,7 @@ async function approveApplicationAction(formData: FormData) {
   const entrepreneurName = formData.get('entrepreneurName') as string
   const businessName = formData.get('businessName') as string
 
-  await approveApplication(applicationId, entrepreneurId, durationDays)
-  await notifyEntrepreneurApproved({ to: entrepreneurEmail, entrepreneurName, businessName })
+  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName)
   redirect('/admin/solicitudes')
 }
 
@@ -29,8 +27,7 @@ async function rejectApplicationAction(formData: FormData) {
   const entrepreneurName = formData.get('entrepreneurName') as string
   const notes = (formData.get('notes') as string | null) || undefined
 
-  await rejectApplication(applicationId, notes)
-  await notifyEntrepreneurRejected({ to: entrepreneurEmail, entrepreneurName, notes })
+  await applicationsService.reject(applicationId, notes, entrepreneurEmail, entrepreneurName)
   redirect('/admin/solicitudes')
 }
 
@@ -74,7 +71,7 @@ export default async function AdminSolicitudDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const solicitud = await getAdminApplicationById(id)
+  const solicitud = await applicationsService.getById(id)
 
   if (!solicitud) notFound()
 

@@ -6,7 +6,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { verifySession, SESSION_COOKIE_NAME } from '@/lib/auth'
+import { verifySession, SESSION_COOKIE_NAME } from '@src/shared/lib/auth'
 
 interface AdminLayoutProps {
   children: React.ReactNode

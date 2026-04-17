@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { getAdminApplications } from '@/lib/admin-data'
-import type { AdminApplication } from '@/lib/types'
+import { applicationsService } from '@src/features/admin/services/applications.service'
+import type { AdminApplication } from '@src/features/admin/types'
 
 type StatusFilter = 'pendiente' | 'aprobado' | 'rechazado'
 
@@ -46,8 +46,8 @@ export default async function AdminSolicitudesPage({
   const activeFilter = isValidStatus(rawStatus) ? rawStatus : undefined
 
   const [allSolicitudes, pendientesSolicitudes] = await Promise.all([
-    getAdminApplications(activeFilter),
-    getAdminApplications('pendiente'),
+    applicationsService.list(activeFilter),
+    applicationsService.list('pendiente'),
   ])
 
   const solicitudes = allSolicitudes

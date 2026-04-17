@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { getAdminProfiles } from '@/lib/admin-data'
-import type { AdminProfile } from '@/lib/types'
+import { adminProfilesService } from '@src/features/admin/services/profiles.admin.service'
+import type { AdminProfile } from '@src/features/admin/types'
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
@@ -56,7 +56,7 @@ export default async function AdminPerfilesPage({
   const params = await searchParams
   const q = params.q?.trim() || undefined
 
-  const perfiles = await getAdminProfiles(q)
+  const perfiles = await adminProfilesService.list(q)
 
   return (
     <div className="space-y-6">

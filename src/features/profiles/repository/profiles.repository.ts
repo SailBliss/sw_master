@@ -1,6 +1,6 @@
-import { supabasePublic } from './supabase'
-import { slugify } from './utils'
-import type { DirectoryProfile } from './types'
+import { supabasePublic } from '@src/shared/lib/supabase'
+import { slugify } from '@src/shared/utils/slugify'
+import type { DirectoryProfile, ProfileFilters } from '../types'
 
 type BusinessProfileRow = {
   id: string
@@ -31,12 +31,6 @@ type EntrepreneurRow = {
   business_profiles: BusinessProfileRow | BusinessProfileRow[] | null
   memberships: MembershipRow | MembershipRow[] | null
   applications: ApplicationRow | ApplicationRow[] | null
-}
-
-interface ProfileFilters {
-  categoria?: string
-  ciudad?: string
-  q?: string
 }
 
 function isVisibleProfile(row: EntrepreneurRow, nowIso: string): boolean {

@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { getProfiles } from '@/lib/data'
-import { slugify } from '@/lib/utils'
-import type { DirectoryProfile } from '@/lib/types'
+import { profilesService } from '@src/features/profiles/services/profiles.service'
+import { slugify } from '@src/shared/utils/slugify'
+import type { DirectoryProfile } from '@src/features/profiles/types'
 
 function getInitials(name: string): string {
   return name
@@ -61,7 +61,7 @@ function PreviewCard({ profile }: { profile: DirectoryProfile }) {
 }
 
 export default async function LandingPage() {
-  const profiles = await getProfiles()
+  const profiles = await profilesService.findAll()
   const previewProfiles = profiles.slice(0, 4)
 
   return (

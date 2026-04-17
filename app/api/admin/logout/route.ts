@@ -4,7 +4,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { SESSION_COOKIE_NAME } from '@/lib/auth'
+import { SESSION_COOKIE_NAME } from '@src/shared/lib/auth'
 
 export async function POST(): Promise<never> {
   const cookieStore = await cookies()
