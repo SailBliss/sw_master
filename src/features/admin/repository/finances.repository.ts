@@ -15,12 +15,15 @@ export type AccountSettings = {
   opening_date: string
 }
 
-export async function getLedger(): Promise<LedgerEntry[]> {
-  const { data, error } = await supabaseAdmin
+export async function getLedger(fromDate?: string): Promise<LedgerEntry[]> {
+  let query = supabaseAdmin
     .from('ledger_entries')
     .select('id, direction, amount_cop, description, counterparty, entry_date, created_at')
     .order('entry_date', { ascending: false })
 
+  if (fromDate) query = query.gte('entry_date', fromDate)
+
+  const { data, error } = await query
   if (error) throw new Error(`Error al obtener ledger: ${error.message}`)
   return (data ?? []) as LedgerEntry[]
 }
@@ -40,13 +43,17 @@ export type MembershipPayment = {
   entrepreneur_name: string | null
 }
 
-export async function getMembershipPayments(): Promise<MembershipPayment[]> {
-  const { data, error } = await supabaseAdmin
+export async function getMembershipPayments(fromDate?: string): Promise<MembershipPayment[]> {
+  let query = supabaseAdmin
     .from('membership_periods')
     .select('id, amount_cop, paid_at, entrepreneurs ( full_name )')
     .not('paid_at', 'is', null)
     .gt('amount_cop', 0)
     .order('paid_at', { ascending: false })
+
+  if (fromDate) query = query.gte('paid_at', fromDate)
+
+  const { data, error } = await query
 
   if (error) throw new Error(`Error al obtener pagos de membresía: ${error.message}`)
 
