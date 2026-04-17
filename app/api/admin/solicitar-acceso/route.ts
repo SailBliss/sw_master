@@ -2,8 +2,8 @@
 // Siempre responde con el mismo mensaje genérico para no revelar si el email existe.
 
 import { NextRequest, NextResponse } from 'next/server'
-import { isEmailAllowed, createOtp } from '@/lib/auth'
-import { sendOtpEmail } from '@/lib/email'
+import { isEmailAllowed, createOtp } from '@src/shared/lib/auth'
+import { sendOtpEmail } from '@src/shared/lib/email'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: unknown

@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabasePublic } from '@/lib/supabase'
-import { CATEGORIES } from '@/lib/utils'
+import { supabasePublic } from '@src/shared/lib/supabase'
+import { CATEGORIES } from '@src/shared/utils/categories'
 import type {
   ApplicationFormStep1,
   ApplicationFormStep2,
   ApplicationFormStep3,
   ProductOption,
-} from '@/lib/types'
+} from '@src/features/enrollment/types'
 
 // ─── Error shape types ────────────────────────────────────────────────────────
 

@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { verifyOtp, createSession, SESSION_COOKIE_NAME } from '@/lib/auth'
+import { verifyOtp, createSession, SESSION_COOKIE_NAME } from '@src/shared/lib/auth'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: unknown

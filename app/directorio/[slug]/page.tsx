@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { getProfileBySlug } from '@/lib/data'
-import { formatPhone } from '@/lib/utils'
+import { profilesService } from '@src/features/profiles/services/profiles.service'
+import { formatPhone } from '@src/shared/utils/formatPhone'
 
 type Props = {
   params: { slug: string }
@@ -10,7 +10,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const profile = await getProfileBySlug(slug)
+  const profile = await profilesService.getBySlug(slug)
   if (!profile) return {}
   return {
     title: profile.business_name,
@@ -33,7 +33,7 @@ function Initials({ name }: { name: string }) {
 
 export default async function ProfilePage({ params }: Props) {
   const { slug } = await params
-  const profile = await getProfileBySlug(slug)
+  const profile = await profilesService.getBySlug(slug)
 
   if (!profile) notFound()
 
