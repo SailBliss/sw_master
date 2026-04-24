@@ -14,10 +14,59 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const profile = await profilesService.getBySlug(slug)
   if (!profile) return {}
+
+  const title = profile.business_name
+  const description =
+    profile.description ??
+    `${profile.business_name} — emprendedora verificada SW Mujeres.`
+
   return {
-    title: profile.business_name,
-    description: profile.description ?? profile.business_name,
+    title,
+    description,
+    openGraph: {
+      title: `${title} · SW Mujeres`,
+      description,
+      url: `/directorio/${slug}`,
+      type: 'profile',
+      ...(profile.directory_image_path
+        ? { images: [{ url: profile.directory_image_path, alt: title ?? '' }] }
+        : {}),
+    },
+    twitter: {
+      card: 'summary',
+      title: `${title} · SW Mujeres`,
+      description,
+    },
   }
+}
+
+function JsonLd({ profile, slug }: { profile: import('@src/features/profiles/types').DirectoryProfile; slug: string }) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: profile.business_name,
+    description: profile.description ?? undefined,
+    url: `${siteUrl}/directorio/${slug}`,
+    telephone: profile.business_phone,
+    ...(profile.instagram_handle
+      ? { sameAs: [`https://instagram.com/${profile.instagram_handle}`] }
+      : {}),
+    ...(profile.website_url ? { sameAs: [profile.website_url] } : {}),
+    ...(profile.directory_image_path ? { image: profile.directory_image_path } : {}),
+    ...(profile.category ? { knowsAbout: profile.category } : {}),
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'CO',
+      ...(profile.city ? { addressLocality: profile.city } : {}),
+    },
+  }
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  )
 }
 
 function Initials({ name }: { name: string }) {
@@ -43,6 +92,7 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
+      <JsonLd profile={profile} slug={slug} />
       <TrackView profileId={profile.id} />
       {/* Header */}
       <div className="flex flex-col items-center gap-4 text-center">
