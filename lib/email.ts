@@ -75,8 +75,30 @@ export async function notifyEntrepreneurApproved(data: {
   to: string
   entrepreneurName: string
   businessName: string
+  statsToken?: string
 }): Promise<void> {
   const subject = `¡Tu emprendimiento fue aprobado en SW Mujeres! 🎉`
+
+  const statsSection = data.statsToken
+    ? `
+    <p style="margin-top: 24px;">
+      Puedes ver cuántas personas han visitado tu perfil y cuántos clicks han hecho en tus canales
+      de contacto desde tu página privada de estadísticas:
+    </p>
+    <div style="margin: 16px 0; text-align: center;">
+      <a
+        href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'}/estadisticas/${data.statsToken}"
+        style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;"
+      >
+        Ver mis estadísticas
+      </a>
+    </div>
+    <p style="font-size: 13px; color: #888;">
+      Guarda este link — es privado y solo tú lo tienes.
+    </p>
+  `
+    : ''
+
   const html = `
     <div style="font-family: sans-serif; color: #333; max-width: 600px;">
       <h2 style="color: #7c3aed;">¡Felicitaciones, ${data.entrepreneurName}!</h2>
@@ -88,6 +110,7 @@ export async function notifyEntrepreneurApproved(data: {
         Tu emprendimiento ya está visible para toda nuestra comunidad. Gracias por confiar en nosotras
         y por ser parte de esta red de mujeres que se impulsan mutuamente.
       </p>
+      ${statsSection}
       <p style="margin-top: 24px; color: #555;">
         Con cariño,<br />
         <strong>El equipo de SW Mujeres</strong>

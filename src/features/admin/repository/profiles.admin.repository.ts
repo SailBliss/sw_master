@@ -26,6 +26,7 @@ type RawBusinessProfile = {
   directory_image_path: string | null
   offers_discount: boolean
   discount_details: string | null
+  stats_token: string | null
 }
 
 type RawProfileRow = {
@@ -72,7 +73,7 @@ export async function getAdminProfiles(search?: string): Promise<AdminProfile[]>
       id, cedula, full_name, email, phone, fb_profile_url,
       business_profiles ( id, business_name, category, description,
         business_phone, instagram_handle, website_url, other_socials,
-        directory_image_path, offers_discount, discount_details ),
+        directory_image_path, offers_discount, discount_details, stats_token ),
       memberships ( status, start_at, end_at )
     `)
     .order('full_name', { ascending: true })
@@ -136,6 +137,7 @@ export async function getAdminProfiles(search?: string): Promise<AdminProfile[]>
       membership_start: mem?.start_at ?? null,
       membership_end: mem?.end_at ?? null,
       application_status: appStatusMap.get(r.id) ?? null,
+      stats_token: bp?.stats_token ?? null,
     }
   })
 }
@@ -151,7 +153,7 @@ export async function getAdminProfileById(entrepreneurId: string): Promise<Admin
       id, cedula, full_name, email, phone, fb_profile_url,
       business_profiles ( id, business_name, category, description,
         business_phone, instagram_handle, website_url, other_socials,
-        directory_image_path, offers_discount, discount_details ),
+        directory_image_path, offers_discount, discount_details, stats_token ),
       memberships ( status, start_at, end_at )
     `)
     .eq('id', entrepreneurId)
@@ -197,6 +199,7 @@ export async function getAdminProfileById(entrepreneurId: string): Promise<Admin
     membership_start: mem?.start_at ?? null,
     membership_end: mem?.end_at ?? null,
     application_status: latestApp?.status ?? null,
+    stats_token: bp?.stats_token ?? null,
   }
 }
 
