@@ -32,6 +32,8 @@ export const metadata: Metadata = {
   },
 }
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,6 +41,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} h-full antialiased`}>
+      <head>
+        {SUPABASE_URL && (
+          <link rel="preconnect" href={SUPABASE_URL} />
+        )}
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   )
