@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 import { slugify } from '@src/shared/utils/slugify'
 import type { DirectoryProfile } from '@src/features/profiles/types'
@@ -41,9 +42,11 @@ function PreviewCard({ profile }: { profile: DirectoryProfile }) {
     >
       <div className="flex items-center gap-3">
         {profile.directory_image_path ? (
-          <img
+          <Image
             src={profile.directory_image_path}
             alt={profile.business_name}
+            width={44}
+            height={44}
             className="w-11 h-11 rounded-full object-cover shrink-0 ring-2 ring-pink-100"
           />
         ) : (
