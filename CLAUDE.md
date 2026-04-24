@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code when working with code in this repository.
+This file is the single source of truth for working in this repository. Keep it accurate — if the code diverges from what's written here, update this file.
 
 ---
 
@@ -8,157 +8,204 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 **DirectorioSW** is a women entrepreneurs directory for the SW Mujeres community — a private Facebook group of 13,500 verified women in Medellín, Colombia.
 
-The product solves a real problem: commercial posts in the Facebook group get rejected at a 46%+ rate due to ad fatigue. The directory flips the context — women arrive *looking* for products and services instead of being interrupted.
+The product flips the ad-fatigue problem: instead of interrupting women with commercial posts (46%+ rejection rate in the group), the directory lets buyers arrive *looking* for products and services.
 
 **Three actors, three jobs:**
 
-- **Compradora** (buyer) — browses the directory without logging in, filters by category or city, clicks straight to WhatsApp to contact the entrepreneur.
+- **Compradora** (buyer) — browses without logging in, filters by category or city, contacts via WhatsApp in one click.
 - **Empresaria** (entrepreneur) — submits an enrollment form, waits for manual approval, gets a public profile with a verified SW badge once approved and membership is active.
-- **Administradora** (admin) — reviews applications, approves/rejects, manages memberships, monitors finances, and controls what's visible.
+- **Administradora** (admin) — reviews applications, approves/rejects, manages memberships, monitors finances.
 
-**Critical rule:** a profile appears in the directory *only* when `memberships.status = 'active'` AND `profile_reviews.status = 'aprobada'` AND `memberships.end_at > now()`. This logic lives exclusively in the backend — never in the frontend.
+**Visibility rule (critical — enforced in backend only):**
 
-**Launch model:** first 90 days are free for existing members (product `plan-lanzamiento-gratis`, $0 COP). Paid subscriptions start once real traffic data justifies a price.
+```
+memberships.status = 'active'
+AND memberships.end_at > now()
+AND applications.status = 'aprobado'
+```
+
+`profile_reviews` does NOT control visibility. It is a staging area for CSV imports only.
+
+**Launch model:** first 90 days are free (`plan-lanzamiento-gratis`, $0 COP). Paid subscriptions start once real traffic data justifies a price.
+
+---
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16.2.3 (App Router, TypeScript strict) |
+| Database | Supabase (PostgreSQL + Storage + RLS) |
+| Auth | Custom OTP (6-digit code via Gmail, JWT session cookie) |
+| Email | Nodemailer + Gmail SMTP (not Resend) |
+| Styling | Tailwind CSS |
+| Hosting | Vercel |
+| Domain | swmujeres.com |
 
 ---
 
 ## Where things live
 
 ```
-directorio-sw/
+sw_master/
 ├── app/
 │   ├── page.tsx                          # Landing — swmujeres.com/
+│   ├── robots.ts                         # SEO: robots.txt generation
+│   ├── sitemap.ts                        # SEO: sitemap generation
 │   ├── directorio/
 │   │   ├── page.tsx                      # Directory grid with search + filters
 │   │   └── [slug]/page.tsx               # Individual business profile
 │   ├── inscripcion/page.tsx              # Public enrollment form (no login)
-│   ├── estadisticas/[token]/page.tsx     # Private stats page (token-gated, no login)
+│   ├── aliadas/page.tsx                  # Private: SW group rules + enrollment for existing members
+│   │                                     #   URL shared manually by admin. NOT linked publicly.
+│   ├── estadisticas/[token]/page.tsx     # Token-gated stats page for each empresaria (no login)
 │   ├── admin/
-│   │   ├── login/page.tsx                # Admin login (checked against admin_allowlist)
+│   │   ├── login/page.tsx                # Admin login (email → OTP code)
 │   │   └── (panel)/                      # Route group — doesn't appear in URL
-│   │       ├── layout.tsx                # Verifies admin session on every route
+│   │       ├── layout.tsx                # Verifies JWT session cookie on every admin route
 │   │       ├── page.tsx                  # Admin dashboard
 │   │       ├── solicitudes/              # Application review: list + [id] detail
 │   │       ├── perfiles/                 # Profile management: list + [id] editor
-│   │       ├── membresias/               # Membership activation/deactivation
-│   │       └── finanzas/                 # Ledger: income, expenses, loans
+│   │       ├── membresias/               # Membership alerts + full table
+│   │       └── finanzas/                 # Ledger: income (membership_periods) + manual entries
 │   └── api/
-│       ├── perfiles/route.ts             # Returns visible profiles (visibility rule applied here)
-│       ├── solicitudes/route.ts          # Handles form submission + cascading inserts
+│       ├── admin/
+│       │   ├── solicitar-acceso/route.ts # POST: generate OTP + send email
+│       │   ├── verificar-otp/route.ts    # POST: validate OTP → set session cookie
+│       │   ├── auth/route.ts             # Legacy magic link callback (kept, not in use)
+│       │   └── logout/route.ts           # POST: clear session cookie
+│       ├── perfiles/route.ts             # GET: visible profiles (visibility rule applied here)
+│       ├── solicitudes/route.ts          # POST: form submission + cascading inserts
 │       ├── membresias/route.ts           # Activate/deactivate memberships
-│       ├── tracking/route.ts             # Records profile views and contact clicks
-│       └── email/route.ts               # Triggers Nodemailer emails
+│       ├── finanzas/route.ts             # Financial entries CRUD
+│       ├── tracking/route.ts             # POST: record profile views and contact clicks
+│       └── email/route.ts               # Utility email endpoint
+│
+├── src/
+│   ├── features/
+│   │   ├── profiles/                     # Directory public-facing logic
+│   │   │   └── repository/profiles.repository.ts  # Visibility rule lives here
+│   │   ├── enrollment/                   # Inscription form types + logic
+│   │   ├── admin/                        # Admin panel logic
+│   │   │   ├── repository/               # Data access (reads)
+│   │   │   ├── services/                 # Business logic (applications, memberships, finances, profiles)
+│   │   │   └── types.ts
+│   │   └── tracking/                     # Profile views + contact clicks
+│   │       └── services/tracking.service.ts
+│   └── shared/
+│       ├── lib/                          # Shared Supabase clients (re-exported from lib/)
+│       └── utils/                        # slugify, formatPhone, CATEGORIES, getPublicImageUrl
+│
+├── lib/                                  # Server-only utilities — never import in Client Components
+│   ├── supabase.ts                       # supabasePublic (anon key, safe for client)
+│   ├── supabase-admin.ts                 # supabaseAdmin (service role key, bypasses RLS)
+│   ├── auth.ts                           # OTP creation/verification + JWT session (createOtp, verifyOtp, createSession, verifySession)
+│   ├── email.ts                          # All transactional email via Nodemailer + Gmail SMTP
+│   └── storage.ts                        # File upload helpers (uploadReceipt, uploadScreenshot)
 │
 ├── components/
-│   ├── ui/                               # Small reusable pieces: buttons, badges, inputs
+│   ├── ui/                               # Reusable primitives: buttons, badges, inputs
 │   └── directorio/                       # Domain-specific: business cards, filter bars
 │
-├── lib/
-│   ├── supabase.ts                       # Two clients: supabasePublic + supabaseAdmin
-│   ├── email.ts                          # All transactional email (Nodemailer + Gmail SMTP)
-│   └── utils.ts                          # slugify(), formatPhone(), shared helpers
-│
+├── context/specs/                        # Internal specs and references
+├── docs/                                 # Product and marketing docs
 ├── public/images/                        # Static site assets
+├── BITACORA.md                           # Chronological implementation log (required — see below)
+├── AGENTS.md                             # Next.js-specific agent rules
 ├── .env.local                            # Credentials — never committed to git
 ├── next.config.ts
 ├── tailwind.config.ts
 └── tsconfig.json
 ```
 
-Current business-logic layout (DDD tactical):
+---
 
-```
-src/
-├── features/
-│   ├── profiles/
-│   ├── enrollment/
-│   ├── admin/
-│   └── tracking/
-└── shared/
-    ├── lib/
-    └── utils/
-```
+## Key files explained
 
-### Key files explained
+**`lib/supabase.ts`** — exports `supabasePublic` (anon key). Safe for Client Components and server reads that respect RLS.
 
-**`lib/supabase.ts`** — exports two clients. `supabasePublic` uses the anon key and is safe for client components. `supabaseAdmin` uses the service role key and must only be used in API routes. Never use `supabaseAdmin` in anything that runs on the client.
+**`lib/supabase-admin.ts`** — exports `supabaseAdmin` (service role key). Bypasses RLS. Only import from `app/api/*` or `lib/*`. Never from Client Components or page components.
 
-**`lib/email.ts`** — all outbound email goes through here. Two triggers: new application received (→ admin) and application approved/rejected (→ entrepreneur). Add new templates here as named exports.
+**`lib/auth.ts`** — owns all admin authentication logic:
+- `isEmailAllowed(email)` — checks `admin_allowlist`
+- `createOtp(email)` — generates 6-digit code, stores in `admin_magic_links.token`, expires in 10 min
+- `verifyOtp(email, code)` — validates code, marks as used
+- `createSession(email)` — returns a signed JWT (7 days, signed with `JWT_SECRET`)
+- `verifySession(token)` — decodes JWT, returns email or null
 
-**`src/shared/utils/*`** — `slugify()` converts business names to URL-safe slugs (`"Moda Élite & Más"` → `"moda-elite-mas"`). `formatPhone()` builds WhatsApp links (`wa.me/57...`). These utilities are shared across features without coupling to HTTP.
+**`lib/email.ts`** — all outbound email. Nodemailer + Gmail SMTP. Functions: `notifyAdminNewApplication`, `notifyEntrepreneurApproved`, `notifyEntrepreneurRejected`, `sendOtpEmail`. Add new templates here as named exports.
 
-**`src/features/profiles/repository/profiles.repository.ts`** — source of truth for visibility filtering. Returns only profiles where membership is active, review is approved, and `end_at > now()`. API routes/pages delegate here.
+**`lib/storage.ts`** — wraps Supabase Storage uploads. `uploadReceipt(file, entrepreneurId)` → path in `recipts` bucket. `uploadScreenshot(file, entrepreneurId)` → path in `post_screenshots` bucket.
 
-**`app/admin/(panel)/layout.tsx`** — wraps every admin route. Checks for a valid admin session before rendering. If the session is invalid, redirects to `/admin/login`. The `(panel)` parentheses make this a route group — it organizes code without adding a URL segment.
+**`src/features/profiles/repository/profiles.repository.ts`** — single source of truth for visibility filtering. Returns only profiles where `memberships.status = 'active'` AND `memberships.end_at > now()` AND `applications.status = 'aprobado'`. All public-facing pages delegate here.
 
-### Database tables (Supabase / PostgreSQL)
+**`src/shared/utils/getPublicImageUrl.ts`** — converts raw `directory_image_path` stored in DB to a full Supabase Storage URL. Guards against double-prefixing (if path already starts with `http`, returns as-is).
+
+**`app/admin/(panel)/layout.tsx`** — protects every admin route. Reads the `sw_admin_session` cookie, calls `verifySession()`, redirects to `/admin/login` if invalid. The `(panel)` group doesn't add a URL segment.
+
+---
+
+## Database tables (Supabase / PostgreSQL)
 
 | Table | What it stores |
 |---|---|
-| `entrepreneurs` | Personal data of the entrepreneur. `cedula` is UNIQUE — prevents duplicate enrollments. |
-| `business_profiles` | Business data. 1:1 with `entrepreneurs`. Holds name, description, category, phone, socials, image path. |
-| `products` | Membership plans (`plan-lanzamiento-gratis` is the free 90-day launch plan). |
-| `applications` | Each enrollment request. Status: `pendiente` → `aprobada` / `rechazada`. |
+| `entrepreneurs` | Personal data. `cedula` is UNIQUE — prevents duplicate enrollments. |
+| `business_profiles` | Business data. 1:1 with `entrepreneurs`. Holds name, description, category, phone, socials, image path, `stats_token` (UUID, UNIQUE, NOT NULL — gates `/estadisticas/[token]`). |
+| `products` | Membership plans. `plan-lanzamiento-gratis`: free, 90 days. |
+| `applications` | Enrollment requests. Status enum: `pendiente` → `aprobado` / `rechazado`. |
 | `memberships` | Current membership state per entrepreneur. One row per entrepreneur. |
-| `membership_periods` | Source of truth for membership payments. One row per approved period. The finances view reads income from here — do NOT duplicate these entries into `ledger_entries`. |
-| `profile_reviews` | Editorial review state per entrepreneur: `pendiente` / `aprobada` / `rechazada`. |
-| `ledger_entries` | Manual financial entries only: egresos operativos e ingresos manuales puntuales. `direction` is enum `ledger_direction` with values `income` / `expense`. `amount_cop` must be > 0. `description` is NOT NULL. |
-| `account_settings` | Single-row global config. Opening balance and date. |
-| `admin_allowlist` | Emails that can log in to the admin panel. Checked on login. |
-| `profile_views` | One row per page visit to a business profile. `profile_id` references `business_profiles.id`. |
-| `contact_clicks` | One row per click on WhatsApp, Instagram, or website. `profile_id` references `business_profiles.id`. `click_type` is a USER-DEFINED enum. |
+| `membership_periods` | Paid periods history. One row per approved period. Finances reads income from here — do NOT duplicate into `ledger_entries`. |
+| `profile_reviews` | Staging area for CSV imports. NOT used for directory visibility. States: `pendiente` / `aprobada` / `rechazada`. |
+| `ledger_entries` | Manual financial entries only (operating expenses + one-off manual income). `direction` enum `ledger_direction`: `income` / `expense`. `amount_cop` > 0. `description` NOT NULL. |
+| `account_settings` | Singleton global config. Opening balance and date. |
+| `admin_allowlist` | Emails allowed in the admin panel. Primary key is `email`. |
+| `admin_magic_links` | OTP auth tokens. Columns: `id`, `email`, `token` (6-digit string), `expires_at`, `used_at`. Reused from original magic link system. |
+| `profile_views` | One row per visit to a business profile page. References `business_profiles.id`. |
+| `contact_clicks` | One row per click on WhatsApp, Instagram, or website. References `business_profiles.id`. `click_type` is a USER-DEFINED enum. |
 
-**Column `business_profiles.stats_token`:** UUID generado automáticamente (`DEFAULT gen_random_uuid()`), UNIQUE, NOT NULL. Es el token privado que identifica la página de estadísticas de cada negocio (`/estadisticas/[token]`). Siempre presente — no puede ser null en nuevos registros.
+### Critical Supabase join pattern
+
+All foreign keys originate from `entrepreneurs` as the root table:
+
+```
+entrepreneurs (id)
+  ← business_profiles (entrepreneur_id)
+  ← memberships      (entrepreneur_id)
+  ← applications     (entrepreneur_id)
+  ← profile_reviews  (entrepreneur_id)
+```
+
+There is NO direct FK between `business_profiles` and `memberships`. Queries always join through `entrepreneurs`.
+
+### Supabase returns 1:1 relations as object, not array
+
+When a table has one related row (e.g. `memberships`, which is 1:1 with `entrepreneurs`), Supabase JS client returns `{}` not `[]`. Normalize both cases:
+
+```typescript
+const memberships = Array.isArray(row.memberships)
+  ? row.memberships
+  : row.memberships ? [row.memberships] : []
+```
+
+Apply to `memberships` and `business_profiles`. `applications` returns an array (there can be multiple).
+
+### RLS policies
+
+All tables have RLS enabled. Public SELECT policies (USING true) exist on:
+- `business_profiles`, `entrepreneurs`, `memberships`, `applications`
+
+Financial and admin tables (`ledger_entries`, `account_settings`, `admin_allowlist`, `membership_periods`, `admin_magic_links`) have NO public policy — admin-only access. Correct.
 
 ### Supabase Storage buckets
 
 | Bucket | Used for |
 |---|---|
-| `recipts` | Payment receipts (`applications.receipt_path`). **Note: the bucket was created with this typo. Use this exact name in code.** |
+| `recipts` | Payment receipts (`applications.receipt_path`). **Typo is intentional — bucket was created this way. Use exactly `recipts` in all code.** |
 | `post_screenshots` | Optional Facebook post screenshots (`applications.post_screenshot_path`). |
 
 ---
 
-## How work gets done
-
-### Review and commit workflow
-
-After completing each task, stop and ask for review before moving on. Do not chain tasks together without a checkpoint.
-
-The flow for every task:
-
-1. Complete the task.
-2. Summarize what was done: which files were created or modified, what the change does, and anything the reviewer should pay attention to.
-3. Ask explicitly: **"¿Lo revisas y me confirmas para hacer commit?"**
-4. Wait. Do not proceed to the next task.
-5. If the review surfaces issues, fix them and repeat from step 2.
-6. Once the reviewer says it's good (any affirmative: "sí", "dale", "aprobado", "lgtm", etc.), run:
-
-```bash
-git add .
-git commit -m "<concise description of what was done>"
-```
-
-Commit messages follow the conventional commits format: `type(scope): description`. Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`. Description in English, present tense, lowercase. Examples:
-- `feat(lib): add data access layer with getProfiles and getProfileBySlug`
-- `feat(directorio): build directory page with search and category filters`
-- `fix(api): enforce visibility rule in perfiles route`
-
-**Never mention Claude, Claude Code, or any AI tool in commit messages or commit bodies.** No `Co-Authored-By: Claude` trailers. Commits must look like they were written by a human engineer.
-
-Never commit without explicit approval. Never batch multiple tasks into one commit.
-
-### Commands
-
-```bash
-npm run dev      # Start development server (localhost:3000)
-npm run build    # Production build
-npm run lint     # Run ESLint
-```
-
-No test suite is configured.
-
-### Environment variables
+## Environment variables
 
 Required in `.env.local` (never committed to git):
 
@@ -166,101 +213,142 @@ Required in `.env.local` (never committed to git):
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-EMAIL_FROM=           # Gmail address used as sender
-EMAIL_APP_PASSWORD=   # Gmail App Password (not the account password)
-EMAIL_ADMIN=          # Comma-separated admin emails for notifications
+JWT_SECRET=              # Signing secret for admin session JWTs (any strong random string)
+EMAIL_FROM=              # Gmail address used as sender
+EMAIL_APP_PASSWORD=      # Gmail App Password (not the Gmail account password)
+EMAIL_ADMIN=             # Comma-separated admin emails for notifications
+NEXT_PUBLIC_SITE_URL=    # Full URL (https://swmujeres.com or http://localhost:3000 for dev)
 ```
-
-### Architecture rules (enforced, not negotiable)
-
-1. **Frontend represents. Backend decides.** The frontend renders what the API returns. It never filters by membership status, never decides who is visible, never validates business rules.
-
-2. **Visibility rule lives in the profiles repository**, not in a component. If `profiles.repository.ts` returns a profile, it's visible. If it doesn't, it isn't.
-
-3. **Multi-table writes use transactions.** Enrolling a new entrepreneur creates records in `entrepreneurs`, `business_profiles`, `applications`, `profile_reviews`, and `memberships` — all in one atomic operation. Never sequential inserts without error handling.
-
-4. **`supabaseAdmin` is server-only.** It uses the service role key which bypasses Row Level Security. Never import it in a client component or expose it to the browser.
-
-5. **Types reflect the real schema.** No `any`. Every type is derived from the actual Supabase tables. If a field doesn't exist in the DB, it doesn't exist in a TypeScript type.
-
-6. **Slug generation is deterministic.** `slugify()` in `src/shared/utils` is the single source of slug logic. Used in both the directory listing (to build URLs) and the profile page (to match URLs). They must produce identical output.
-
-### Data flow: new enrollment
-
-```
-/inscripcion (form) 
-  → POST /api/solicitudes 
-  → validates input server-side
-  → uploads receipt to Supabase Storage ("recipts" bucket)
-  → atomic insert into 5 tables
-  → sends email notification to EMAIL_ADMIN via lib/email.ts
-  → returns success to form
-  → admin sees request in /admin/solicitudes
-  → admin approves → membership activated → email sent to entrepreneur
-  → profile becomes visible in /directorio
-```
-
-### Data flow: directory browsing
-
-```
-/directorio (page)
-  → GET /api/perfiles?categoria=...&q=...&ciudad=...
-  → profiles service/repository applies visibility rule in data query
-  → returns only active, approved, non-expired profiles
-  → page renders grid of cards
-  → user clicks card → /directorio/[slug]
-  → click on WhatsApp → POST /api/tracking (contact_clicks)
-```
-
-### Module build order
-
-Modules must be built in sequence. Don't start a new module until the previous one is validated with real data.
-
-```
-M0 (Foundations: env, supabase connection, folder structure, Vercel deploy)
- └→ M1 (Directory + Landing: P1, P2, P3 with real data, visibility rule active)
-     ├→ M2 (Enrollment form: P4, file uploads, transactional inserts, email)
-     │   └→ M3 (Admin panel: P5, login, review flow, membership management)
-     │       └→ M4 (Finances: unified view of ledger_entries + membership_periods, monthly summaries, manual entries)
-     └→ M5 (Tracking: profile_views, contact_clicks, stats page P6)
-         └→ M6 (Launch: SEO, JSON-LD, Lighthouse >90, swmujeres.com live)
-```
-
-### Seed data required before M1
-
-Before starting M1, verify these rows exist in Supabase. If not, insert manually:
-
-```sql
--- Launch product (free 90-day plan)
-INSERT INTO products (slug, name, type, price_cop, duration_days, is_active)
-VALUES ('plan-lanzamiento-gratis', 'Plan Lanzamiento Gratuito', 'lanzamiento', 0, 90, true);
-
--- Admin email
-INSERT INTO admin_allowlist (email) VALUES ('admin@swmujeres.com');
-
--- Account settings (one row, singleton)
-INSERT INTO account_settings (name, opening_balance_cop, opening_balance, opening_date)
-VALUES ('sw_account', 0, 0, CURRENT_DATE);
-```
-
-### Known quirks
-
-- **Bucket typo:** the receipts bucket was created as `recipts` (missing an 'e'). Every storage call that uploads payment receipts must use this exact string.
-- **Slug matching:** `getProfileBySlug()` compares the URL slug against `business_name` run through `slugify()`. The function in `src/shared/utils` must handle accents, special characters, and ampersands.
-- **Admin route group:** `app/admin/(panel)/` uses Next.js route groups. The parentheses are load-bearing — they apply the shared admin layout without adding `panel` to the URL. `/admin/solicitudes` is correct, `/admin/panel/solicitudes` is not.
-
-Archivos de contexto en: /context
-
-Crea un bloque de documentacion en BITACORA.md por cada tarea que completes. El bloque debe seguir este formato exacto:
 
 ---
-## [Nombre de la tarea]
 
-**Qué hace:** una línea.
-**Por qué existe:** una línea.
-**Archivos creados o modificados:** lista con ruta exacta y una línea por archivo.
-**Decisiones tomadas:** solo lo que no es obvio — por qué se eligió X sobre Y.
-**Cómo probarlo:** comando o URL exacta para verificar que funciona.
+## How work gets done
+
+### Review and commit workflow
+
+After completing each task, stop and ask for review before moving on.
+
+1. Complete the task.
+2. Summarize: which files changed, what the change does, anything to pay attention to.
+3. Ask explicitly: **"¿Lo revisas y me confirmas para hacer commit?"**
+4. Wait. Do not proceed.
+5. Fix any issues and repeat from step 2.
+6. On approval (any affirmative: "sí", "dale", "aprobado", "lgtm", etc.):
+
+```bash
+git add .
+git commit -m "<type(scope): description>"
+```
+
+Commit message format: `type(scope): description` — present tense, lowercase, English.
+Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`.
+
+**Never mention Claude, AI, or any tool in commit messages.** No `Co-Authored-By` trailers. Commits look like they were written by a human engineer.
+
+Never commit without explicit approval. Never batch multiple tasks into one commit.
+
+### Commands
+
+```bash
+npm run dev      # Development server (localhost:3000)
+npm run build    # Production build
+npm run lint     # ESLint
+```
+
+No test suite is configured.
+
 ---
 
-Este bloque va AL FINAL de tu respuesta, después del resumen técnico y antes de preguntarme si hago commit.
+## Architecture rules (non-negotiable)
+
+1. **Frontend represents. Backend decides.** The frontend renders what the API returns. It never filters by membership status, never decides visibility, never validates business rules.
+
+2. **Visibility rule lives in `profiles.repository.ts`** — not in components, not in pages. One place, one implementation.
+
+3. **Multi-table writes use rollback.** Enrolling a new entrepreneur touches 5 tables. If any insert fails, the previous inserts are rolled back manually. Never silent failures.
+
+4. **`supabaseAdmin` is server-only.** Service role key bypasses RLS. Never import `lib/supabase-admin.ts` in Client Components or page components.
+
+5. **No `any`.** Every type is derived from the actual Supabase schema. If a field doesn't exist in the DB, it doesn't exist in a TypeScript type.
+
+6. **Slug generation is deterministic.** `slugify()` in `src/shared/utils` is the single source. Used in listing (builds URLs) and profile page (matches URLs). They must produce identical output.
+
+---
+
+## Data flows
+
+### New enrollment
+
+```
+/inscripcion or /aliadas (form)
+  → POST /api/solicitudes
+  → validate server-side
+  → upload receipt to Storage ("recipts" bucket)
+  → insert into 5 tables (entrepreneurs, business_profiles, applications, profile_reviews, memberships)
+  → notify admin via lib/email.ts
+  → return success
+  → admin reviews in /admin/solicitudes
+  → approve → memberships.status = 'active', membership_periods created, email to entrepreneur
+  → profile visible in /directorio
+```
+
+### Admin authentication
+
+```
+/admin/login (email input)
+  → POST /api/admin/solicitar-acceso
+  → isEmailAllowed() checks admin_allowlist
+  → createOtp() → 6-digit code stored in admin_magic_links
+  → sendOtpEmail() → email with code
+  → /admin/login (OTP input)
+  → POST /api/admin/verificar-otp
+  → verifyOtp() validates + marks used
+  → createSession() → JWT
+  → Set-Cookie: sw_admin_session (httpOnly, 7 days)
+  → client: window.location.href = '/admin'  ← intentional (guarantees cookie commit before navigation)
+```
+
+---
+
+## Module status (Abril 2026)
+
+| Module | Status | What it covers |
+|---|---|---|
+| M0 — Foundations | ✅ Complete | Folder structure, env, Supabase connection, email setup |
+| M1 — Directory + Landing | ✅ Complete | P1 landing, P2 directory with search/filters, P3 profile pages, visibility rule |
+| M2 — Enrollment form | ✅ Complete | P4 multi-step form, file uploads, 5-table insert, email notification |
+| M3 — Admin panel | ✅ Complete | OTP auth, solicitudes review, perfiles editor, membresías alerts, dashboard |
+| M4 — Finances | ✅ Complete | Ledger view combining membership_periods + ledger_entries, monthly summaries, manual entries |
+| M5 — Tracking | 🔄 In progress | profile_views, contact_clicks tables, tracking service, P6 stats page |
+| M6 — Launch | 🔄 In progress | robots.ts, sitemap.ts, Next.js Image optimization done; JSON-LD, Lighthouse audit pending |
+
+---
+
+## Known quirks
+
+- **Bucket typo:** receipts bucket was created as `recipts`. Use this exact string everywhere.
+- **Slug matching:** `getProfileBySlug()` compares URL slug against `business_name` run through `slugify()`. The function must handle accents, ampersands, and special characters consistently.
+- **Admin route group:** `app/admin/(panel)/` — parentheses are load-bearing. `/admin/solicitudes` is correct, `/admin/panel/solicitudes` is not.
+- **OTP in admin_magic_links:** the `token` column stores the 6-digit numeric code (as string). The table was originally designed for magic links — it was repurposed, not replaced.
+- **`window.location.href` after OTP verification:** intentional. `router.push()` can navigate before the cookie is committed in some browsers. `window.location.href` forces a full page load, guaranteeing the cookie is present on the next request.
+- **`instagram_handle` in DB:** existing data may contain full URLs instead of just handles. Clean on display or in the admin editor.
+
+---
+
+## BITACORA.md
+
+Add a documentation block to `BITACORA.md` for every task you complete. Format:
+
+```
+---
+## [Task name]
+
+**Qué hace:** one line.
+**Por qué existe:** one line.
+**Archivos creados o modificados:** exact paths, one line each.
+**Decisiones tomadas:** only non-obvious choices — why X over Y.
+**Cómo probarlo:** exact command or URL.
+---
+```
+
+This block goes at the END of your response, after the technical summary and before asking for commit approval.
