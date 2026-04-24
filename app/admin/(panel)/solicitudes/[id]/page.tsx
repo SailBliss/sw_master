@@ -16,7 +16,14 @@ async function approveApplicationAction(formData: FormData) {
   const entrepreneurName = formData.get('entrepreneurName') as string
   const businessName = formData.get('businessName') as string
 
-  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName)
+  const { data: bp } = await supabaseAdmin
+    .from('business_profiles')
+    .select('stats_token')
+    .eq('entrepreneur_id', entrepreneurId)
+    .maybeSingle()
+  const statsToken = (bp?.stats_token as string | null) ?? undefined
+
+  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName, statsToken)
   redirect('/admin/solicitudes')
 }
 

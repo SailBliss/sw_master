@@ -105,13 +105,10 @@ src/
 | `ledger_entries` | Manual financial entries only: egresos operativos e ingresos manuales puntuales. `direction` is enum `ledger_direction` with values `income` / `expense`. `amount_cop` must be > 0. `description` is NOT NULL. |
 | `account_settings` | Single-row global config. Opening balance and date. |
 | `admin_allowlist` | Emails that can log in to the admin panel. Checked on login. |
+| `profile_views` | One row per page visit to a business profile. `profile_id` references `business_profiles.id`. |
+| `contact_clicks` | One row per click on WhatsApp, Instagram, or website. `profile_id` references `business_profiles.id`. `click_type` is a USER-DEFINED enum. |
 
-**Tables created in Sprint 3 (not yet in DB):**
-
-| Table | What it stores |
-|---|---|
-| `profile_views` | One row per page visit to a business profile. |
-| `contact_clicks` | One row per click on WhatsApp, Instagram, or website. |
+**Column `business_profiles.stats_token`:** UUID generado automáticamente (`DEFAULT gen_random_uuid()`), UNIQUE, NOT NULL. Es el token privado que identifica la página de estadísticas de cada negocio (`/estadisticas/[token]`). Siempre presente — no puede ser null en nuevos registros.
 
 ### Supabase Storage buckets
 

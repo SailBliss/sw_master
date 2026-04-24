@@ -70,6 +70,7 @@ export async function createAll(params: CreateAllParams): Promise<string> {
     entrepreneur_id: entrepreneurId,
     business_name, description, category, business_phone,
     offers_discount, wants_directory: true, directory_image_path: null,
+    stats_token: crypto.randomUUID(), // token único para la página privada de estadísticas
   }
   if (instagram_handle) profileInsert.instagram_handle = instagram_handle
   if (website_url) profileInsert.website_url = website_url

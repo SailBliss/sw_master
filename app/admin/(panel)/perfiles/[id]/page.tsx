@@ -405,7 +405,57 @@ export default async function AdminPerfilDetailPage({
       </form>
 
       {/* -------------------------------------------------------------------- */}
-      {/* Sección 4 — Membresía (formulario separado para el toggle)            */}
+      {/* Sección 4 — Estadísticas del perfil                                  */}
+      {/* -------------------------------------------------------------------- */}
+      <section className="rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 px-6 py-4">
+          <h2 className="text-base font-semibold text-gray-800">Estadísticas del perfil</h2>
+        </div>
+        <div className="px-6 py-5">
+          {profile.stats_token ? (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-500">
+                Página privada de métricas — vistas y clicks de los últimos 30 días.
+              </p>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                <code className="flex-1 truncate text-xs text-gray-500">
+                  {`${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'}/estadisticas/${profile.stats_token}`}
+                </code>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={`/estadisticas/${profile.stats_token}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                    <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                    <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clipRule="evenodd" />
+                  </svg>
+                  Ver estadísticas
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3">
+              <p className="text-sm text-yellow-800">
+                Esta empresaria no tiene un token de estadísticas generado.
+                Fue inscrita antes de que se implementara esta función.
+              </p>
+              <p className="mt-1 text-xs text-yellow-600">
+                Ejecuta este SQL en Supabase para asignarle uno:
+              </p>
+              <code className="mt-2 block rounded bg-yellow-100 px-3 py-2 text-xs text-yellow-800 font-mono">
+                {`UPDATE business_profiles SET stats_token = gen_random_uuid() WHERE entrepreneur_id = '${profile.entrepreneur_id}' AND stats_token IS NULL;`}
+              </code>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------- */}
+      {/* Sección 5 — Membresía (formulario separado para el toggle)            */}
       {/* -------------------------------------------------------------------- */}
       <section className="rounded-lg border border-gray-200 bg-white">
         <div className="border-b border-gray-100 px-6 py-4">
