@@ -1,7 +1,20 @@
+import type { Metadata } from 'next'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 import { slugify } from '@src/shared/utils/slugify'
 import { CATEGORIES } from '@src/shared/utils/categories'
 import type { DirectoryProfile } from '@src/features/profiles/types'
+
+export const metadata: Metadata = {
+  title: 'Directorio de emprendedoras',
+  description:
+    'Busca y filtra emprendimientos verificados de la comunidad SW Mujeres por categoría, ciudad y nombre.',
+  openGraph: {
+    title: 'Directorio de emprendedoras · SW Mujeres',
+    description:
+      'Busca emprendimientos verificados de la comunidad SW Mujeres por categoría y ciudad.',
+    url: '/directorio',
+  },
+}
 
 const CITIES = [
   'Medellín',

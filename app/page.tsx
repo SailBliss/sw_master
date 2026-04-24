@@ -1,7 +1,20 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 import { slugify } from '@src/shared/utils/slugify'
 import type { DirectoryProfile } from '@src/features/profiles/types'
+
+export const metadata: Metadata = {
+  title: 'SW Mujeres — Directorio de emprendedoras',
+  description:
+    'Descubre productos y servicios de emprendedoras verificadas de la comunidad SW Mujeres. Más de 13.500 mujeres en Medellín y Colombia.',
+  openGraph: {
+    title: 'SW Mujeres — Directorio de emprendedoras',
+    description:
+      'Descubre productos y servicios de emprendedoras verificadas de la comunidad SW Mujeres.',
+    url: '/',
+  },
+}
 
 function getInitials(name: string): string {
   return name
