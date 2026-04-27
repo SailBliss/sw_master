@@ -18,12 +18,7 @@ export const metadata: Metadata = {
 }
 
 function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
 }
 
 function truncate(text: string, max: number): string {
@@ -31,278 +26,375 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max).trimEnd() + '…'
 }
 
-function PreviewCard({ profile }: { profile: DirectoryProfile }) {
+const CARD_GRADIENTS = [
+  'linear-gradient(160deg,#C7A89C,#5F1F3C)',
+  'linear-gradient(160deg,#A98072,#3a1d22)',
+  'linear-gradient(160deg,#E7B1A5,#5F1F3C)',
+  'linear-gradient(160deg,#E6B6C6,#821641)',
+]
+
+function PreviewCard({ profile, idx }: { profile: DirectoryProfile; idx: number }) {
   const slug = slugify(profile.business_name)
-  const shortDesc = profile.description ? truncate(profile.description, 80) : null
+  const shortDesc = profile.description ? truncate(profile.description, 72) : null
 
   return (
-    <a
+    <Link
       href={`/directorio/${slug}`}
-      className="group flex flex-col bg-white rounded-2xl border border-stone-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 gap-3"
+      style={{
+        background: 'var(--sw-paper)',
+        border: '1px solid var(--sw-line)',
+        borderRadius: 10,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: 'var(--shadow-xs)',
+        transition: 'box-shadow var(--dur-base), border-color var(--dur-base)',
+      }}
+      className="group hover:shadow-[var(--shadow-md)] hover:border-[var(--sw-burgundy-light)]"
     >
-      <div className="flex items-center gap-3">
-        {profile.directory_image_path ? (
+      {/* Photo / gradient block */}
+      <div
+        style={{
+          aspectRatio: '4/3',
+          position: 'relative',
+          background: profile.directory_image_path ? undefined : CARD_GRADIENTS[idx % 4],
+        }}
+      >
+        {profile.directory_image_path && (
           <Image
             src={profile.directory_image_path}
             alt={profile.business_name}
-            width={44}
-            height={44}
-            className="w-11 h-11 rounded-full object-cover shrink-0 ring-2 ring-pink-100"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 25vw"
           />
-        ) : (
-          <div className="w-11 h-11 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-sm font-semibold shrink-0">
-            {getInitials(profile.business_name)}
-          </div>
         )}
-        <div className="min-w-0">
-          <p className="font-semibold text-stone-900 truncate group-hover:text-pink-600 transition-colors">
-            {profile.business_name}
-          </p>
-          <p className="text-xs text-stone-500 truncate">
-            {profile.category ?? '—'}
-            {profile.city ? ` · ${profile.city}` : ''}
-          </p>
+        <span style={{
+          position: 'absolute', top: 12, right: 12,
+          padding: '5px 10px', borderRadius: 999,
+          background: 'rgba(247,239,233,0.92)',
+          color: 'var(--accent)', fontSize: 11, fontWeight: 600,
+        }}>✓ Verificada</span>
+        <div style={{
+          position: 'absolute', top: 12, left: 12,
+          width: 32, height: 32, borderRadius: '50%',
+          background: 'rgba(57,17,37,0.55)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Image src="/logo-symbol-minimal.svg" width={18} height={18} alt="" style={{ filter: 'brightness(0) invert(1)' }} />
         </div>
       </div>
-      {shortDesc && (
-        <p className="text-sm text-stone-600 leading-relaxed">{shortDesc}</p>
-      )}
-      <div className="mt-auto">
-        <span className="inline-flex items-center gap-1 text-xs font-medium bg-pink-50 text-pink-600 px-2.5 py-0.5 rounded-full border border-pink-100">
-          ✓ SW Verificada
-        </span>
+
+      {/* Body */}
+      <div style={{ padding: '20px 22px 22px' }}>
+        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', color: 'var(--accent)', textTransform: 'uppercase' }}>
+          {profile.category ?? '—'}
+        </div>
+        <div style={{
+          fontFamily: 'var(--font-display)', fontStyle: 'italic',
+          fontSize: 22, color: 'var(--fg)', margin: '4px 0 6px', letterSpacing: '-0.005em', lineHeight: 1.15,
+        }}>
+          {profile.business_name}
+        </div>
+        {shortDesc && (
+          <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55 }}>{shortDesc}</div>
+        )}
+        {profile.city && (
+          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--fg-3)' }}>{profile.city}</div>
+        )}
       </div>
-    </a>
+    </Link>
   )
 }
 
+/* ── Site header (shared) ───────────────────────────────────────── */
+function SiteHeader({ dark = false }: { dark?: boolean }) {
+  const fg = dark ? 'var(--fg-on-dark)' : 'var(--fg)'
+  return (
+    <header style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '20px 64px', color: fg,
+      borderBottom: dark ? '1px solid rgba(247,239,233,0.08)' : '1px solid var(--sw-line)',
+    }}>
+      <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'inherit' }}>
+        <Image
+          src={dark ? '/logo-symbol-circle-burgundy.svg' : '/logo-symbol-circle-dark.svg'}
+          width={36} height={36} alt="SW"
+          style={{ filter: dark ? 'brightness(0) invert(1)' : 'none' }}
+        />
+        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.22em', textTransform: 'uppercase' }}>MUJERES</span>
+      </Link>
+      <nav style={{ display: 'flex', gap: 36 }}>
+        {[
+          { href: '/directorio', label: 'Directorio' },
+          { href: '/inscripcion', label: 'Inscríbete' },
+        ].map((n) => (
+          <Link key={n.href} href={n.href} style={{
+            fontSize: 12, fontWeight: 500, letterSpacing: '0.18em',
+            textTransform: 'uppercase', color: 'inherit', opacity: 0.85,
+          }}>{n.label}</Link>
+        ))}
+      </nav>
+      <Link href="/inscripcion" style={{
+        padding: '11px 26px', borderRadius: 6,
+        border: `1px solid ${dark ? 'var(--fg-on-dark)' : 'var(--fg)'}`,
+        fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
+        color: fg,
+      }}>Sé parte</Link>
+    </header>
+  )
+}
+
+/* ── Site footer (shared) ───────────────────────────────────────── */
+function SiteFooter() {
+  return (
+    <footer style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '56px 64px 36px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 60, marginBottom: 48 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+            <Image src="/logo-symbol-circle-dark.svg" width={40} height={40} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
+            <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.22em' }}>MUJERES</span>
+          </div>
+          <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg-on-dark-2)', maxWidth: 360, margin: 0 }}>
+            Directorio de negocios liderados por mujeres en Medellín. Confianza verificada, sin intermediarios.
+          </p>
+          <div style={{ marginTop: 22, fontSize: 11, fontWeight: 600, letterSpacing: '0.22em', color: 'var(--accent-soft)' }}>
+            CONECTA · IMPULSA · VISIBILIZA
+          </div>
+        </div>
+        {[
+          { t: 'Directorio', l: ['Belleza', 'Moda', 'Bienestar', 'Hogar', 'Comida'] },
+          { t: 'Comunidad', l: ['Quiénes somos', 'Inscríbete', 'Verificación', 'Recursos'] },
+          { t: 'Contacto', l: ['hola@swmujeres.co', 'Instagram', 'WhatsApp', 'Medellín, CO'] },
+        ].map((c) => (
+          <div key={c.t}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--fg-on-dark-2)', marginBottom: 18 }}>{c.t}</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {c.l.map((x) => <li key={x} style={{ fontSize: 13, color: 'var(--fg-on-dark)' }}>{x}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div style={{
+        paddingTop: 24, borderTop: '1px solid rgba(247,239,233,0.12)',
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--fg-on-dark-3)',
+      }}>
+        <span>© 2026 SW Mujeres · Medellín</span>
+        <span>Confianza verificada</span>
+      </div>
+    </footer>
+  )
+}
+
+/* ── Landing page ───────────────────────────────────────────────── */
 export default async function LandingPage() {
   const profiles = await profilesService.findAll()
   const previewProfiles = profiles.slice(0, 4)
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div style={{ background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)' }}>
 
-      {/* NAV */}
-      <header className="border-b border-stone-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <span className="font-bold text-stone-900 tracking-tight">SW Mujeres</span>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/directorio" className="text-stone-600 hover:text-pink-600 transition-colors">
-              Directorio
-            </Link>
-            <Link
-              href="/inscripcion"
-              className="bg-pink-500 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-pink-600 transition-colors"
-            >
-              Inscríbete
-            </Link>
-          </nav>
+      {/* ── Hero ─────────────────────────────────────────────────── */}
+      <div style={{ background: 'var(--bg-dark)' }}>
+        <SiteHeader dark />
+        <section style={{ padding: '60px 64px 90px', color: 'var(--fg-on-dark)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: 60, alignItems: 'center' }}>
+            <div>
+              <span className="sw-eyebrow" style={{ color: 'var(--accent-soft)' }}>Confianza verificada</span>
+              <h1 style={{
+                fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
+                fontSize: 68, lineHeight: 1.05, letterSpacing: '-0.01em',
+                margin: '16px 0 0', color: 'var(--sw-cream)',
+              }}>
+                Directorio de<br />negocios liderados<br />por <span style={{ color: 'var(--sw-rose-pale)' }}>mujeres.</span>
+              </h1>
+              <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--fg-on-dark-2)', maxWidth: 460, marginTop: 24 }}>
+                13.500 mujeres. 6 años. Una comunidad construida sobre confianza. Aquí encuentras negocios verificados de emprendedoras en Medellín — sin intermediarios, sin promesas vacías.
+              </p>
+
+              {/* Search pill */}
+              <form method="get" action="/directorio" style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 8px 8px 22px',
+                background: 'var(--sw-cream)', borderRadius: 999, maxWidth: 460, marginTop: 28,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8E6571" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                </svg>
+                <input name="q" placeholder="Buscar negocio, categoría o palabra clave…" style={{
+                  flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                  fontSize: 14, color: 'var(--fg)',
+                }} />
+                <button type="submit" style={{
+                  width: 40, height: 40, borderRadius: 999, background: 'var(--accent)',
+                  border: 'none', color: 'var(--sw-cream)',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </form>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 26 }}>
+                <div style={{ display: 'flex' }}>
+                  {['#C7A89C', '#A98072', '#E6B6C6', '#8E6B5F', '#E7B1A5'].map((c, i) => (
+                    <div key={i} style={{
+                      width: 30, height: 30, borderRadius: '50%', marginLeft: i ? -10 : 0,
+                      border: '2px solid var(--bg-dark)', background: c,
+                    }} />
+                  ))}
+                </div>
+                <span style={{ fontSize: 13, color: 'var(--fg-on-dark-2)' }}>+250 negocios activos</span>
+              </div>
+            </div>
+
+            {/* Hero image grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gridTemplateRows: '1fr 1fr', gap: 12, height: 480 }}>
+              <div style={{ gridRow: '1 / 3', background: CARD_GRADIENTS[0], borderRadius: 10 }} />
+              <div style={{ background: CARD_GRADIENTS[2], borderRadius: 10 }} />
+              <div style={{ background: 'var(--accent)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Image src="/logo-symbol-circle-dark.svg" width={88} height={88} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* ── Métricas ─────────────────────────────────────────────── */}
+      <section style={{ background: 'var(--bg-alt)', padding: '56px 64px', borderBottom: '1px solid var(--sw-line)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 36 }}>
+          {[
+            { n: '13.500', l: 'Mujeres en la comunidad' },
+            { n: '6 años', l: 'Construyendo confianza' },
+            { n: '75%', l: 'En Medellín metropolitana' },
+            { n: profiles.length > 0 ? `${profiles.length}` : '—', l: 'Negocios verificados' },
+          ].map((m) => (
+            <div key={m.l}>
+              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 48, color: 'var(--accent)', lineHeight: 1, letterSpacing: '-0.01em' }}>{m.n}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', color: 'var(--fg-2)', textTransform: 'uppercase', marginTop: 14 }}>{m.l}</div>
+            </div>
+          ))}
         </div>
-      </header>
+      </section>
 
-      {/* 1. HERO */}
-      <section className="bg-white border-b border-stone-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-28 flex flex-col items-center text-center gap-6">
-          <span className="text-xs font-semibold tracking-widest text-pink-500 uppercase">
-            SW Mujeres · Medellín
-          </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-stone-900 leading-tight max-w-3xl">
-            El directorio de emprendimientos de{' '}
-            <span className="text-pink-500">mujeres verificadas</span>{' '}
-            de Medellín
-          </h1>
-          <p className="text-lg text-stone-500 max-w-xl leading-relaxed">
-            Busca, descubre y conecta directamente con emprendedoras de la
-            comunidad SW — sin anuncios, sin intermediarios.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 mt-2">
-            <Link
-              href="/directorio"
-              className="bg-pink-500 text-white px-7 py-3 rounded-full font-semibold text-base hover:bg-pink-600 transition-colors shadow-sm"
-            >
-              Explorar el directorio
-            </Link>
-            <Link
-              href="/inscripcion"
-              className="border border-stone-300 text-stone-700 px-7 py-3 rounded-full font-semibold text-base hover:border-pink-300 hover:text-pink-600 transition-colors"
-            >
-              Inscribir mi negocio
-            </Link>
+      {/* ── Quiénes somos ────────────────────────────────────────── */}
+      <section style={{ padding: '100px 64px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 80, alignItems: 'center' }}>
+          <div>
+            <span className="sw-eyebrow">Quiénes somos</span>
+            <h2 style={{
+              fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
+              fontSize: 44, lineHeight: 1.1, margin: '16px 0 22px', letterSpacing: '-0.01em',
+            }}>
+              Aquí encuentras<br />negocios <span style={{ color: 'var(--accent)' }}>verificados.</span>
+            </h2>
+            <p style={{ fontSize: 15, lineHeight: 1.75, color: 'var(--fg-2)', maxWidth: 480 }}>
+              Cada perfil pasa por una revisión manual — una por una. Rechazamos el 46% de las solicitudes. Por eso lo que ves, importa.
+            </p>
+            <div style={{ marginTop: 28 }}>
+              <span style={{ width: 60, height: 1, background: 'var(--accent)', display: 'inline-block' }} />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {[
+              { icon: '🛡️', t: 'Verificación manual', d: 'Cada negocio revisado, una por una.' },
+              { icon: '❤️', t: 'Hecho por mujeres', d: 'Comunidad de 13.500 emprendedoras.' },
+              { icon: '📍', t: 'Apoya local', d: 'Fortalecemos el talento de Medellín.' },
+              { icon: '🤝', t: 'Sin intermediarios', d: 'Conectas directo con la empresaria.' },
+            ].map((i) => (
+              <div key={i.t} style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, padding: 24 }}>
+                <div style={{ fontSize: 22 }}>{i.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--fg)', marginTop: 12 }}>{i.t}</div>
+                <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55, marginTop: 6 }}>{i.d}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 2. METRICAS */}
-      <section className="border-b border-stone-200 bg-pink-500">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div className="flex flex-col gap-1">
-              <dt className="text-sm font-medium text-pink-200 uppercase tracking-wide">
-                Miembras en la comunidad
-              </dt>
-              <dd className="text-4xl font-bold text-white">13.500+</dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-sm font-medium text-pink-200 uppercase tracking-wide">
-                Fundada en
-              </dt>
-              <dd className="text-4xl font-bold text-white">2020</dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-sm font-medium text-pink-200 uppercase tracking-wide">
-                Emprendimientos en el directorio
-              </dt>
-              <dd className="text-4xl font-bold text-white">
-                {profiles.length > 0 ? profiles.length : '—'}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-
-      {/* 3. QUE ES SW */}
-      <section className="border-b border-stone-200 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-4">
-            <span className="text-xs font-semibold tracking-widest text-pink-500 uppercase">
-              Quiénes somos
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 leading-snug">
-              Una comunidad privada de mujeres que se apoyan entre sí
+      {/* ── Preview directorio ───────────────────────────────────── */}
+      <section style={{ padding: '0 64px 100px' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 32 }}>
+          <div>
+            <span className="sw-eyebrow">Negocios destacados</span>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 38, margin: '10px 0 0', letterSpacing: '-0.005em' }}>
+              Recién verificados
             </h2>
           </div>
-          <div className="space-y-4 text-stone-600 leading-relaxed">
-            <p>
-              SW Mujeres es un grupo privado de Facebook con más de 13.500
-              mujeres verificadas en Medellín y el área metropolitana. Nació en
-              2020 con una premisa simple: crear un espacio seguro donde las
-              mujeres puedan apoyarse, recomendarse y crecer juntas.
-            </p>
-            <p>
-              Pertenecer a SW no es automático — cada miembra pasa por un
-              proceso de verificación. Eso hace que la comunidad sea de alta
-              confianza y que las recomendaciones dentro de ella tengan un peso
-              real.
-            </p>
-            <p>
-              Este directorio nació porque las emprendedoras de SW merecían un
-              espacio propio: un lugar donde las compradoras lleguen buscando,
-              no interrumpidas por publicidad.
-            </p>
-          </div>
+          <Link href="/directorio" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 500 }}>
+            Ver todo el directorio →
+          </Link>
         </div>
+
+        {previewProfiles.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 22 }}>
+            {previewProfiles.map((profile, idx) => (
+              <PreviewCard key={profile.id} profile={profile} idx={idx} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--fg-3)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24 }}>El directorio se está armando.</p>
+            <p style={{ fontSize: 13, marginTop: 8 }}>Pronto habrá emprendimientos aquí.</p>
+          </div>
+        )}
       </section>
 
-      {/* 4. PREVIEW DIRECTORIO */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div className="space-y-1">
-              <span className="text-xs font-semibold tracking-widest text-pink-500 uppercase">
-                Emprendimientos verificados
-              </span>
-              <h2 className="text-3xl font-bold text-stone-900">
-                Conoce a algunas empresarias SW
-              </h2>
-            </div>
-            <Link
-              href="/directorio"
-              className="self-start sm:self-auto text-sm font-medium text-pink-500 hover:text-pink-700 underline underline-offset-2 transition-colors whitespace-nowrap"
-            >
-              Ver todas →
-            </Link>
-          </div>
-
-          {previewProfiles.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {previewProfiles.map((profile) => (
-                <PreviewCard key={profile.id} profile={profile} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-stone-400">
-              <p className="text-base">El directorio se está armando.</p>
-              <p className="text-sm mt-1">Pronto habrá emprendimientos aquí.</p>
-            </div>
-          )}
-
-          <div className="flex justify-center pt-2">
-            <Link
-              href="/directorio"
-              className="border border-stone-300 text-stone-700 px-6 py-2.5 rounded-full text-sm font-medium hover:border-pink-300 hover:text-pink-600 transition-colors"
-            >
-              Ver todas las empresarias SW
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. SECCION EMPRESARIAS */}
-      <section className="border-b border-stone-200 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <span className="text-xs font-semibold tracking-widest text-pink-500 uppercase">
-              Para empresarias SW
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 leading-snug">
-              Tu negocio, visible donde buscan las que ya confían en ti
+      {/* ── Para empresarias ─────────────────────────────────────── */}
+      <section style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '100px 64px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
+          <div>
+            <span className="sw-eyebrow" style={{ color: 'var(--accent-soft)' }}>Para empresarias</span>
+            <h2 style={{
+              fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
+              fontSize: 52, lineHeight: 1.05, margin: '16px 0 22px', letterSpacing: '-0.01em',
+              color: 'var(--sw-cream)',
+            }}>
+              ¿Tienes un negocio?<br />
+              <span style={{ color: 'var(--sw-rose-pale)' }}>Inscríbelo aquí.</span>
             </h2>
-            <p className="text-stone-600 leading-relaxed text-base">
-              Si eres miembra de SW Mujeres, puedes inscribir tu emprendimiento
-              en el directorio. Una vez aprobado, tu perfil incluye nombre y
-              descripción de tu negocio, categoría, ciudad, enlace directo a
-              WhatsApp e Instagram, y el badge de{' '}
-              <strong className="text-stone-800">SW Verificada</strong> — la
-              señal que le dice a cualquier compradora que ya pasaste por el
-              filtro de confianza de la comunidad.
+            <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--fg-on-dark-2)', maxWidth: 460 }}>
+              90 días gratis. Datos reales. Después, decidimos juntas. Proceso manual de 5 días hábiles.
             </p>
-            <p className="text-stone-500 text-sm">
-              Durante los primeros 90 días, la inscripción es completamente
-              gratuita para miembras activas.
-            </p>
-            <Link
-              href="/inscripcion"
-              className="inline-block bg-pink-500 text-white px-8 py-3 rounded-full font-semibold text-base hover:bg-pink-600 transition-colors shadow-sm"
-            >
-              Inscribir mi negocio gratis
-            </Link>
+            <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
+              <Link href="/inscripcion" style={{
+                padding: '13px 26px', borderRadius: 6,
+                background: 'var(--accent)', color: 'var(--sw-cream)', border: 'none',
+                fontSize: 13, fontWeight: 500, letterSpacing: '0.04em',
+                boxShadow: '0 1px 2px rgba(57,17,37,0.20)',
+              }}>
+                Inscribir mi negocio →
+              </Link>
+              <Link href="/directorio" style={{
+                padding: '13px 26px', borderRadius: 6, background: 'transparent',
+                color: 'var(--fg-on-dark)', border: '1px solid rgba(247,239,233,0.4)',
+                fontSize: 13, fontWeight: 500,
+              }}>
+                Ver el directorio
+              </Link>
+            </div>
           </div>
+          <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {[
+              { n: '01', t: 'Cuéntanos sobre ti', d: 'Datos personales, cédula, Facebook.' },
+              { n: '02', t: 'Cuéntanos sobre tu negocio', d: 'Nombre, descripción, categoría, redes.' },
+              { n: '03', t: 'Confirmamos en 5 días', d: 'Revisamos manualmente. Te avisamos.' },
+            ].map((s) => (
+              <li key={s.n} style={{ display: 'flex', gap: 22, padding: '20px 0', borderTop: '1px solid rgba(247,239,233,0.12)' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 32, color: 'var(--accent-soft)', minWidth: 60 }}>{s.n}</span>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--sw-cream)' }}>{s.t}</div>
+                  <div style={{ fontSize: 13, color: 'var(--fg-on-dark-2)', marginTop: 4 }}>{s.d}</div>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* 6. FOOTER */}
-      <footer className="bg-stone-900 text-stone-400">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <p className="font-semibold text-white text-sm">SW Mujeres</p>
-            <p className="text-xs text-stone-500">
-              Directorio de emprendimientos verificados · Medellín, Colombia
-            </p>
-          </div>
-          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            <Link href="/directorio" className="hover:text-white transition-colors">Directorio</Link>
-            <Link href="/inscripcion" className="hover:text-white transition-colors">Inscríbete</Link>
-            <a
-              href="https://www.facebook.com/groups/292942651995627"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Grupo de Facebook
-            </a>
-            <a
-              href="https://www.instagram.com/swmujeres"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Instagram
-            </a>
-          </nav>
-        </div>
-      </footer>
-
+      <SiteFooter />
     </div>
   )
 }

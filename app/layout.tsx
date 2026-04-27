@@ -1,10 +1,21 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import { EB_Garamond, Montserrat } from 'next/font/google'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const ebGaramond = EB_Garamond({
+  variable: '--font-display',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+})
+
+const montserrat = Montserrat({
+  variable: '--font-body',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'
@@ -40,13 +51,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} h-full antialiased`}>
+    <html lang="es" className={`${ebGaramond.variable} ${montserrat.variable} h-full antialiased`}>
       <head>
         {SUPABASE_URL && (
           <link rel="preconnect" href={SUPABASE_URL} />
         )}
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col font-body">{children}</body>
     </html>
   )
 }

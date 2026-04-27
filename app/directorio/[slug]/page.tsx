@@ -1,25 +1,21 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
+import { slugify } from '@src/shared/utils/slugify'
 import { formatPhone } from '@src/shared/utils/formatPhone'
 import TrackView from '@components/directorio/TrackView'
 import ContactLinks from '@components/directorio/ContactLinks'
 
-type Props = {
-  params: { slug: string }
-}
+type Props = { params: { slug: string } }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const profile = await profilesService.getBySlug(slug)
   if (!profile) return {}
-
   const title = profile.business_name
-  const description =
-    profile.description ??
-    `${profile.business_name} — emprendedora verificada SW Mujeres.`
-
+  const description = profile.description ?? `${profile.business_name} — emprendedora verificada SW Mujeres.`
   return {
     title,
     description,
@@ -28,15 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `/directorio/${slug}`,
       type: 'profile',
-      ...(profile.directory_image_path
-        ? { images: [{ url: profile.directory_image_path, alt: title ?? '' }] }
-        : {}),
+      ...(profile.directory_image_path ? { images: [{ url: profile.directory_image_path, alt: title ?? '' }] } : {}),
     },
-    twitter: {
-      card: 'summary',
-      title: `${title} · SW Mujeres`,
-      description,
-    },
+    twitter: { card: 'summary', title: `${title} · SW Mujeres`, description },
   }
 }
 
@@ -49,9 +39,7 @@ function JsonLd({ profile, slug }: { profile: import('@src/features/profiles/typ
     description: profile.description ?? undefined,
     url: `${siteUrl}/directorio/${slug}`,
     telephone: profile.business_phone,
-    ...(profile.instagram_handle
-      ? { sameAs: [`https://instagram.com/${profile.instagram_handle}`] }
-      : {}),
+    ...(profile.instagram_handle ? { sameAs: [`https://instagram.com/${profile.instagram_handle}`] } : {}),
     ...(profile.website_url ? { sameAs: [profile.website_url] } : {}),
     ...(profile.directory_image_path ? { image: profile.directory_image_path } : {}),
     ...(profile.category ? { knowsAbout: profile.category } : {}),
@@ -61,105 +49,198 @@ function JsonLd({ profile, slug }: { profile: import('@src/features/profiles/typ
       ...(profile.city ? { addressLocality: profile.city } : {}),
     },
   }
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  )
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
-function Initials({ name }: { name: string }) {
-  const parts = name.trim().split(/\s+/)
-  const letters =
-    parts.length >= 2
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : name.slice(0, 2).toUpperCase()
-  return (
-    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-pink-100 text-2xl font-bold text-pink-700 ring-4 ring-white">
-      {letters}
-    </div>
-  )
-}
+const HERO_GRADIENT = 'linear-gradient(160deg,#C7A89C,#5F1F3C)'
 
 export default async function ProfilePage({ params }: Props) {
   const { slug } = await params
   const profile = await profilesService.getBySlug(slug)
-
   if (!profile) notFound()
 
   const whatsappUrl = formatPhone(profile.business_phone)
+  const founderFirstName = profile.full_name?.split(' ')[0] ?? 'ella'
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <div style={{ background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)' }}>
       <JsonLd profile={profile} slug={slug} />
       <TrackView profileId={profile.id} />
-      {/* Header */}
-      <div className="flex flex-col items-center gap-4 text-center">
-        {profile.directory_image_path ? (
-          <div className="relative h-24 w-24 overflow-hidden rounded-full ring-4 ring-white shadow">
-            <Image
-              src={profile.directory_image_path}
-              alt={profile.business_name}
-              fill
-              className="object-cover"
-              sizes="96px"
-            />
-          </div>
-        ) : (
-          <Initials name={profile.business_name} />
+
+      {/* ── Header ───────────────────────────────────────────────── */}
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 64px', borderBottom: '1px solid var(--sw-line)',
+      }}>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+          <Image src="/logo-symbol-circle-dark.svg" width={36} height={36} alt="SW" />
+          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.22em', textTransform: 'uppercase' }}>MUJERES</span>
+        </Link>
+        <nav style={{ display: 'flex', gap: 36 }}>
+          <Link href="/directorio" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Directorio</Link>
+          <Link href="/inscripcion" style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.85 }}>Inscríbete</Link>
+        </nav>
+        <Link href="/inscripcion" style={{
+          padding: '11px 26px', borderRadius: 6, border: '1px solid var(--fg)',
+          fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
+        }}>Sé parte</Link>
+      </header>
+
+      {/* ── Breadcrumb ───────────────────────────────────────────── */}
+      <div style={{ padding: '20px 64px 0', fontSize: 12, color: 'var(--fg-2)', letterSpacing: '0.04em' }}>
+        <Link href="/" style={{ color: 'var(--fg-3)' }}>Inicio</Link>
+        <span style={{ margin: '0 8px', color: 'var(--fg-3)' }}>›</span>
+        <Link href="/directorio" style={{ color: 'var(--fg-3)' }}>Directorio</Link>
+        {profile.category && (
+          <>
+            <span style={{ margin: '0 8px', color: 'var(--fg-3)' }}>›</span>
+            <Link href={`/directorio?categoria=${encodeURIComponent(profile.category)}`} style={{ color: 'var(--fg-3)' }}>
+              {profile.category}
+            </Link>
+          </>
         )}
-
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{profile.business_name}</h1>
-          {profile.full_name && (
-            <p className="mt-0.5 text-sm text-gray-500">{profile.full_name}</p>
-          )}
-          {profile.category && (
-            <p className="mt-1 text-sm font-medium text-pink-600">{profile.category}</p>
-          )}
-        </div>
-
-        {/* Badge SW Verificada */}
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700 ring-1 ring-pink-200">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="h-3.5 w-3.5"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-              clipRule="evenodd"
-            />
-          </svg>
-          SW Verificada
-        </span>
+        <span style={{ margin: '0 8px', color: 'var(--fg-3)' }}>›</span>
+        <span style={{ color: 'var(--accent)' }}>{profile.business_name}</span>
       </div>
 
-      {/* Descripción */}
-      {profile.description && (
-        <p className="mt-8 text-center text-gray-700 leading-relaxed">{profile.description}</p>
-      )}
-
-      {/* Descuento SW */}
-      {profile.offers_discount && profile.discount_details && (
-        <div className="mt-6 rounded-xl bg-amber-50 px-5 py-4 ring-1 ring-amber-200">
-          <p className="text-sm font-semibold text-amber-800">Descuento especial SW</p>
-          <p className="mt-1 text-sm text-amber-700">{profile.discount_details}</p>
+      {/* ── Magazine hero ────────────────────────────────────────── */}
+      <section style={{ padding: '32px 64px 0' }}>
+        {profile.category && (
+          <span className="sw-eyebrow">{profile.category}</span>
+        )}
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
+          fontSize: 'clamp(48px, 6vw, 88px)', lineHeight: 0.98, letterSpacing: '-0.02em',
+          margin: '12px 0 20px', maxWidth: 980,
+        }}>
+          {profile.business_name}<span style={{ color: 'var(--accent)' }}>.</span>
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontSize: 13, color: 'var(--fg-2)', flexWrap: 'wrap' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 12px', borderRadius: 999,
+            background: 'var(--sw-rose-pale)', color: 'var(--accent)', fontSize: 12, fontWeight: 600,
+          }}>✓ Verificada por SW Mujeres</span>
+          {profile.city && (
+            <span>📍 {profile.city}</span>
+          )}
         </div>
-      )}
+      </section>
 
-      {/* Acciones de contacto — con tracking de clicks */}
-      <ContactLinks
-        profileId={profile.id}
-        whatsappUrl={whatsappUrl}
-        instagramHandle={profile.instagram_handle}
-        websiteUrl={profile.website_url}
-        otherSocials={profile.other_socials}
-      />
-    </main>
+      {/* ── Photo + contact sidebar ───────────────────────────────── */}
+      <section style={{ padding: '32px 64px', display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 56, alignItems: 'start' }}>
+
+        {/* Left: photo + about */}
+        <div>
+          {/* Main photo */}
+          <div style={{ aspectRatio: '5/4', borderRadius: 10, overflow: 'hidden', position: 'relative', background: HERO_GRADIENT }}>
+            {profile.directory_image_path && (
+              <Image
+                src={profile.directory_image_path}
+                alt={profile.business_name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                priority
+              />
+            )}
+            {!profile.directory_image_path && (
+              <div style={{ position: 'absolute', top: 18, left: 18, width: 70, height: 70, borderRadius: '50%', background: 'rgba(57,17,37,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Image src="/logo-symbol-minimal.svg" width={38} height={38} alt="" style={{ filter: 'brightness(0) invert(1)' }} />
+              </div>
+            )}
+          </div>
+
+          {/* Sobre */}
+          {profile.description && (
+            <div style={{ marginTop: 56 }}>
+              <span className="sw-eyebrow">Sobre {profile.business_name}</span>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 36, margin: '12px 0 18px', letterSpacing: '-0.005em' }}>
+                {profile.description.split('.')[0]}.
+              </h2>
+              <p style={{ fontSize: 15, lineHeight: 1.8, color: 'var(--fg-2)', maxWidth: 620 }}>
+                {profile.description}
+              </p>
+            </div>
+          )}
+
+          {/* Empresaria */}
+          {profile.full_name && (
+            <div style={{ marginTop: 56, padding: 32, background: 'var(--bg-alt)', borderRadius: 10, border: '1px solid var(--sw-line)' }}>
+              <span className="sw-eyebrow">La empresaria</span>
+              <div style={{ display: 'flex', gap: 20, marginTop: 14, alignItems: 'center' }}>
+                <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(160deg,#A98072,#3a1d22)', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 26, color: 'var(--fg)' }}>{profile.full_name}</div>
+                  <div style={{ fontSize: 13, color: 'var(--fg-2)', marginTop: 4 }}>Fundadora · Verificada por SW</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right: sticky contact panel */}
+        <aside style={{ position: 'sticky', top: 24, background: 'var(--sw-paper)', border: '1px solid var(--sw-line-strong)', borderRadius: 10, padding: 28 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--fg-2)' }}>Contacta directo</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 28, marginTop: 8, lineHeight: 1.15 }}>
+            Sin <span style={{ color: 'var(--accent)' }}>intermediarios.</span>
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.6, marginTop: 12 }}>
+            Habla directo con {founderFirstName} — ella responde personalmente.
+          </p>
+
+          {/* Contact actions with tracking */}
+          <div style={{ marginTop: 22 }}>
+            <ContactLinks
+              profileId={profile.id}
+              whatsappUrl={whatsappUrl}
+              instagramHandle={profile.instagram_handle}
+              websiteUrl={profile.website_url}
+              otherSocials={profile.other_socials}
+            />
+          </div>
+
+          {/* Descuento SW */}
+          {profile.offers_discount && profile.discount_details && (
+            <div style={{
+              marginTop: 22, padding: 18, background: 'var(--sw-rose-pale)', borderRadius: 8,
+              border: '1px dashed var(--accent)',
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Descuento exclusivo SW</div>
+              <div style={{ fontSize: 14, color: 'var(--bg-dark)', marginTop: 6, lineHeight: 1.5 }}>{profile.discount_details}</div>
+            </div>
+          )}
+
+          {/* Meta */}
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--sw-line)', fontSize: 12, color: 'var(--fg-2)', lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {profile.category && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Categoría</span><span style={{ color: 'var(--fg)' }}>{profile.category}</span>
+              </div>
+            )}
+            {profile.city && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Ciudad</span><span style={{ color: 'var(--fg)' }}>{profile.city}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>Estado</span><span style={{ color: '#5A7A52' }}>✓ Verificada</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────── */}
+      <footer style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '40px 64px 28px', marginTop: 80 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Image src="/logo-symbol-circle-dark.svg" width={28} height={28} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
+            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.22em' }}>MUJERES</span>
+          </div>
+          <Link href="/directorio" style={{ fontSize: 12, color: 'var(--fg-on-dark-2)' }}>← Volver al directorio</Link>
+          <Link href="/inscripcion" style={{ fontSize: 12, color: 'var(--accent-soft)', fontWeight: 500 }}>Inscribir mi negocio →</Link>
+        </div>
+      </footer>
+    </div>
   )
 }

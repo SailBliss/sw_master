@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ── SW Mujeres brand fonts ──────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-body:    var(--font-body);
+
+  /* ── SW palette ───────────────────────────────────────────────── */
+  --color-sw-negro:         #391125;
+  --color-sw-burgundy-dark: #5F1F3C;
+  --color-sw-burgundy:      #821641;
+  --color-sw-burgundy-light:#A16579;
+  --color-sw-rose-pale:     #E6B6C6;
+  --color-sw-beige-warm:    #E7B1A5;
+  --color-sw-blush-mist:    #FFF0F0;
+  --color-sw-cream:         #F7EFE9;
+  --color-sw-pearl:         #FAF4F0;
+  --color-sw-paper:         #FFFFFF;
+  --color-sw-fg2:           #6B3F4F;
+  --color-sw-fg3:           #8E6571;
+  --color-sw-line:          rgba(57,17,37,0.10);
+  --color-sw-line-strong:   rgba(57,17,37,0.18);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Raw tokens (available everywhere, including inline styles) ─── */
+:root {
+  --sw-negro-profundo:  #391125;
+  --sw-burgundy-dark:   #5F1F3C;
+  --sw-burgundy:        #821641;
+  --sw-burgundy-light:  #A16579;
+  --sw-rose-pale:       #E6B6C6;
+  --sw-beige-warm:      #E7B1A5;
+  --sw-blush-mist:      #FFF0F0;
+  --sw-cream:           #F7EFE9;
+  --sw-pearl:           #FAF4F0;
+  --sw-paper:           #FFFFFF;
+  --sw-line:            rgba(57,17,37,0.10);
+  --sw-line-strong:     rgba(57,17,37,0.18);
+
+  /* semantic */
+  --bg:              var(--sw-cream);
+  --bg-alt:          var(--sw-pearl);
+  --bg-dark:         var(--sw-negro-profundo);
+  --fg:              var(--sw-negro-profundo);
+  --fg-2:            #6B3F4F;
+  --fg-3:            #8E6571;
+  --fg-on-dark:      var(--sw-cream);
+  --fg-on-dark-2:    rgba(247,239,233,0.72);
+  --fg-on-dark-3:    rgba(247,239,233,0.52);
+  --accent:          var(--sw-burgundy);
+  --accent-hover:    var(--sw-burgundy-dark);
+  --accent-soft:     var(--sw-rose-pale);
+
+  /* shadows */
+  --shadow-xs: 0 1px 2px rgba(57,17,37,0.04);
+  --shadow-sm: 0 2px 6px rgba(57,17,37,0.06);
+  --shadow-md: 0 6px 18px rgba(57,17,37,0.08);
+  --shadow-lg: 0 18px 40px rgba(57,17,37,0.12);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-base: 220ms;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body), 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ── Typography helpers ─────────────────────────────────────────── */
+.sw-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.sw-h1 { font-size: 48px; }
+.sw-h2 { font-size: 36px; }
+.sw-h3 { font-size: 28px; }
+
+.sw-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── Link reset ─────────────────────────────────────────────────── */
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+*, *::before, *::after { box-sizing: border-box; }
