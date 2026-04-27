@@ -5,6 +5,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { verifySession, SESSION_COOKIE_NAME } from '@src/shared/lib/auth'
 
@@ -32,11 +33,15 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <aside className="w-56 bg-white border-r border-gray-200 flex flex-col shrink-0">
-        {/* Logo / título */}
-        <div className="px-5 py-5 border-b border-gray-100">
-          <span className="text-sm font-bold text-gray-900 tracking-wide uppercase">
-            SW Admin
-          </span>
+        {/* Logo */}
+        <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-center">
+          <Image
+            src="/logo-sw-4.svg"
+            alt="SW Mujeres"
+            width={80}
+            height={80}
+            priority
+          />
         </div>
 
         {/* Navegación */}

@@ -72,9 +72,8 @@ export default async function ProfilePage({ params }: Props) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '20px 64px', borderBottom: '1px solid var(--sw-line)',
       }}>
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-          <Image src="/logo-symbol-circle-dark.svg" width={36} height={36} alt="SW" />
-          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.22em', textTransform: 'uppercase' }}>MUJERES</span>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <Image src="/logo-sw-4.svg" width={48} height={48} alt="SW Mujeres" />
         </Link>
         <nav style={{ display: 'flex', gap: 36 }}>
           <Link href="/directorio" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Directorio</Link>

@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
-import { slugify } from '@src/shared/utils/slugify'
 import { CATEGORIES } from '@src/shared/utils/categories'
-import type { DirectoryProfile } from '@src/features/profiles/types'
+import PreviewCard from '@/components/directorio/PreviewCard'
 
 export const metadata: Metadata = {
   title: 'Directorio de emprendedoras',
@@ -20,16 +19,6 @@ export const metadata: Metadata = {
 
 const CITIES = ['Medellín', 'Bogotá', 'Cali', 'Envigado', 'Sabaneta', 'Itagüí', 'Bello', 'Rionegro']
 
-const CARD_GRADIENTS = [
-  'linear-gradient(160deg,#C7A89C,#5F1F3C)',
-  'linear-gradient(160deg,#A98072,#3a1d22)',
-  'linear-gradient(160deg,#E7B1A5,#5F1F3C)',
-  'linear-gradient(160deg,#A1726B,#4a1a2a)',
-  'linear-gradient(160deg,#B5917F,#4a1a2a)',
-  'linear-gradient(160deg,#C7A89C,#391125)',
-  'linear-gradient(150deg,#E6B6C6,#821641)',
-  'linear-gradient(160deg,#8E6B5F,#391125)',
-]
 
 function buildUrl(params: { q?: string; categoria?: string; ciudad?: string }): string {
   const parts: string[] = []
@@ -39,76 +28,6 @@ function buildUrl(params: { q?: string; categoria?: string; ciudad?: string }): 
   return parts.length > 0 ? `/directorio?${parts.join('&')}` : '/directorio'
 }
 
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text
-  return text.slice(0, max).trimEnd() + '…'
-}
-
-function ProfileCard({ profile, idx }: { profile: DirectoryProfile; idx: number }) {
-  const slug = slugify(profile.business_name)
-  const shortDesc = profile.description ? truncate(profile.description, 80) : null
-  const gradient = CARD_GRADIENTS[idx % CARD_GRADIENTS.length]
-
-  return (
-    <Link
-      href={`/directorio/${slug}`}
-      style={{
-        background: 'var(--sw-paper)',
-        border: '1px solid var(--sw-line)',
-        borderRadius: 10,
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: 'var(--shadow-xs)',
-        transition: 'box-shadow 220ms, border-color 220ms',
-      }}
-      className="group hover:shadow-[var(--shadow-md)] hover:border-[var(--sw-burgundy-light)]"
-    >
-      {/* Photo / gradient */}
-      <div style={{ aspectRatio: '4/3', position: 'relative', background: profile.directory_image_path ? undefined : gradient }}>
-        {profile.directory_image_path && (
-          <Image
-            src={profile.directory_image_path}
-            alt={profile.business_name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        )}
-        <span style={{
-          position: 'absolute', top: 12, right: 12, padding: '5px 10px',
-          borderRadius: 999, background: 'rgba(247,239,233,0.92)',
-          color: 'var(--accent)', fontSize: 11, fontWeight: 600,
-        }}>✓ Verificada</span>
-        <div style={{
-          position: 'absolute', top: 12, left: 12, width: 32, height: 32, borderRadius: '50%',
-          background: 'rgba(57,17,37,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Image src="/logo-symbol-minimal.svg" width={18} height={18} alt="" style={{ filter: 'brightness(0) invert(1)' }} />
-        </div>
-      </div>
-
-      {/* Body */}
-      <div style={{ padding: '20px 22px 22px' }}>
-        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', color: 'var(--accent)', textTransform: 'uppercase' }}>
-          {profile.category ?? '—'}
-        </div>
-        <div style={{
-          fontFamily: 'var(--font-display)', fontStyle: 'italic',
-          fontSize: 22, color: 'var(--fg)', margin: '4px 0 6px', letterSpacing: '-0.005em', lineHeight: 1.15,
-        }}>
-          {profile.business_name}
-        </div>
-        {shortDesc && (
-          <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55 }}>{shortDesc}</div>
-        )}
-        {profile.city && (
-          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--fg-3)' }}>{profile.city}</div>
-        )}
-      </div>
-    </Link>
-  )
-}
 
 type SearchParams = Promise<{ q?: string; categoria?: string; ciudad?: string }>
 
@@ -132,9 +51,8 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '20px 64px', borderBottom: '1px solid var(--sw-line)',
       }}>
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-          <Image src="/logo-symbol-circle-dark.svg" width={36} height={36} alt="SW" />
-          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.22em', textTransform: 'uppercase' }}>MUJERES</span>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <Image src="/logo-sw-4.svg" width={48} height={48} alt="SW Mujeres" />
         </Link>
         <nav style={{ display: 'flex', gap: 36 }}>
           <Link href="/directorio" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Directorio</Link>
@@ -300,7 +218,7 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 28 }}>
               {profiles.map((profile, idx) => (
-                <ProfileCard key={profile.id} profile={profile} idx={idx} />
+                <PreviewCard key={profile.id} profile={profile} idx={idx} descMaxLen={80} />
               ))}
             </div>
           )}
