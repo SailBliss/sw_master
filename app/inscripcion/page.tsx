@@ -47,6 +47,11 @@ type Step3State = {
   consent_accepted: boolean
 }
 
+// ─── File validation constants ───────────────────────────────────────────────
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+const ALLOWED_RECEIPT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
 const baseInput =
@@ -716,13 +721,31 @@ export default function InscripcionPage() {
   }
 
   function validateStep3(): boolean {
-    const errs: Step3Errors = {}
-    if (!step3.product_id) errs.product_id = 'Selecciona un plan.'
-    const isPaid = selectedProduct !== null && selectedProduct.price_cop > 0
-    if (isPaid && !step3.receipt) errs.receipt = 'El comprobante de pago es obligatorio.'
-    if (!step3.consent_accepted) errs.consent_accepted = 'Debes aceptar los términos para continuar.'
-    setErrors3(errs)
-    return Object.keys(errs).length === 0
+    const newErrors: Step3Errors = {}
+
+    if (!step3.product_id) {
+      newErrors.product_id = 'Selecciona un plan.'
+    }
+
+    const selectedPlan = products.find(p => p.id === step3.product_id)
+    const isPaid = selectedPlan && selectedPlan.price_cop > 0
+
+    if (isPaid) {
+      if (!step3.receipt) {
+        newErrors.receipt = 'El comprobante de pago es obligatorio para este plan.'
+      } else if (!ALLOWED_RECEIPT_TYPES.includes(step3.receipt.type)) {
+        newErrors.receipt = 'El comprobante debe ser una imagen (JPG, PNG, WebP) o PDF.'
+      } else if (step3.receipt.size > MAX_FILE_SIZE) {
+        newErrors.receipt = 'El archivo no puede superar los 5 MB.'
+      }
+    }
+
+    if (!step3.consent_accepted) {
+      newErrors.consent_accepted = 'Debes aceptar los términos para continuar.'
+    }
+
+    setErrors3(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
