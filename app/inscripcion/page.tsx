@@ -273,16 +273,14 @@ function Step2Form({
 
       <Field
         label="WhatsApp del negocio"
-        hint="Incluye el código de país: 57300…"
         error={errors.business_phone}
       >
-        <input
-          type="tel"
+        <PhoneInput
+          id="business_phone"
           value={data.business_phone}
-          onChange={(e) => onChange('business_phone', e.target.value)}
-          className={inputClass(!!errors.business_phone)}
-          placeholder="57300..."
-          inputMode="tel"
+          onChange={(val) => onChange('business_phone', val)}
+          placeholder="300 123 4567"
+          error={!!errors.business_phone}
         />
       </Field>
 
@@ -657,17 +655,64 @@ export default function InscripcionPage() {
   }
 
   function validateStep2(): boolean {
-    const errs: Step2Errors = {}
-    if (!step2.business_name.trim()) errs.business_name = 'El nombre del negocio es obligatorio.'
-    if (!step2.category) errs.category = 'Selecciona una categoría.'
-    if (!step2.description.trim()) errs.description = 'La descripción es obligatoria.'
-    else if (step2.description.length > 300)
-      errs.description = 'La descripción no puede superar 300 caracteres.'
-    if (!step2.business_phone.trim()) errs.business_phone = 'El WhatsApp del negocio es obligatorio.'
-    if (step2.offers_discount && !step2.discount_details.trim())
-      errs.discount_details = 'Describe el descuento que ofreces.'
-    setErrors2(errs)
-    return Object.keys(errs).length === 0
+    const newErrors: Step2Errors = {}
+
+    const businessName = step2.business_name.trim()
+    if (!businessName) {
+      newErrors.business_name = 'El nombre del negocio es obligatorio.'
+    } else if (businessName.length < 2) {
+      newErrors.business_name = 'El nombre del negocio debe tener al menos 2 caracteres.'
+    }
+
+    if (!step2.category) {
+      newErrors.category = 'Selecciona una categoría.'
+    } else if (!CATEGORIES.includes(step2.category as typeof CATEGORIES[number])) {
+      newErrors.category = 'Categoría no válida.'
+    }
+
+    const description = step2.description.trim()
+    if (!description) {
+      newErrors.description = 'La descripción es obligatoria.'
+    } else if (description.length < 10) {
+      newErrors.description = 'La descripción debe tener al menos 10 caracteres.'
+    } else if (description.length > 300) {
+      newErrors.description = 'La descripción no puede superar los 300 caracteres.'
+    }
+
+    const businessPhoneDigits = step2.business_phone.replace(/^\+\d{1,4}/, '')
+    if (!businessPhoneDigits) {
+      newErrors.business_phone = 'El teléfono de WhatsApp es obligatorio.'
+    } else if (!/^\d{7,15}$/.test(businessPhoneDigits)) {
+      newErrors.business_phone = 'Ingresa un número válido (7–15 dígitos).'
+    }
+
+    const instagram = step2.instagram_handle?.trim()
+    if (instagram) {
+      const usernameOnly = instagram
+        .replace(/^https?:\/\/(www\.)?instagram\.com\//, '')
+        .replace(/^@/, '')
+        .replace(/\/$/, '')
+      if (!/^[\w.]{1,30}$/.test(usernameOnly)) {
+        newErrors.instagram_handle = 'Usuario de Instagram no válido. Usa @usuario o el enlace de tu perfil.'
+      }
+    }
+
+    const website = step2.website_url?.trim()
+    if (website) {
+      try {
+        const url = new URL(website)
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error()
+      } catch {
+        newErrors.website_url = 'Ingresa una URL válida para el sitio web.'
+      }
+    }
+
+    if (step2.offers_discount && !step2.discount_details?.trim()) {
+      newErrors.discount_details = 'Describe el descuento que ofreces.'
+    }
+
+    setErrors2(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   function validateStep3(): boolean {
