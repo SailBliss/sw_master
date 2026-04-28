@@ -43,12 +43,6 @@ function SiteHeader({ dark = false }: { dark?: boolean }) {
           }}>{n.label}</Link>
         ))}
       </nav>
-      <Link href="/inscripcion" style={{
-        padding: '11px 26px', borderRadius: 6,
-        border: `1px solid ${dark ? 'var(--fg-on-dark)' : 'var(--fg)'}`,
-        fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
-        color: fg,
-      }}>Sé parte</Link>
     </header>
   )
 }
