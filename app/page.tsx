@@ -93,44 +93,55 @@ function SiteFooter() {
 export default async function LandingPage() {
   const profiles = await profilesService.findAll()
   const previewProfiles = profiles.slice(0, 4)
+  const heroImageProfiles = profiles.filter((profile) => profile.directory_image_path).slice(0, 3)
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)' }}>
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <div style={{ background: 'var(--bg-dark)' }}>
+      <div style={{
+        background:
+          'radial-gradient(circle at 72% 28%, rgba(130,22,65,0.38), transparent 36%), radial-gradient(circle at 28% 8%, rgba(230,182,198,0.10), transparent 30%), var(--bg-dark)',
+      }}>
         <SiteHeader dark />
-        <section style={{ padding: '60px 64px 90px', color: 'var(--fg-on-dark)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: 60, alignItems: 'center' }}>
+        <section style={{ padding: '52px 64px 86px', color: 'var(--fg-on-dark)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '0.95fr 1.05fr', gap: 70, alignItems: 'center' }}>
             <div>
-              <span className="sw-eyebrow" style={{ color: 'var(--accent-soft)' }}>Confianza verificada</span>
               <h1 style={{
-                fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
-                fontSize: 68, lineHeight: 1.05, letterSpacing: '-0.01em',
-                margin: '16px 0 0', color: 'var(--sw-cream)',
+                fontFamily: 'var(--font-display)', fontStyle: 'normal', fontWeight: 500,
+                fontSize: 58, lineHeight: 1.02, letterSpacing: '-0.025em',
+                margin: 0, color: 'var(--sw-cream)',
+                textShadow: '0 1px 0 rgba(247,239,233,0.18)',
               }}>
-                Directorio de<br />negocios liderados<br />por <span style={{ color: 'var(--sw-rose-pale)' }}>mujeres.</span>
+                Directorio de<br />negocios liderados<br />por <span style={{
+                  position: 'relative',
+                  fontFamily: 'var(--font-display)',
+                  fontStyle: 'italic',
+                  fontWeight: 600,
+                  color: 'var(--sw-rose-pale)',
+                }}>mujeres</span>.
               </h1>
-              <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--fg-on-dark-2)', maxWidth: 460, marginTop: 24 }}>
-                13.500 mujeres. 6 años. Una comunidad construida sobre confianza. Aquí encuentras negocios verificados de emprendedoras en Medellín — sin intermediarios, sin promesas vacías.
+              <p style={{ fontSize: 17, lineHeight: 1.55, color: 'rgba(247,239,233,0.84)', maxWidth: 380, margin: '22px 0 0' }}>
+                Descubre, conecta y apoya negocios creados por mujeres en Medellín.
               </p>
 
               {/* Search pill */}
               <form method="get" action="/directorio" style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 8px 8px 22px',
-                background: 'var(--sw-cream)', borderRadius: 999, maxWidth: 460, marginTop: 28,
+                padding: '7px 7px 7px 18px',
+                background: 'var(--sw-cream)', borderRadius: 999, maxWidth: 380, marginTop: 30,
+                boxShadow: '0 14px 34px rgba(20,5,13,0.22)',
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8E6571" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8E6571" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                   <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                 </svg>
                 <input name="q" placeholder="Buscar negocio, categoría o palabra clave…" style={{
                   flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                  fontSize: 14, color: 'var(--fg)',
+                  fontSize: 12, color: 'var(--fg)',
                 }} />
                 <button type="submit" style={{
-                  width: 40, height: 40, borderRadius: 999, background: 'var(--accent)',
-                  border: 'none', color: 'var(--sw-cream)',
+                  width: 38, height: 38, borderRadius: 999, background: 'var(--sw-rose-pale)',
+                  border: 'none', color: 'var(--accent)',
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -139,25 +150,52 @@ export default async function LandingPage() {
                 </button>
               </form>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 26 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 24 }}>
                 <div style={{ display: 'flex' }}>
-                  {['#C7A89C', '#A98072', '#E6B6C6', '#8E6B5F', '#E7B1A5'].map((c, i) => (
+                  {['#F7EFE9', '#C7A89C', '#E6B6C6', '#A98072', '#E7B1A5', '#8E6B5F'].map((c, i) => (
                     <div key={i} style={{
-                      width: 30, height: 30, borderRadius: '50%', marginLeft: i ? -10 : 0,
+                      width: 26, height: 26, borderRadius: '50%', marginLeft: i ? -8 : 0,
                       border: '2px solid var(--bg-dark)', background: c,
                     }} />
                   ))}
                 </div>
-                <span style={{ fontSize: 13, color: 'var(--fg-on-dark-2)' }}>+250 negocios activos</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(247,239,233,0.78)' }}>+250 negocios activos</span>
               </div>
             </div>
 
             {/* Hero image grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gridTemplateRows: '1fr 1fr', gap: 12, height: 480 }}>
-              <div style={{ gridRow: '1 / 3', background: 'linear-gradient(160deg,#C7A89C,#5F1F3C)', borderRadius: 10 }} />
-              <div style={{ background: 'linear-gradient(160deg,#E7B1A5,#5F1F3C)', borderRadius: 10 }} />
-              <div style={{ background: 'var(--accent)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Image src="/logo-symbol-circle-dark.svg" width={88} height={88} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
+            <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1.24fr 0.9fr', gridTemplateRows: '1.08fr 1fr', gap: 10, height: 420 }}>
+              <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(145deg,#D8C1B5,#6B2A45)', borderRadius: 18, boxShadow: '0 20px 45px rgba(20,5,13,0.24)' }}>
+                {heroImageProfiles[0]?.directory_image_path && (
+                  <Image src={heroImageProfiles[0].directory_image_path} alt={heroImageProfiles[0].business_name} fill sizes="(max-width: 768px) 100vw, 34vw" style={{ objectFit: 'cover' }} />
+                )}
+              </div>
+              <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(145deg,#B99386,#5F1F3C)', borderRadius: 18 }}>
+                {heroImageProfiles[1]?.directory_image_path && (
+                  <Image src={heroImageProfiles[1].directory_image_path} alt={heroImageProfiles[1].business_name} fill sizes="(max-width: 768px) 100vw, 22vw" style={{ objectFit: 'cover' }} />
+                )}
+              </div>
+              <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(145deg,#C7A89C,#391125)', borderRadius: 18 }}>
+                {heroImageProfiles[2]?.directory_image_path && (
+                  <Image src={heroImageProfiles[2].directory_image_path} alt={heroImageProfiles[2].business_name} fill sizes="(max-width: 768px) 100vw, 34vw" style={{ objectFit: 'cover' }} />
+                )}
+              </div>
+              <div style={{
+                position: 'relative', overflow: 'hidden',
+                background: 'radial-gradient(circle at 35% 25%, rgba(230,182,198,0.45), transparent 32%), linear-gradient(145deg,#9B4968,#4A1830)',
+                borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Image src="/logo-symbol-minimal.svg" width={104} height={104} alt="SW" style={{ filter: 'brightness(0) invert(1)', opacity: 0.8 }} />
+                <span style={{ position: 'absolute', top: '33%', right: '38%', color: 'var(--sw-cream)', fontSize: 18, lineHeight: 1 }}>+</span>
+              </div>
+              <div style={{
+                position: 'absolute', left: '43%', top: '45%', transform: 'translate(-50%, -50%)',
+                width: 104, height: 104, borderRadius: '50%',
+                background: 'rgba(57,17,37,0.62)', border: '1px solid rgba(247,239,233,0.38)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 14px 34px rgba(20,5,13,0.25)', backdropFilter: 'blur(2px)',
+              }}>
+                <Image src="/logo-symbol-circle-dark.svg" width={92} height={92} alt="SW Mujeres" style={{ filter: 'brightness(0) invert(1)', opacity: 0.92 }} />
               </div>
             </div>
           </div>
