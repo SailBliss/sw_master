@@ -22,15 +22,15 @@ const STATUS_LABELS: Record<StatusFilter, string> = {
   rechazado: 'Rechazada',
 }
 
-const STATUS_BADGE: Record<StatusFilter, string> = {
-  pendiente: 'bg-yellow-100 text-yellow-800',
-  aprobado: 'bg-green-100 text-green-800',
-  rechazado: 'bg-red-100 text-red-800',
+const STATUS_BADGE_STYLE: Record<StatusFilter, React.CSSProperties> = {
+  pendiente: { background: 'var(--sw-rose-pale)', color: 'var(--accent)' },
+  aprobado: { background: 'rgba(90,122,82,0.15)', color: '#3a6b35' },
+  rechazado: { background: 'rgba(139,42,42,0.10)', color: '#8b2a2a' },
 }
 
 function StatusBadge({ status }: { status: StatusFilter }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[status]}`}>
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, ...STATUS_BADGE_STYLE[status] }}>
       {STATUS_LABELS[status]}
     </span>
   )
@@ -69,26 +69,37 @@ export default async function AdminSolicitudesPage({
   const emptyMsg = emptyMessages[activeFilter ?? 'all']
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Solicitudes</h1>
+    <div>
+      {/* AdminHeader */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)' }}>
+        <div>
+          <div className="sw-eyebrow">Admin</div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 38, margin: '8px 0 4px', letterSpacing: '-0.005em', color: 'var(--fg)' }}>
+            Solicitudes
+          </h1>
+          <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>{pendientesCount} pendiente{pendientesCount !== 1 ? 's' : ''} de revisión</div>
+        </div>
+      </div>
 
       {/* Tabs de filtro */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--sw-line)', marginBottom: 24 }}>
         {tabs.map((tab) => {
           const isActive = tab.value === activeFilter
           return (
             <Link
               key={tab.label}
               href={tab.href}
-              className={`flex items-center gap-1.5 pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
-                isActive
-                  ? 'border-pink-500 text-pink-500'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 16px', fontSize: 13, fontWeight: isActive ? 600 : 400,
+                color: isActive ? 'var(--accent)' : 'var(--fg-3)',
+                borderBottom: `2px solid ${isActive ? 'var(--sw-burgundy)' : 'transparent'}`,
+                marginBottom: -1, textDecoration: 'none', transition: 'color 150ms',
+              }}
             >
               {tab.label}
               {tab.value === 'pendiente' && pendientesCount > 0 && (
-                <span className="inline-flex items-center justify-center rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 min-w-[1.25rem]">
+                <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: 'var(--accent)', color: 'var(--sw-cream)', fontWeight: 600 }}>
                   {pendientesCount}
                 </span>
               )}
@@ -99,45 +110,27 @@ export default async function AdminSolicitudesPage({
 
       {/* Tabla */}
       {solicitudes.length === 0 ? (
-        <div className="py-16 text-center text-gray-500 text-sm">{emptyMsg}</div>
+        <div style={{ padding: '64px 0', textAlign: 'center', color: 'var(--fg-3)', fontSize: 13 }}>{emptyMsg}</div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Empresaria</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Negocio</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Categoría</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Enviada</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Estado</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600"></th>
+        <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-alt)', color: 'var(--fg-2)', textAlign: 'left' }}>
+                {['Empresaria', 'Negocio', 'Categoría', 'Enviada', 'Estado', ''].map(h => (
+                  <th key={h} style={{ padding: '14px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{h}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody>
               {solicitudes.map((s: AdminApplication) => (
-                <tr key={s.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {s.entrepreneur.full_name ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {s.business_profile.business_name ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {s.business_profile.category ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {formatDate(s.submitted_at)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={s.status} />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/solicitudes/${s.id}`}
-                      className="text-pink-500 hover:text-pink-700 font-medium"
-                    >
-                      Ver detalle →
-                    </Link>
+                <tr key={s.id} style={{ borderTop: '1px solid var(--sw-line)' }}>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg)', fontWeight: 500 }}>{s.entrepreneur.full_name ?? '—'}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{s.business_profile.business_name ?? '—'}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{s.business_profile.category ?? '—'}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{formatDate(s.submitted_at)}</td>
+                  <td style={{ padding: '16px 24px' }}><StatusBadge status={s.status} /></td>
+                  <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                    <Link href={`/admin/solicitudes/${s.id}`} style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none' }}>Ver →</Link>
                   </td>
                 </tr>
               ))}

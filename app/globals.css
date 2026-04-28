@@ -98,6 +98,23 @@ button { font-family: inherit; cursor: pointer; }
 input, textarea, select { font-family: inherit; }
 *, *::before, *::after { box-sizing: border-box; }
 
+/* ── Admin sidebar nav ──────────────────────────────────────────── */
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--fg-on-dark-2);
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: none;
+  transition: background var(--dur-base), color var(--dur-base);
+}
+.admin-nav-link:hover {
+  background: rgba(247,239,233,0.08);
+  color: var(--sw-cream);
+}
+
 /* ── PreviewCard hover ──────────────────────────────────────────── */
 .swpc {
   contain: layout style;
@@ -130,7 +147,13 @@ input, textarea, select { font-family: inherit; }
   max-height: 200px;
   padding: 20px 22px 22px;
   overflow: hidden;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   transition: max-height 380ms cubic-bezier(0.16,1,0.3,1),
               padding    380ms cubic-bezier(0.16,1,0.3,1);
+}
+.swpc-desc {
+  overflow: hidden;
 }
 .swpc:hover .swpc-body { max-height: 0; padding: 0 22px; }

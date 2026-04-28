@@ -44,7 +44,7 @@ function DaysBadge({ days }: { days: number }) {
     )
   }
   return (
-    <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700">
+    <span className="inline-flex items-center rounded-full bg-sw-blush-mist px-2.5 py-0.5 text-xs font-medium text-sw-burgundy">
       Vence en {days} {days === 1 ? 'día' : 'días'}
     </span>
   )
@@ -56,17 +56,9 @@ function DaysBadge({ days }: { days: number }) {
 
 function StatusBadge({ status }: { status: 'active' | 'inactive' | null }) {
   if (status === 'active') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-        Activa
-      </span>
-    )
+    return <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: 'rgba(90,122,82,0.15)', color: '#3a6b35' }}>Activa</span>
   }
-  return (
-    <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-      Inactiva
-    </span>
-  )
+  return <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: 'var(--bg-alt)', color: 'var(--fg-3)' }}>Inactiva</span>
 }
 
 // ---------------------------------------------------------------------------
@@ -86,132 +78,78 @@ export default async function MembresiasPage() {
   })
 
   return (
-    <div className="space-y-10">
-      {/* ------------------------------------------------------------------ */}
-      {/* SECCIÓN 1 — Alertas                                                 */}
-      {/* ------------------------------------------------------------------ */}
-      <section>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Alertas de membresía</h2>
-
-        {alerts.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white px-6 py-8 text-center text-sm text-gray-500">
-            Sin alertas activas
+    <div>
+      {/* AdminHeader */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)' }}>
+        <div>
+          <div className="sw-eyebrow">Admin</div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 38, margin: '8px 0 4px', letterSpacing: '-0.005em', color: 'var(--fg)' }}>
+            Membresías
+          </h1>
+          <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>
+            {profiles.filter(p => p.membership_status === 'active').length} activas · {alerts.length} con alertas
           </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {alerts.map((alert: MembershipAlert) => (
-              <div
-                key={alert.entrepreneur_id}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="mb-3 space-y-0.5">
-                  <p className="text-sm font-semibold text-gray-800 truncate">
-                    {alert.full_name ?? '(sin nombre)'}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {alert.business_name ?? '(sin negocio)'}
-                  </p>
-                </div>
+        </div>
+      </div>
 
-                <div className="mb-3">
-                  <DaysBadge days={alert.days_remaining} />
-                </div>
+      {/* KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18, marginBottom: 22 }}>
+        <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, padding: '22px 24px' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-2)' }}>Activas</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 42, color: 'var(--fg)', lineHeight: 1, marginTop: 12 }}>{profiles.filter(p => p.membership_status === 'active').length}</div>
+        </div>
+        <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, padding: '22px 24px' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-2)' }}>Alertas activas</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 42, color: alerts.length > 0 ? 'var(--accent)' : 'var(--fg)', lineHeight: 1, marginTop: 12 }}>{alerts.length}</div>
+          <div style={{ fontSize: 12, color: 'var(--fg-3)', marginTop: 8 }}>vencidas o por vencer</div>
+        </div>
+        <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, padding: '22px 24px' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-2)' }}>Inactivas</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 42, color: 'var(--fg-3)', lineHeight: 1, marginTop: 12 }}>{profiles.filter(p => p.membership_status !== 'active').length}</div>
+        </div>
+      </div>
 
-                <p className="text-xs text-gray-400 mb-3">
-                  Vence el {formatDate(alert.membership_end)}
-                </p>
-
-                <Link
-                  href={`/admin/perfiles/${alert.entrepreneur_id}`}
-                  className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-                >
-                  Ver perfil →
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* SECCIÓN 2 — Tabla de todas las membresías                           */}
-      {/* ------------------------------------------------------------------ */}
-      <section>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Todas las membresías</h2>
-
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Empresaria</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Negocio</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Estado</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Inicio</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Fin</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Días restantes</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {sorted.map((p: AdminProfile) => {
-                const days = daysFromNow(p.membership_end)
-                return (
-                  <tr key={p.entrepreneur_id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
-                      {p.full_name ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                      {p.business_name ?? '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={p.membership_status} />
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                      {formatDate(p.membership_start)}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                      {formatDate(p.membership_end)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {days !== null ? (
-                        <span
-                          className={
-                            days < 0
-                              ? 'text-red-600 font-medium'
-                              : days <= 7
-                                ? 'text-yellow-600 font-medium'
-                                : 'text-gray-600'
-                          }
-                        >
-                          {days < 0 ? `−${Math.abs(days)}` : days}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/admin/perfiles/${p.entrepreneur_id}`}
-                        className="text-indigo-600 hover:text-indigo-800 hover:underline font-medium"
-                      >
-                        Gestionar
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              })}
-
-              {sorted.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
-                    No hay membresías registradas.
+      {/* Tabla */}
+      <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: 'var(--bg-alt)', color: 'var(--fg-2)', textAlign: 'left' }}>
+              {['Negocio', 'Inicio', 'Vence', 'Días restantes', 'Estado', ''].map(h => (
+                <th key={h} style={{ padding: '14px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((p: AdminProfile) => {
+              const days = daysFromNow(p.membership_end)
+              const urgent = days !== null && days < 14
+              return (
+                <tr key={p.entrepreneur_id} style={{ borderTop: '1px solid var(--sw-line)' }}>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg)', fontWeight: 500 }}>{p.business_name ?? '—'}</td>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg-2)' }}>{formatDate(p.membership_start)}</td>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg-2)' }}>{formatDate(p.membership_end)}</td>
+                  <td style={{ padding: '14px 24px', color: urgent ? '#dc2626' : 'var(--fg)', fontWeight: urgent ? 600 : 400 }}>
+                    {days !== null ? `${days < 0 ? '−' : ''}${Math.abs(days)}d` : '—'}
+                  </td>
+                  <td style={{ padding: '14px 24px' }}><StatusBadge status={p.membership_status} /></td>
+                  <td style={{ padding: '14px 24px', textAlign: 'right' }}>
+                    <Link href={`/admin/perfiles/${p.entrepreneur_id}`} style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none' }}>
+                      Gestionar
+                    </Link>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              )
+            })}
+            {sorted.length === 0 && (
+              <tr>
+                <td colSpan={6} style={{ padding: '32px 24px', textAlign: 'center', color: 'var(--fg-3)' }}>
+                  No hay membresías registradas.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
