@@ -93,7 +93,6 @@ function SiteFooter() {
 export default async function LandingPage() {
   const profiles = await profilesService.findAll()
   const previewProfiles = profiles.slice(0, 4)
-  const heroImageProfiles = profiles.filter((profile) => profile.directory_image_path).slice(0, 3)
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)' }}>
@@ -113,7 +112,7 @@ export default async function LandingPage() {
                 margin: 0, color: 'var(--sw-cream)',
                 textShadow: '0 1px 0 rgba(247,239,233,0.18)',
               }}>
-                Directorio de<br />negocios liderados<br />por <span style={{
+                <span style={{ opacity: 0.78 }}>Directorio de<br />negocios liderados<br />por</span> <span style={{
                   position: 'relative',
                   fontFamily: 'var(--font-display)',
                   fontStyle: 'italic',
@@ -164,38 +163,45 @@ export default async function LandingPage() {
             </div>
 
             {/* Hero image grid */}
-            <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1.24fr 0.9fr', gridTemplateRows: '1.08fr 1fr', gap: 10, height: 420 }}>
-              <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(145deg,#D8C1B5,#6B2A45)', borderRadius: 18, boxShadow: '0 20px 45px rgba(20,5,13,0.24)' }}>
-                {heroImageProfiles[0]?.directory_image_path && (
-                  <Image src={heroImageProfiles[0].directory_image_path} alt={heroImageProfiles[0].business_name} fill sizes="(max-width: 768px) 100vw, 34vw" style={{ objectFit: 'cover' }} />
-                )}
+            <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1.08fr 0.84fr', gap: 10, height: 446 }}>
+              <div style={{ display: 'grid', gridTemplateRows: '1.42fr 1fr', gap: 10 }}>
+                <div style={{
+                  background: 'linear-gradient(145deg,#D8C1B5 0%,#A16678 54%,#5F1F3C 100%)',
+                  borderRadius: 18,
+                  boxShadow: '0 20px 45px rgba(20,5,13,0.24)',
+                }} />
+                <div style={{
+                  background: 'linear-gradient(145deg,#C7A89C 0%,#8A626B 52%,#391125 100%)',
+                  borderRadius: 18,
+                }} />
               </div>
-              <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(145deg,#B99386,#5F1F3C)', borderRadius: 18 }}>
-                {heroImageProfiles[1]?.directory_image_path && (
-                  <Image src={heroImageProfiles[1].directory_image_path} alt={heroImageProfiles[1].business_name} fill sizes="(max-width: 768px) 100vw, 22vw" style={{ objectFit: 'cover' }} />
-                )}
-              </div>
-              <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(145deg,#C7A89C,#391125)', borderRadius: 18 }}>
-                {heroImageProfiles[2]?.directory_image_path && (
-                  <Image src={heroImageProfiles[2].directory_image_path} alt={heroImageProfiles[2].business_name} fill sizes="(max-width: 768px) 100vw, 34vw" style={{ objectFit: 'cover' }} />
-                )}
+              <div style={{ display: 'grid', gridTemplateRows: '0.74fr 1.26fr', gap: 10 }}>
+                <div style={{
+                  background: 'linear-gradient(145deg,#B99386 0%,#8D5664 52%,#5F1F3C 100%)',
+                  borderRadius: 18,
+                }} />
+                <div style={{
+                  background:
+                    'radial-gradient(circle at 35% 25%, rgba(230,182,198,0.42), transparent 32%), linear-gradient(145deg,#9B4968 0%,#6F2947 54%,#4A1830 100%)',
+                  borderRadius: 18,
+                }} />
               </div>
               <div style={{
-                position: 'relative', overflow: 'hidden',
-                background: 'radial-gradient(circle at 35% 25%, rgba(230,182,198,0.45), transparent 32%), linear-gradient(145deg,#9B4968,#4A1830)',
-                borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'absolute',
+                left: 0,
+                top: '58.5%',
+                transform: 'translate(-50%, -50%)',
+                width: 118,
+                height: 118,
+                borderRadius: '50%',
+                background: 'rgba(57,17,37,0.72)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 14px 34px rgba(20,5,13,0.26)',
+                zIndex: 2,
               }}>
-                <Image src="/logo-symbol-minimal.svg" width={104} height={104} alt="SW" style={{ filter: 'brightness(0) invert(1)', opacity: 0.8 }} />
-                <span style={{ position: 'absolute', top: '33%', right: '38%', color: 'var(--sw-cream)', fontSize: 18, lineHeight: 1 }}>+</span>
-              </div>
-              <div style={{
-                position: 'absolute', left: '43%', top: '45%', transform: 'translate(-50%, -50%)',
-                width: 104, height: 104, borderRadius: '50%',
-                background: 'rgba(57,17,37,0.62)', border: '1px solid rgba(247,239,233,0.38)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 14px 34px rgba(20,5,13,0.25)', backdropFilter: 'blur(2px)',
-              }}>
-                <Image src="/logo-symbol-circle-dark.svg" width={92} height={92} alt="SW Mujeres" style={{ filter: 'brightness(0) invert(1)', opacity: 0.92 }} />
+                <Image src="/11.svg" width={108} height={108} alt="SW Mujeres" />
               </div>
             </div>
           </div>
