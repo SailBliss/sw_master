@@ -58,10 +58,6 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
           <Link href="/directorio" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Directorio</Link>
           <Link href="/inscripcion" style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.85 }}>Inscríbete</Link>
         </nav>
-        <Link href="/inscripcion" style={{
-          padding: '11px 26px', borderRadius: 6, border: '1px solid var(--fg)',
-          fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
-        }}>Sé parte</Link>
       </header>
 
       {/* ── Hero small ───────────────────────────────────────────── */}
