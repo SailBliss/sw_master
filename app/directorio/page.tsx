@@ -52,7 +52,7 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
         padding: '20px 64px', borderBottom: '1px solid var(--sw-line)',
       }}>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <Image src="/logo-sw-4.svg" width={48} height={48} alt="SW Mujeres" />
+          <Image src="/logo-sw-4.svg" width={90} height={90} alt="SW Mujeres" />
         </Link>
         <nav style={{ display: 'flex', gap: 36 }}>
           <Link href="/directorio" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Directorio</Link>

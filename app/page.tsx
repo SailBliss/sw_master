@@ -28,7 +28,7 @@ function SiteHeader({ dark = false }: { dark?: boolean }) {
       <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', color: 'inherit' }}>
         <Image
           src="/logo-sw-4.svg"
-          width={48} height={48} alt="SW Mujeres"
+          width={90} height={90} alt="SW Mujeres"
           style={{ filter: dark ? 'brightness(0) invert(1)' : 'none' }}
         />
       </Link>
