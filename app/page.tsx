@@ -33,15 +33,9 @@ function SiteHeader({ dark = false }: { dark?: boolean }) {
         />
       </Link>
       <nav style={{ display: 'flex', gap: 36 }}>
-        {[
-          { href: '/directorio', label: 'Directorio' },
-          { href: '/inscripcion', label: 'Inscríbete' },
-        ].map((n) => (
-          <Link key={n.href} href={n.href} style={{
-            fontSize: 12, fontWeight: 500, letterSpacing: '0.18em',
-            textTransform: 'uppercase', color: 'inherit', opacity: 0.85,
-          }}>{n.label}</Link>
-        ))}
+        <Link href="/directorio" className="sw-header-nav-link" style={{ color: 'inherit' }}>
+          Directorio
+        </Link>
       </nav>
     </header>
   )
@@ -53,16 +47,13 @@ function SiteFooter() {
     <footer style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '56px 64px 36px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 60, marginBottom: 48 }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-            <Image src="/logo-symbol-circle-dark.svg" width={40} height={40} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
-            <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.22em' }}>MUJERES</span>
-          </div>
-          <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg-on-dark-2)', maxWidth: 360, margin: 0 }}>
-            Directorio de negocios liderados por mujeres en Medellín. Confianza verificada, sin intermediarios.
-          </p>
-          <div style={{ marginTop: 22, fontSize: 11, fontWeight: 600, letterSpacing: '0.22em', color: 'var(--accent-soft)' }}>
-            CONECTA · IMPULSA · VISIBILIZA
-          </div>
+          <Image
+            src="/10.svg"
+            width={190}
+            height={190}
+            alt="SW Mujeres"
+            style={{ width: '100%', maxWidth: 190, height: 'auto', display: 'block' }}
+          />
         </div>
         {[
           { t: 'Directorio', l: ['Belleza', 'Moda', 'Bienestar', 'Hogar', 'Comida'] },
@@ -89,10 +80,18 @@ function SiteFooter() {
   )
 }
 
+const FEATURES = [
+  { t: 'Verificación manual',  d: 'Cada negocio revisado, uno por uno. Rechazamos el 46% de las solicitudes.' },
+  { t: 'Hecho por mujeres',    d: 'Comunidad de 13.500 emprendedoras que se apoyan entre sí.' },
+  { t: 'Apoya lo local',       d: 'Fortalecemos el talento femenino de Medellín y Antioquia.' },
+  { t: 'Sin intermediarios',   d: 'Contactas directo con la empresaria, sin comisiones.' },
+]
+
 /* ── Landing page ───────────────────────────────────────────────── */
 export default async function LandingPage() {
   const profiles = await profilesService.findAll()
   const previewProfiles = profiles.slice(0, 4)
+  const businessCount = profiles.length > 0 ? `${profiles.length}+` : '—'
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)' }}>
@@ -112,8 +111,8 @@ export default async function LandingPage() {
                 margin: 0, color: 'var(--sw-cream)',
                 textShadow: '0 1px 0 rgba(247,239,233,0.18)',
               }}>
-                <span style={{ opacity: 0.78 }}>Directorio de<br />negocios liderados<br />por</span> <span style={{
-                  position: 'relative',
+                <span style={{ opacity: 0.78 }}>Directorio de<br />negocios liderados<br />por</span>{' '}
+                <span style={{
                   fontFamily: 'var(--font-display)',
                   fontStyle: 'italic',
                   fontWeight: 500,
@@ -134,15 +133,21 @@ export default async function LandingPage() {
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8E6571" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                   <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                 </svg>
-                <input name="q" placeholder="Buscar negocio, categoría o palabra clave…" style={{
-                  flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                  fontSize: 12, color: 'var(--fg)',
-                }} />
-                <button type="submit" style={{
-                  width: 38, height: 38, borderRadius: 999, background: 'var(--sw-rose-pale)',
-                  border: 'none', color: 'var(--accent)',
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                <input
+                  name="q"
+                  placeholder="Buscar negocio, categoría o palabra clave…"
+                  style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, color: 'var(--fg)' }}
+                />
+                <button
+                  type="submit"
+                  className="sw-search-submit"
+                  style={{
+                    width: 38, height: 38, borderRadius: 999, background: 'var(--sw-rose-pale)',
+                    border: 'none', color: 'var(--accent)',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                  aria-label="Buscar"
+                >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
@@ -158,7 +163,9 @@ export default async function LandingPage() {
                     }} />
                   ))}
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(247,239,233,0.78)' }}>+250 negocios activos</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(247,239,233,0.78)' }}>
+                  {businessCount} negocios activos
+                </span>
               </div>
             </div>
 
@@ -188,16 +195,11 @@ export default async function LandingPage() {
               </div>
               <div style={{
                 position: 'absolute',
-                left: 0,
-                top: '58.5%',
+                left: 0, top: '58.5%',
                 transform: 'translate(-50%, -50%)',
-                width: 118,
-                height: 118,
-                borderRadius: '50%',
+                width: 118, height: 118, borderRadius: '50%',
                 background: 'rgba(57,17,37,0.72)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 14px 34px rgba(20,5,13,0.26)',
                 zIndex: 2,
               }}>
@@ -213,9 +215,9 @@ export default async function LandingPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 36 }}>
           {[
             { n: '13.500', l: 'Mujeres en la comunidad' },
-            { n: '6 años', l: 'Construyendo confianza' },
-            { n: '75%', l: 'En Medellín metropolitana' },
-            { n: profiles.length > 0 ? `${profiles.length}` : '—', l: 'Negocios verificados' },
+            { n: '6 años',  l: 'Construyendo confianza' },
+            { n: '75%',     l: 'En Medellín metropolitana' },
+            { n: businessCount, l: 'Negocios verificados' },
           ].map((m) => (
             <div key={m.l}>
               <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 48, color: 'var(--accent)', lineHeight: 1, letterSpacing: '-0.01em' }}>{m.n}</div>
@@ -227,35 +229,38 @@ export default async function LandingPage() {
 
       {/* ── Quiénes somos ────────────────────────────────────────── */}
       <section style={{ padding: '100px 64px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 80, alignItems: 'center' }}>
-          <div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 80, alignItems: 'start' }}>
+          <div style={{ paddingTop: 4 }}>
             <span className="sw-eyebrow">Quiénes somos</span>
             <h2 style={{
-              fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
+              fontFamily: 'var(--font-display)', fontStyle: 'normal', fontWeight: 400,
               fontSize: 44, lineHeight: 1.1, margin: '16px 0 22px', letterSpacing: '-0.01em',
             }}>
-              Aquí encuentras<br />negocios <span style={{ color: 'var(--accent)' }}>verificados.</span>
+              Aquí encuentras<br />negocios <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>verificados.</span>
             </h2>
             <p style={{ fontSize: 15, lineHeight: 1.75, color: 'var(--fg-2)', maxWidth: 480 }}>
-              Cada perfil pasa por una revisión manual — una por una. Rechazamos el 46% de las solicitudes. Por eso lo que ves, importa.
+              Cada perfil pasa por una revisión manual, una por una. Rechazamos el 46% de las solicitudes. Por eso lo que ves, importa.
             </p>
             <div style={{ marginTop: 28 }}>
               <span style={{ width: 60, height: 1, background: 'var(--accent)', display: 'inline-block' }} />
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {[
-              { icon: '🛡️', t: 'Verificación manual', d: 'Cada negocio revisado, una por una.' },
-              { icon: '❤️', t: 'Hecho por mujeres', d: 'Comunidad de 13.500 emprendedoras.' },
-              { icon: '📍', t: 'Apoya local', d: 'Fortalecemos el talento de Medellín.' },
-              { icon: '🤝', t: 'Sin intermediarios', d: 'Conectas directo con la empresaria.' },
-            ].map((i) => (
-              <div key={i.t} style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, padding: 24 }}>
-                <div style={{ fontSize: 22 }}>{i.icon}</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--fg)', marginTop: 12 }}>{i.t}</div>
-                <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55, marginTop: 6 }}>{i.d}</div>
+
+          {/* Feature list — editorial rows, no cards */}
+          <div>
+            {FEATURES.map((f, i) => (
+              <div key={f.t} style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1.4fr',
+                gap: '0 28px',
+                padding: '22px 0',
+                borderTop: `1px solid ${i === 0 ? 'var(--sw-line-strong)' : 'var(--sw-line)'}`,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)', lineHeight: 1.4, paddingTop: 1 }}>{f.t}</div>
+                <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.6 }}>{f.d}</div>
               </div>
             ))}
+            <div style={{ borderTop: '1px solid var(--sw-line)' }} />
           </div>
         </div>
       </section>
@@ -269,7 +274,7 @@ export default async function LandingPage() {
               Recién verificados
             </h2>
           </div>
-          <Link href="/directorio" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 500 }}>
+          <Link href="/directorio" className="sw-link-more">
             Ver todo el directorio →
           </Link>
         </div>
@@ -305,28 +310,19 @@ export default async function LandingPage() {
               90 días gratis. Datos reales. Después, decidimos juntas. Proceso manual de 5 días hábiles.
             </p>
             <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
-              <Link href="/inscripcion" style={{
-                padding: '13px 26px', borderRadius: 6,
-                background: 'var(--accent)', color: 'var(--sw-cream)', border: 'none',
-                fontSize: 13, fontWeight: 500, letterSpacing: '0.04em',
-                boxShadow: '0 1px 2px rgba(57,17,37,0.20)',
-              }}>
+              <Link href="/inscripcion" className="sw-cta-primary">
                 Inscribir mi negocio →
               </Link>
-              <Link href="/directorio" style={{
-                padding: '13px 26px', borderRadius: 6, background: 'transparent',
-                color: 'var(--fg-on-dark)', border: '1px solid rgba(247,239,233,0.4)',
-                fontSize: 13, fontWeight: 500,
-              }}>
+              <Link href="/directorio" className="sw-cta-ghost">
                 Ver el directorio
               </Link>
             </div>
           </div>
           <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
             {[
-              { n: '01', t: 'Cuéntanos sobre ti', d: 'Datos personales, cédula, Facebook.' },
+              { n: '01', t: 'Cuéntanos sobre ti',         d: 'Datos personales, cédula, Facebook.' },
               { n: '02', t: 'Cuéntanos sobre tu negocio', d: 'Nombre, descripción, categoría, redes.' },
-              { n: '03', t: 'Confirmamos en 5 días', d: 'Revisamos manualmente. Te avisamos.' },
+              { n: '03', t: 'Confirmamos en 5 días',      d: 'Revisamos manualmente. Te avisamos.' },
             ].map((s) => (
               <li key={s.n} style={{ display: 'flex', gap: 22, padding: '20px 0', borderTop: '1px solid rgba(247,239,233,0.12)' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 32, color: 'var(--accent-soft)', minWidth: 60 }}>{s.n}</span>

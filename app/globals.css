@@ -157,3 +157,73 @@ input, textarea, select { font-family: inherit; }
   overflow: hidden;
 }
 .swpc:hover .swpc-body { max-height: 0; padding: 0 22px; }
+
+/* ── Landing interactive elements ──────────────────────────────── */
+.sw-cta-primary {
+  padding: 13px 26px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--sw-cream);
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px rgba(57,17,37,0.20);
+  transition: background var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.sw-cta-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-md);
+}
+.sw-cta-primary:focus-visible {
+  outline: 2px solid var(--sw-rose-pale);
+  outline-offset: 3px;
+}
+
+.sw-cta-ghost {
+  padding: 13px 26px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg-on-dark);
+  border: 1px solid rgba(247,239,233,0.30);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.sw-cta-ghost:hover {
+  border-color: rgba(247,239,233,0.60);
+  background: rgba(247,239,233,0.06);
+}
+.sw-cta-ghost:focus-visible {
+  outline: 2px solid var(--sw-rose-pale);
+  outline-offset: 3px;
+}
+
+.sw-link-more {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.sw-link-more:hover { opacity: 0.70; }
+
+.sw-search-submit {
+  transition: background var(--dur-base) var(--ease-out);
+}
+.sw-search-submit:hover { background: #d4a0b0 !important; }
+.sw-search-submit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.sw-header-nav-link {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.80;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.sw-header-nav-link:hover { opacity: 1; }
