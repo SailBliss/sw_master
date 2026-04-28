@@ -107,7 +107,7 @@ export default async function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '0.95fr 1.05fr', gap: 70, alignItems: 'center' }}>
             <div>
               <h1 style={{
-                fontFamily: 'var(--font-display)', fontStyle: 'normal', fontWeight: 500,
+                fontFamily: 'var(--font-display)', fontStyle: 'normal', fontWeight: 400,
                 fontSize: 58, lineHeight: 1.02, letterSpacing: '-0.025em',
                 margin: 0, color: 'var(--sw-cream)',
                 textShadow: '0 1px 0 rgba(247,239,233,0.18)',
@@ -116,7 +116,7 @@ export default async function LandingPage() {
                   position: 'relative',
                   fontFamily: 'var(--font-display)',
                   fontStyle: 'italic',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   color: 'var(--sw-rose-pale)',
                 }}>mujeres</span>.
               </h1>
@@ -158,7 +158,7 @@ export default async function LandingPage() {
                     }} />
                   ))}
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(247,239,233,0.78)' }}>+250 negocios activos</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(247,239,233,0.78)' }}>+250 negocios activos</span>
               </div>
             </div>
 
