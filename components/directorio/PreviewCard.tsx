@@ -1,0 +1,125 @@
+'use client'
+
+import { useRef } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import type { DirectoryProfile } from '@src/features/profiles/types'
+
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text
+  return text.slice(0, max).trimEnd() + '…'
+}
+
+const CARD_GRADIENTS = [
+  'linear-gradient(160deg,#C7A89C,#5F1F3C)',
+  'linear-gradient(160deg,#A98072,#3a1d22)',
+  'linear-gradient(160deg,#E7B1A5,#5F1F3C)',
+  'linear-gradient(160deg,#E6B6C6,#821641)',
+  'linear-gradient(160deg,#A1726B,#4a1a2a)',
+  'linear-gradient(160deg,#B5917F,#4a1a2a)',
+  'linear-gradient(160deg,#C7A89C,#391125)',
+  'linear-gradient(160deg,#8E6B5F,#391125)',
+]
+
+
+interface PreviewCardProps {
+  profile: DirectoryProfile
+  idx: number
+  videoSrc?: string
+  descMaxLen?: number
+}
+
+export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }: PreviewCardProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const handleMouseEnter = () => videoRef.current?.play().catch(() => {})
+  const handleMouseLeave = () => {
+    const v = videoRef.current
+    if (!v) return
+    v.pause()
+    v.currentTime = 0
+  }
+
+  const shortDesc = profile.description ? truncate(profile.description, descMaxLen) : null
+  const gradient = CARD_GRADIENTS[idx % CARD_GRADIENTS.length]
+  const src = videoSrc ?? '/preview-placeholder.mp4'
+
+  return (
+    <Link
+        href={`/directorio/${profile.slug}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="swpc"
+        style={{
+          background: 'var(--sw-paper)',
+          border: '1px solid',
+          borderRadius: 10,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Media block */}
+        <div
+          className="swpc-media"
+          style={{ position: 'relative', background: profile.directory_image_path ? undefined : gradient, overflow: 'hidden' }}
+        >
+          {profile.directory_image_path && (
+            <Image
+              src={profile.directory_image_path}
+              alt={profile.business_name}
+              fill
+              className="swpc-img object-cover"
+              sizes="(max-width: 768px) 100vw, 25vw"
+            />
+          )}
+
+          <video
+            ref={videoRef}
+            src={src}
+            muted
+            playsInline
+            loop
+            preload="none"
+            className="swpc-video"
+          />
+
+          <span style={{
+            position: 'absolute', top: 12, right: 12,
+            padding: '5px 10px', borderRadius: 999,
+            background: 'rgba(247,239,233,0.92)',
+            color: 'var(--accent)', fontSize: 11, fontWeight: 600,
+            zIndex: 1,
+          }}>✓ Verificada</span>
+          <div style={{
+            position: 'absolute', top: 12, left: 12,
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'rgba(57,17,37,0.55)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1,
+          }}>
+            <Image src="/logo-symbol-minimal.svg" width={18} height={18} alt="" style={{ filter: 'brightness(0) invert(1)' }} />
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="swpc-body">
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', color: 'var(--accent)', textTransform: 'uppercase' }}>
+            {profile.category ?? '—'}
+          </div>
+          <div style={{
+            fontFamily: 'var(--font-display)', fontStyle: 'italic',
+            fontSize: 22, color: 'var(--fg)', margin: '4px 0 6px', letterSpacing: '-0.005em', lineHeight: 1.15,
+          }}>
+            {profile.business_name}
+          </div>
+          {shortDesc && (
+            <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55 }}>{shortDesc}</div>
+          )}
+          {profile.city && (
+            <div style={{ marginTop: 10, fontSize: 12, color: 'var(--fg-3)' }}>{profile.city}</div>
+          )}
+        </div>
+      </Link>
+  )
+}
