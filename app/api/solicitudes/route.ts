@@ -35,11 +35,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<Submissio
     offers_discount:  formData.get('offers_discount') === 'true',
     discount_details: formData.get('discount_details') || '',
     product_id:       formData.get('product_id'),
-    consent_accepted: formData.get('consent_accepted') === 'true' ? true : (false as unknown as true),
+    consent_accepted: formData.get('consent_accepted') === 'true',
   })
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0].message } as unknown as SubmissionResult, { status: 400 })
+    return NextResponse.json({ success: false, message: parsed.error.issues[0].message }, { status: 400 })
   }
 
   // File validation
@@ -49,10 +49,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<Submissio
   const receiptFile = formData.get('receipt')
   if (receiptFile instanceof File && receiptFile.size > 0) {
     if (!ALLOWED_RECEIPT_TYPES.includes(receiptFile.type)) {
-      return NextResponse.json({ error: 'El comprobante debe ser JPG, PNG, WebP o PDF.' } as unknown as SubmissionResult, { status: 400 })
+      return NextResponse.json({ success: false, message: 'El comprobante debe ser JPG, PNG, WebP o PDF.' }, { status: 400 })
     }
     if (receiptFile.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'El comprobante no puede superar los 5 MB.' } as unknown as SubmissionResult, { status: 400 })
+      return NextResponse.json({ success: false, message: 'El comprobante no puede superar los 5 MB.' }, { status: 400 })
     }
   }
 
