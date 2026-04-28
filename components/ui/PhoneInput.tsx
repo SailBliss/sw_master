@@ -25,10 +25,10 @@ const COUNTRIES: Country[] = [
   { flag: "🇭🇳", name: "Honduras", dialCode: "+504" },
   { flag: "🇸🇻", name: "El Salvador", dialCode: "+503" },
   { flag: "🇳🇮", name: "Nicaragua", dialCode: "+505" },
+  { flag: "🇺🇸", name: "Estados Unidos", dialCode: "+1" },
   { flag: "🇩🇴", name: "Rep. Dominicana", dialCode: "+1" },
   { flag: "🇨🇺", name: "Cuba", dialCode: "+53" },
   { flag: "🇪🇸", name: "España", dialCode: "+34" },
-  { flag: "🇺🇸", name: "Estados Unidos", dialCode: "+1" },
 ];
 
 const DEFAULT_COUNTRY = COUNTRIES[0];
@@ -71,11 +71,10 @@ export function PhoneInput({
 
   // Keep selectedCountry in sync if external value changes (e.g. form reset)
   useEffect(() => {
-    if (value) {
-      const detected = detectCountryFromValue(value);
-      setSelectedCountry(detected);
+    if (!value) {
+      setSelectedCountry(DEFAULT_COUNTRY);
     }
-  }, []);  // intentionally run only on mount; user-driven changes are handled in handlers
+  }, [value]);
 
   const digits = value.startsWith(selectedCountry.dialCode)
     ? value.slice(selectedCountry.dialCode.length)
