@@ -49,9 +49,9 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
     <div style={{ background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)', minHeight: '100vh' }}>
 
       {/* ── Header ───────────────────────────────────────────────── */}
-      <header className="sw-pad" style={{
+      <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 20, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)',
+        padding: '20px 64px', borderBottom: '1px solid var(--sw-line)',
       }}>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
           <Image src="/logo-sw-4.svg" width={120} height={120} alt="SW Mujeres" />
@@ -62,16 +62,16 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
       </header>
 
       {/* ── Hero small ───────────────────────────────────────────── */}
-      <section className="sw-pad" style={{ paddingTop: 56, paddingBottom: 32, borderBottom: '1px solid var(--sw-line)' }}>
+      <section style={{ padding: '56px 64px 32px', borderBottom: '1px solid var(--sw-line)' }}>
         <div style={{ fontSize: 12, color: 'var(--fg-2)', letterSpacing: '0.04em', marginBottom: 18 }}>
           <Link href="/" style={{ color: 'var(--fg-3)' }}>Inicio</Link>
           <span style={{ margin: '0 8px', color: 'var(--fg-3)' }}>›</span>
           <span style={{ color: 'var(--accent)' }}>Directorio</span>
         </div>
         <span className="sw-eyebrow">Confianza verificada</span>
-        <h1 className="sw-dir-h1" style={{
+        <h1 style={{
           fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400,
-          lineHeight: 1.05, margin: '12px 0 14px', letterSpacing: '-0.01em',
+          fontSize: 56, lineHeight: 1.05, margin: '12px 0 14px', letterSpacing: '-0.01em',
         }}>
           Busca negocios <span style={{ color: 'var(--accent)' }}>verificados.</span>
         </h1>
@@ -109,7 +109,7 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
       </section>
 
       {/* ── Body: sidebar + grid ─────────────────────────────────── */}
-      <section className="sw-pad sw-dir-layout" style={{ paddingTop: 48, paddingBottom: 80 }}>
+      <section style={{ padding: '48px 64px 80px', display: 'grid', gridTemplateColumns: '240px 1fr', gap: 48 }}>
 
         {/* Sidebar */}
         <aside style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -213,7 +213,7 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
               </Link>
             </div>
           ) : (
-            <div className="sw-grid-dir-cards">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 28 }}>
               {profiles.map((profile, idx) => (
                 <PreviewCard key={profile.id} profile={profile} idx={idx} descMaxLen={80} />
               ))}
@@ -223,8 +223,8 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────── */}
-      <footer className="sw-pad" style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', paddingTop: 40, paddingBottom: 28 }}>
-        <div className="sw-inline-footer">
+      <footer style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '40px 64px 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Image src="/logo-symbol-circle-dark.svg" width={28} height={28} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
             <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.22em' }}>MUJERES</span>

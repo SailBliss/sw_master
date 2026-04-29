@@ -75,9 +75,9 @@ export default async function ProfilePage({ params }: Props) {
       <TrackView profileId={profile.id} />
 
       {/* ── Header ───────────────────────────────────────────────── */}
-      <header className="sw-pad" style={{
+      <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 20, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)',
+        padding: '20px 64px', borderBottom: '1px solid var(--sw-line)',
       }}>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
           <Image src="/logo-sw-4.svg" width={120} height={120} alt="SW Mujeres" />
@@ -88,7 +88,7 @@ export default async function ProfilePage({ params }: Props) {
       </header>
 
       {/* ── Breadcrumb ───────────────────────────────────────────── */}
-      <div className="sw-pad" style={{ paddingTop: 20, fontSize: 12, color: 'var(--fg-2)', letterSpacing: '0.04em' }}>
+      <div style={{ padding: '20px 64px 0', fontSize: 12, color: 'var(--fg-2)', letterSpacing: '0.04em' }}>
         <Link href="/" style={{ color: 'var(--fg-3)' }}>Inicio</Link>
         <span style={{ margin: '0 8px', color: 'var(--fg-3)' }}>›</span>
         <Link href="/directorio" style={{ color: 'var(--fg-3)' }}>Directorio</Link>
@@ -105,7 +105,7 @@ export default async function ProfilePage({ params }: Props) {
       </div>
 
       {/* ── Magazine hero ────────────────────────────────────────── */}
-      <section className="sw-pad" style={{ paddingTop: 32 }}>
+      <section style={{ padding: '32px 64px 0' }}>
         {profile.category && (
           <span className="sw-eyebrow">{profile.category}</span>
         )}
@@ -129,7 +129,7 @@ export default async function ProfilePage({ params }: Props) {
       </section>
 
       {/* ── Photo + contact sidebar ───────────────────────────────── */}
-      <section className="sw-pad sw-profile-layout" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <section style={{ padding: '32px 64px', display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 56, alignItems: 'start' }}>
 
         {/* Left: photo + about */}
         <div>
@@ -234,8 +234,8 @@ export default async function ProfilePage({ params }: Props) {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────── */}
-      <footer className="sw-pad" style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', paddingTop: 40, paddingBottom: 28, marginTop: 80 }}>
-        <div className="sw-inline-footer">
+      <footer style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '40px 64px 28px', marginTop: 80 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Image src="/logo-symbol-circle-dark.svg" width={28} height={28} alt="SW" style={{ filter: 'brightness(0) invert(1)' }} />
             <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.22em' }}>MUJERES</span>
