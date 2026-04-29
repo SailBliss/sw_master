@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Country {
   flag: string;
@@ -69,15 +69,10 @@ export function PhoneInput({
     value ? detectCountryFromValue(value) : DEFAULT_COUNTRY
   );
 
-  // Keep selectedCountry in sync if external value changes (e.g. form reset)
-  useEffect(() => {
-    if (!value) {
-      setSelectedCountry(DEFAULT_COUNTRY);
-    }
-  }, [value]);
+  const activeCountry = value ? selectedCountry : DEFAULT_COUNTRY;
 
-  const digits = value.startsWith(selectedCountry.dialCode)
-    ? value.slice(selectedCountry.dialCode.length)
+  const digits = value.startsWith(activeCountry.dialCode)
+    ? value.slice(activeCountry.dialCode.length)
     : "";
 
   function handleCountryChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -88,12 +83,12 @@ export function PhoneInput({
 
   function handleDigitsChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value.replace(/\D/g, "");
-    onChange(selectedCountry.dialCode + raw);
+    onChange(activeCountry.dialCode + raw);
   }
 
   const borderClass = error
-    ? "border-red-400 focus-within:border-red-500"
-    : "border-gray-300 focus-within:border-[#6B2D3E]";
+    ? "border-sw-burgundy focus-within:border-sw-burgundy"
+    : "border-[--sw-line-strong] focus-within:border-[--accent]";
 
   return (
     <div
@@ -102,10 +97,10 @@ export function PhoneInput({
       {/* Country selector */}
       <div className="relative flex-shrink-0">
         <select
-          value={getOptionValue(selectedCountry)}
+          value={getOptionValue(activeCountry)}
           onChange={handleCountryChange}
           aria-label="Código de país"
-          className="appearance-none bg-gray-50 border-r border-gray-200 pl-3 pr-7 py-2.5 text-sm text-gray-700 cursor-pointer focus:outline-none"
+          className="appearance-none bg-gray-50 border-r border-[--sw-line-strong] pl-3 pr-7 py-2.5 text-sm text-gray-700 cursor-pointer focus:outline-none"
         >
           {COUNTRIES.map((country) => (
             <option key={getOptionValue(country)} value={getOptionValue(country)}>
