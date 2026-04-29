@@ -4,8 +4,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isEmailAllowed, createOtp } from '@src/shared/lib/auth'
 import { sendOtpEmail } from '@src/shared/lib/email'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown'
+  const allowed = await checkRateLimit(`otp-request:${ip}`, 5, 600)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Demasiados intentos. Espera 10 minutos e intenta de nuevo.' },
+      { status: 429 },
+    )
+  }
   let body: unknown
 
   try {

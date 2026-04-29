@@ -16,7 +16,14 @@ async function approveApplicationAction(formData: FormData) {
   const entrepreneurName = formData.get('entrepreneurName') as string
   const businessName = formData.get('businessName') as string
 
-  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName)
+  const { data: bp } = await supabaseAdmin
+    .from('business_profiles')
+    .select('stats_token')
+    .eq('entrepreneur_id', entrepreneurId)
+    .maybeSingle()
+  const statsToken = (bp?.stats_token as string | null) ?? undefined
+
+  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName, statsToken)
   redirect('/admin/solicitudes')
 }
 
@@ -55,8 +62,8 @@ const STATUS_LABELS: Record<'pendiente' | 'aprobado' | 'rechazado', string> = {
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</dt>
-      <dd className="mt-1 text-sm text-gray-900">{value ?? <span className="text-gray-400">—</span>}</dd>
+      <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide">{label}</dt>
+      <dd className="mt-1 text-sm text-sw-negro">{value ?? <span className="text-sw-fg3">—</span>}</dd>
     </div>
   )
 }
@@ -91,17 +98,17 @@ export default async function AdminSolicitudDetailPage({
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/admin/solicitudes" className="hover:text-gray-700">
+      <nav className="flex items-center gap-2 text-sm text-sw-fg3">
+        <Link href="/admin/solicitudes" className="hover:text-sw-fg2">
           Solicitudes
         </Link>
         <span>→</span>
-        <span className="text-gray-900 font-medium">{bp.business_name ?? 'Sin nombre'}</span>
+        <span className="text-sw-negro font-medium">{bp.business_name ?? 'Sin nombre'}</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-start justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-sw-negro">
           {bp.business_name ?? 'Sin nombre'}
         </h1>
         <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${STATUS_BADGE[status]}`}>
@@ -110,8 +117,8 @@ export default async function AdminSolicitudDetailPage({
       </div>
 
       {/* Datos de la empresaria */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">
+      <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-4">
+        <h2 className="text-base font-semibold text-sw-negro border-b border-sw-line pb-3">
           Datos de la empresaria
         </h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -120,14 +127,14 @@ export default async function AdminSolicitudDetailPage({
           <Field label="Email" value={ent.email} />
           <Field label="Teléfono" value={ent.phone} />
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Perfil de Facebook</dt>
+            <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide">Perfil de Facebook</dt>
             <dd className="mt-1 text-sm">
               {ent.fb_profile_url ? (
-                <a href={ent.fb_profile_url} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline break-all">
+                <a href={ent.fb_profile_url} target="_blank" rel="noopener noreferrer" className="text-sw-burgundy hover:underline break-all">
                   {ent.fb_profile_url}
                 </a>
               ) : (
-                <span className="text-gray-400">—</span>
+                <span className="text-sw-fg3">—</span>
               )}
             </dd>
           </div>
@@ -135,8 +142,8 @@ export default async function AdminSolicitudDetailPage({
       </section>
 
       {/* Datos del negocio */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">
+      <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-4">
+        <h2 className="text-base font-semibold text-sw-negro border-b border-sw-line pb-3">
           Datos del negocio
         </h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -149,9 +156,9 @@ export default async function AdminSolicitudDetailPage({
           <Field label="Instagram" value={bp.instagram_handle ? `@${bp.instagram_handle}` : null} />
           {bp.website_url && (
             <div className="sm:col-span-2">
-              <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sitio web</dt>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide">Sitio web</dt>
               <dd className="mt-1 text-sm">
-                <a href={bp.website_url} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline break-all">
+                <a href={bp.website_url} target="_blank" rel="noopener noreferrer" className="text-sw-burgundy hover:underline break-all">
                   {bp.website_url}
                 </a>
               </dd>
@@ -159,16 +166,16 @@ export default async function AdminSolicitudDetailPage({
           )}
           {bp.offers_discount && bp.discount_details && (
             <div className="sm:col-span-2">
-              <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">Descuento especial SW</dt>
-              <dd className="mt-1 text-sm text-gray-900">{bp.discount_details}</dd>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide">Descuento especial SW</dt>
+              <dd className="mt-1 text-sm text-sw-negro">{bp.discount_details}</dd>
             </div>
           )}
         </dl>
       </section>
 
       {/* Plan y pago */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">
+      <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-4">
+        <h2 className="text-base font-semibold text-sw-negro border-b border-sw-line pb-3">
           Plan y pago
         </h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -189,7 +196,7 @@ export default async function AdminSolicitudDetailPage({
             href={receiptUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-md border border-sw-line bg-sw-paper px-3 py-2 text-sm font-medium text-sw-fg2 hover:bg-sw-cream transition-colors"
           >
             Ver comprobante de pago ↗
           </a>
@@ -198,7 +205,7 @@ export default async function AdminSolicitudDetailPage({
               href={screenshotUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-md border border-sw-line bg-sw-paper px-3 py-2 text-sm font-medium text-sw-fg2 hover:bg-sw-cream transition-colors"
             >
               Ver captura del post ↗
             </a>
@@ -208,14 +215,14 @@ export default async function AdminSolicitudDetailPage({
 
       {/* Acciones */}
       {status === 'pendiente' ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-6">
-          <h2 className="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">
+        <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-6">
+          <h2 className="text-base font-semibold text-sw-negro border-b border-sw-line pb-3">
             Decisión
           </h2>
 
           {/* Aprobar */}
           <div>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-sw-fg2 mb-3">
               Aprobar activa la membresía por {product.duration_days ?? 90} días y notifica a la empresaria por email.
             </p>
             <form action={approveApplicationAction}>
@@ -234,11 +241,11 @@ export default async function AdminSolicitudDetailPage({
             </form>
           </div>
 
-          <hr className="border-gray-100" />
+          <hr className="border-sw-line" />
 
           {/* Rechazar */}
           <div>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-sw-fg2 mb-3">
               Rechazar desactiva la membresía y notifica a la empresaria por email. La nota es opcional.
             </p>
             <form action={rejectApplicationAction} className="space-y-3">
@@ -249,7 +256,7 @@ export default async function AdminSolicitudDetailPage({
                 name="notes"
                 rows={3}
                 placeholder="Nota para la empresaria (opcional)…"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-300"
+                className="w-full rounded-md border border-sw-line px-3 py-2 text-sm text-sw-negro placeholder-sw-fg3 focus:outline-none focus:ring-2 focus:ring-red-300"
               />
               <button
                 type="submit"
@@ -261,8 +268,8 @@ export default async function AdminSolicitudDetailPage({
           </div>
         </section>
       ) : (
-        <section className="rounded-lg border border-gray-200 bg-white p-6">
-          <p className="text-sm text-gray-600">
+        <section className="rounded-lg border border-sw-line bg-sw-paper p-6">
+          <p className="text-sm text-sw-fg2">
             Esta solicitud fue{' '}
             <span className={`font-medium ${status === 'aprobado' ? 'text-green-700' : 'text-red-700'}`}>
               {STATUS_LABELS[status].toLowerCase()}
@@ -270,7 +277,7 @@ export default async function AdminSolicitudDetailPage({
             {solicitud.reviewed_at ? ` el ${formatDate(solicitud.reviewed_at)}` : ''}.
           </p>
           {solicitud.notes && (
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-sw-fg2">
               <strong>Nota:</strong> {solicitud.notes}
             </p>
           )}

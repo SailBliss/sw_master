@@ -15,23 +15,15 @@ type AppStatus = 'pendiente' | 'aprobado' | 'rechazado' | null
 
 function MembershipBadge({ status }: { status: MembershipStatus }) {
   if (status === 'active') {
-    return (
-      <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-        Activa
-      </span>
-    )
+    return <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: 'rgba(90,122,82,0.15)', color: '#3a6b35' }}>Activa</span>
   }
-  return (
-    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
-      Inactiva
-    </span>
-  )
+  return <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: 'var(--bg-alt)', color: 'var(--fg-3)' }}>Inactiva</span>
 }
 
-const APP_STATUS_BADGE: Record<NonNullable<AppStatus>, string> = {
-  pendiente: 'bg-yellow-100 text-yellow-800',
-  aprobado: 'bg-green-100 text-green-800',
-  rechazado: 'bg-red-100 text-red-800',
+const APP_STATUS_STYLE: Record<NonNullable<AppStatus>, React.CSSProperties> = {
+  pendiente: { background: 'var(--sw-rose-pale)', color: 'var(--accent)' },
+  aprobado: { background: 'rgba(90,122,82,0.15)', color: '#3a6b35' },
+  rechazado: { background: 'rgba(139,42,42,0.10)', color: '#8b2a2a' },
 }
 const APP_STATUS_LABEL: Record<NonNullable<AppStatus>, string> = {
   pendiente: 'Pendiente',
@@ -40,9 +32,9 @@ const APP_STATUS_LABEL: Record<NonNullable<AppStatus>, string> = {
 }
 
 function AppStatusBadge({ status }: { status: AppStatus }) {
-  if (!status) return <span className="text-gray-400 text-xs">—</span>
+  if (!status) return <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>—</span>
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${APP_STATUS_BADGE[status]}`}>
+    <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999, ...APP_STATUS_STYLE[status] }}>
       {APP_STATUS_LABEL[status]}
     </span>
   )
@@ -59,89 +51,60 @@ export default async function AdminPerfilesPage({
   const perfiles = await adminProfilesService.list(q)
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Perfiles</h1>
-
-      {/* Búsqueda */}
-      <form method="GET" className="flex gap-2 max-w-md">
-        <input
-          type="text"
-          name="q"
-          defaultValue={q ?? ''}
-          placeholder="Buscar por empresaria o negocio…"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
-        >
-          Buscar
-        </button>
-        {q && (
-          <a
-            href="/admin/perfiles"
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Limpiar
-          </a>
-        )}
-      </form>
-
-      {/* Total */}
-      <p className="text-sm text-gray-500">
-        {perfiles.length === 0
-          ? 'Sin resultados'
-          : `${perfiles.length} perfil${perfiles.length !== 1 ? 'es' : ''} encontrado${perfiles.length !== 1 ? 's' : ''}`}
-        {q && <span className="ml-1">para &ldquo;{q}&rdquo;</span>}
-      </p>
+    <div>
+      {/* AdminHeader */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)' }}>
+        <div>
+          <div className="sw-eyebrow">Admin</div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 38, margin: '8px 0 4px', letterSpacing: '-0.005em', color: 'var(--fg)' }}>
+            Perfiles
+          </h1>
+          <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>
+            {perfiles.length} perfil{perfiles.length !== 1 ? 'es' : ''}{q ? ` para "${q}"` : ''}
+          </div>
+        </div>
+        <form method="GET" style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            name="q"
+            defaultValue={q ?? ''}
+            placeholder="Buscar perfil…"
+            style={{ padding: '10px 16px', borderRadius: 999, border: '1px solid var(--sw-line-strong)', background: 'var(--sw-paper)', fontSize: 13, outline: 'none', width: 260, fontFamily: 'var(--font-body)', color: 'var(--fg)' }}
+          />
+          {q && (
+            <a href="/admin/perfiles" style={{ padding: '10px 16px', borderRadius: 6, border: '1px solid var(--sw-line)', fontSize: 13, color: 'var(--fg-2)', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+              Limpiar
+            </a>
+          )}
+        </form>
+      </div>
 
       {/* Tabla */}
       {perfiles.length === 0 ? (
-        <div className="py-16 text-center text-gray-500 text-sm">
+        <div style={{ padding: '64px 0', textAlign: 'center', color: 'var(--fg-3)', fontSize: 13 }}>
           No se encontraron perfiles{q ? ` con "${q}"` : ''}.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Empresaria</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Negocio</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Categoría</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Membresía</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Vence</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Solicitud</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600"></th>
+        <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-alt)', color: 'var(--fg-2)', textAlign: 'left' }}>
+                {['Negocio', 'Empresaria', 'Categoría', 'Membresía', 'Vence', 'Solicitud', ''].map(h => (
+                  <th key={h} style={{ padding: '14px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{h}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody>
               {perfiles.map((p: AdminProfile) => (
-                <tr key={p.entrepreneur_id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {p.full_name ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {p.business_name ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {p.category ?? '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    <MembershipBadge status={p.membership_status} />
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {p.membership_end ? formatDate(p.membership_end) : '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    <AppStatusBadge status={p.application_status} />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/perfiles/${p.entrepreneur_id}`}
-                      className="text-pink-500 hover:text-pink-700 font-medium"
-                    >
-                      Editar →
-                    </Link>
+                <tr key={p.entrepreneur_id} style={{ borderTop: '1px solid var(--sw-line)', cursor: 'pointer' }}>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg)', fontWeight: 500 }}>{p.business_name ?? '—'}</td>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg-2)' }}>{p.full_name ?? '—'}</td>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg-2)' }}>{p.category ?? '—'}</td>
+                  <td style={{ padding: '14px 24px' }}><MembershipBadge status={p.membership_status} /></td>
+                  <td style={{ padding: '14px 24px', color: 'var(--fg-2)' }}>{p.membership_end ? formatDate(p.membership_end) : '—'}</td>
+                  <td style={{ padding: '14px 24px' }}><AppStatusBadge status={p.application_status} /></td>
+                  <td style={{ padding: '14px 24px', textAlign: 'right' }}>
+                    <Link href={`/admin/perfiles/${p.entrepreneur_id}`} style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none' }}>Editar →</Link>
                   </td>
                 </tr>
               ))}

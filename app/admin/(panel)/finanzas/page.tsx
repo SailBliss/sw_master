@@ -73,16 +73,12 @@ function SummaryCard({
   color: 'green' | 'red' | 'blue'
   sub?: string
 }) {
-  const colorMap = {
-    green: 'bg-green-50 border-green-200 text-green-700',
-    red: 'bg-red-50 border-red-200 text-red-700',
-    blue: 'bg-blue-50 border-blue-200 text-blue-800',
-  }
+  const textColor = color === 'green' ? '#3a6b35' : color === 'red' ? '#dc2626' : 'var(--fg)'
   return (
-    <div className={`rounded-xl border p-5 ${colorMap[color]}`}>
-      <p className="text-sm font-medium opacity-70">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{formatCOP(amount)}</p>
-      {sub && <p className="mt-1 text-xs opacity-60">{sub}</p>}
+    <div style={{ background: 'var(--sw-paper)', border: '1px solid var(--sw-line)', borderRadius: 10, padding: '22px 24px' }}>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-2)' }}>{label}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 36, color: textColor, lineHeight: 1, marginTop: 12 }}>{formatCOP(amount)}</div>
+      {sub && <div style={{ fontSize: 12, color: 'var(--fg-3)', marginTop: 8 }}>{sub}</div>}
     </div>
   )
 }
@@ -137,17 +133,21 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
     }
   }
 
+  const inputCls = "w-full rounded-lg px-3 py-2 text-sm text-sw-negro placeholder-sw-fg3 focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
+  const inputStyle = { border: '1px solid var(--sw-line-strong)' }
+
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-5">
-      <h2 className="mb-4 text-base font-semibold text-gray-800">Nueva entrada manual</h2>
+    <form onSubmit={handleSubmit} className="rounded-xl bg-sw-paper p-5" style={{ border: '1px solid var(--sw-line)' }}>
+      <h2 className="mb-4 text-base font-semibold text-sw-negro">Nueva entrada manual</h2>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Tipo</label>
+          <label className="mb-1 block text-sm font-medium text-sw-fg2">Tipo</label>
           <select
             value={direction}
             onChange={(e) => setDirection(e.target.value as 'income' | 'expense')}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={inputCls}
+            style={inputStyle}
           >
             <option value="income">Ingreso</option>
             <option value="expense">Egreso</option>
@@ -155,38 +155,41 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Monto (COP)</label>
+          <label className="mb-1 block text-sm font-medium text-sw-fg2">Monto (COP)</label>
           <input
             type="text"
             inputMode="numeric"
             placeholder="Ej: 50000"
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,]/g, ''))}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={inputCls}
+            style={inputStyle}
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Contraparte</label>
+          <label className="mb-1 block text-sm font-medium text-sw-fg2">Contraparte</label>
           <input
             type="text"
             placeholder="Quién pagó / a quién"
             value={counterparty}
             onChange={(e) => setCounterparty(e.target.value)}
             maxLength={200}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={inputCls}
+            style={inputStyle}
           />
         </div>
 
         <div className="sm:col-span-3">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Descripción</label>
+          <label className="mb-1 block text-sm font-medium text-sw-fg2">Descripción</label>
           <input
             type="text"
             placeholder="Ej: Dominio anual, Micrófono…"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={200}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={inputCls}
+            style={inputStyle}
           />
         </div>
       </div>
@@ -197,7 +200,7 @@ function NewEntryForm({ onSuccess }: { onSuccess: () => void }) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+          className="rounded-lg bg-sw-burgundy px-5 py-2 text-sm font-medium text-sw-paper hover:bg-sw-burgundy-dark disabled:opacity-50 transition-colors"
         >
           {saving ? 'Guardando…' : 'Guardar entrada'}
         </button>
@@ -230,8 +233,8 @@ function EntryRow({
   }
 
   return (
-    <tr className="border-b border-gray-100 text-sm hover:bg-gray-50">
-      <td className="py-3 pr-4 text-gray-500">{formatDate(entry.date)}</td>
+    <tr className="border-b text-sm hover:bg-sw-cream transition-colors" style={{ borderColor: 'var(--sw-line)' }}>
+      <td className="py-3 pr-4 text-sw-fg3">{formatDate(entry.date)}</td>
       <td className="py-3 pr-4">
         <span
           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -243,17 +246,17 @@ function EntryRow({
           {entry.direction === 'income' ? '▲ Ingreso' : '▼ Egreso'}
         </span>
         {entry.source === 'membership' && (
-          <span className="ml-1 inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-600">
+          <span className="ml-1 inline-flex items-center rounded-full bg-sw-blush-mist px-2 py-0.5 text-xs text-sw-burgundy">
             membresía
           </span>
         )}
       </td>
-      <td className="py-3 pr-4 text-gray-700">
+      <td className="py-3 pr-4 text-sw-fg2">
         {entry.counterparty && (
           <span className="font-medium">{entry.counterparty}</span>
         )}
         {entry.counterparty && entry.description && (
-          <span className="text-gray-400"> · </span>
+          <span className="text-sw-fg3"> · </span>
         )}
         {entry.description}
       </td>
@@ -277,7 +280,7 @@ function EntryRow({
               </button>
               <button
                 onClick={() => setConfirming(false)}
-                className="text-xs text-gray-400 hover:underline"
+                className="text-xs text-sw-fg3 hover:underline"
               >
                 Cancelar
               </button>
@@ -285,7 +288,7 @@ function EntryRow({
           ) : (
             <button
               onClick={() => setConfirming(true)}
-              className="text-xs text-gray-400 hover:text-red-500"
+              className="text-xs text-sw-fg3 hover:text-red-500"
             >
               Eliminar
             </button>
@@ -352,7 +355,7 @@ export default function AdminFinanzasPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center text-gray-400 text-sm">
+      <div className="flex h-64 items-center justify-center text-sw-fg3 text-sm">
         Cargando finanzas…
       </div>
     )
@@ -369,8 +372,17 @@ export default function AdminFinanzasPage() {
   const { summary, monthlyGroups } = data
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-xl font-bold text-gray-900">Finanzas</h1>
+    <div>
+      {/* AdminHeader */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)' }}>
+        <div>
+          <div className="sw-eyebrow">Admin</div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 38, margin: '8px 0 4px', letterSpacing: '-0.005em', color: 'var(--fg)' }}>
+            Finanzas
+          </h1>
+        </div>
+      </div>
+      <div className="space-y-8">
 
       {/* ── Tarjetas de resumen ── */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -389,13 +401,13 @@ export default function AdminFinanzasPage() {
 
       {/* ── Ledger por mes ── */}
       {monthlyGroups.length === 0 ? (
-        <p className="text-sm text-gray-500">No hay entradas registradas aún.</p>
+        <p className="text-sm text-sw-fg3">No hay entradas registradas aún.</p>
       ) : (
         monthlyGroups.map((group) => (
-          <div key={group.month} className="rounded-xl border border-gray-200 bg-white">
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
-              <span className="font-semibold text-gray-800">{group.label}</span>
-              <span className="text-sm text-gray-500">
+          <div key={group.month} className="rounded-xl bg-sw-paper" style={{ border: '1px solid var(--sw-line)' }}>
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--sw-line)' }}>
+              <span className="font-semibold text-sw-negro">{group.label}</span>
+              <span className="text-sm text-sw-fg3">
                 <span className="text-green-600 font-medium">+{formatCOP(group.ingresos)}</span>
                 {' · '}
                 <span className="text-red-500 font-medium">−{formatCOP(group.egresos)}</span>
@@ -405,7 +417,7 @@ export default function AdminFinanzasPage() {
             <div className="overflow-x-auto px-5">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-400">
+                  <tr className="text-left text-xs font-medium uppercase tracking-wide text-sw-fg3">
                     <th className="pb-2 pt-4 pr-4">Fecha</th>
                     <th className="pb-2 pt-4 pr-4">Tipo</th>
                     <th className="pb-2 pt-4 pr-4">Descripción</th>
@@ -424,6 +436,7 @@ export default function AdminFinanzasPage() {
           </div>
         ))
       )}
+    </div>
     </div>
   )
 }

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { supabasePublic } from '@src/shared/lib/supabase'
+import PhoneInput from '@/components/ui/PhoneInput'
 import { CATEGORIES } from '@src/shared/utils/categories'
 import type {
   ApplicationFormStep1,
   ApplicationFormStep2,
-  ApplicationFormStep3,
   ProductOption,
 } from '@src/features/enrollment/types'
 
@@ -23,7 +23,7 @@ type Step3Errors = {
   consent_accepted?: string
 }
 
-// ─── Step 2 local state (no file upload — directory_image handled separately) ─
+// ─── Step 2 local state ───────────────────────────────────────────────────────
 
 type Step2State = {
   business_name: string
@@ -46,15 +46,32 @@ type Step3State = {
   consent_accepted: boolean
 }
 
+// ─── File validation constants ───────────────────────────────────────────────
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+const ALLOWED_RECEIPT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+
+function isSinglePublicationProduct(product: ProductOption | null): boolean {
+  const normalizedName =
+    product?.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase() ?? ''
+
+  return normalizedName.includes('unica publicacion')
+}
+
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
 const baseInput =
-  'w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-colors'
-const normalBorder = 'border-gray-300'
-const errorBorder = 'border-red-400'
+  'w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all bg-sw-paper'
 
 function inputClass(hasError: boolean): string {
-  return `${baseInput} ${hasError ? errorBorder : normalBorder}`
+  return `${baseInput} ${
+    hasError
+      ? 'border-sw-burgundy ring-0 focus:ring-sw-rose-pale'
+      : 'border-[--sw-line-strong] focus:ring-sw-rose-pale focus:border-[--accent]'
+  }`
 }
 
 function Field({
@@ -69,11 +86,11 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
-      {hint && <p className="text-xs text-gray-500 -mt-0.5">{hint}</p>}
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-semibold tracking-wide uppercase text-[--fg-2]">{label}</label>
+      {hint && <p className="text-xs text-[--fg-3] -mt-1">{hint}</p>}
       {children}
-      {error && <p className="text-xs text-red-600 mt-0.5">{error}</p>}
+      {error && <p className="text-xs text-sw-burgundy mt-0.5">{error}</p>}
     </div>
   )
 }
@@ -84,7 +101,7 @@ const STEP_LABELS = ['Datos personales', 'Tu negocio', 'Plan y envío']
 
 function StepIndicator({ current }: { current: number }) {
   return (
-    <div className="flex items-center justify-center mb-8 gap-0">
+    <div className="flex items-center justify-center mb-10 gap-0">
       {STEP_LABELS.map((label, i) => {
         const step = i + 1
         const isDone = step < current
@@ -94,27 +111,33 @@ function StepIndicator({ current }: { current: number }) {
           <div key={step} className="flex items-center">
             {i > 0 && (
               <div
-                className={`w-10 sm:w-16 h-0.5 ${
-                  step <= current ? 'bg-pink-500' : 'bg-gray-200'
-                }`}
+                className="w-10 sm:w-16 h-px transition-colors duration-300"
+                style={{ background: step <= current ? 'var(--accent)' : 'var(--sw-line-strong)' }}
               />
             )}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all ${
-                  isDone
-                    ? 'bg-pink-500 border-pink-500 text-white'
-                    : isActive
-                    ? 'bg-pink-500 border-pink-500 text-white shadow-md shadow-pink-200'
-                    : 'bg-white border-gray-300 text-gray-400'
-                }`}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all duration-300"
+                style={
+                  isDone || isActive
+                    ? {
+                        background: 'var(--accent)',
+                        borderColor: 'var(--accent)',
+                        color: 'var(--sw-cream)',
+                        boxShadow: isActive ? '0 4px 12px rgba(130,22,65,0.25)' : undefined,
+                      }
+                    : {
+                        background: 'var(--sw-paper)',
+                        borderColor: 'var(--sw-line-strong)',
+                        color: 'var(--fg-3)',
+                      }
+                }
               >
                 {isDone ? '✓' : step}
               </div>
               <span
-                className={`text-xs hidden sm:block ${
-                  isActive ? 'text-pink-600 font-medium' : 'text-gray-400'
-                }`}
+                className="text-xs hidden sm:block font-medium tracking-wide"
+                style={{ color: isActive ? 'var(--accent)' : 'var(--fg-3)' }}
               >
                 {label}
               </span>
@@ -139,7 +162,10 @@ function Step1Form({
 }) {
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-gray-900">Datos personales</h2>
+      <div className="mb-6">
+        <p className="sw-eyebrow mb-1">Paso 1 de 3</p>
+        <h2 className="sw-display sw-h3 text-[--fg]">Datos personales</h2>
+      </div>
 
       <Field label="Cédula" error={errors.cedula}>
         <input
@@ -173,13 +199,11 @@ function Step1Form({
       </Field>
 
       <Field label="Teléfono personal" error={errors.phone}>
-        <input
-          type="tel"
+        <PhoneInput
+          id="phone"
           value={data.phone}
-          onChange={(e) => onChange('phone', e.target.value)}
-          className={inputClass(!!errors.phone)}
-          placeholder="300 000 0000"
-          inputMode="tel"
+          onChange={(val) => onChange('phone', val)}
+          error={!!errors.phone}
         />
       </Field>
 
@@ -212,7 +236,10 @@ function Step2Form({
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-gray-900">Tu negocio</h2>
+      <div className="mb-6">
+        <p className="sw-eyebrow mb-1">Paso 2 de 3</p>
+        <h2 className="sw-display sw-h3 text-[--fg]">Tu negocio</h2>
+      </div>
 
       <Field label="Nombre del negocio" error={errors.business_name}>
         <input
@@ -250,7 +277,7 @@ function Step2Form({
           />
           <span
             className={`absolute bottom-2 right-3 text-xs ${
-              descOver ? 'text-red-500 font-medium' : 'text-gray-400'
+              descOver ? 'text-sw-burgundy font-medium' : 'text-[--fg-3]'
             }`}
           >
             {descLen} / 300
@@ -260,16 +287,14 @@ function Step2Form({
 
       <Field
         label="WhatsApp del negocio"
-        hint="Incluye el código de país: 57300..."
         error={errors.business_phone}
       >
-        <input
-          type="tel"
+        <PhoneInput
+          id="business_phone"
           value={data.business_phone}
-          onChange={(e) => onChange('business_phone', e.target.value)}
-          className={inputClass(!!errors.business_phone)}
-          placeholder="57300..."
-          inputMode="tel"
+          onChange={(val) => onChange('business_phone', val)}
+          placeholder="300 123 4567"
+          error={!!errors.business_phone}
         />
       </Field>
 
@@ -304,29 +329,31 @@ function Step2Form({
       </Field>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-xs font-semibold tracking-wide uppercase text-[--fg-2]">
           ¿Ofreces descuento especial a miembras SW?
         </label>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => onChange('offers_discount', true)}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium border-2 transition-all duration-200"
+            style={
               data.offers_discount
-                ? 'bg-pink-500 border-pink-500 text-white'
-                : 'bg-white border-gray-300 text-gray-600 hover:border-pink-200'
-            }`}
+                ? { background: 'var(--accent)', borderColor: 'var(--accent)', color: 'var(--sw-cream)' }
+                : { background: 'var(--sw-paper)', borderColor: 'var(--sw-line-strong)', color: 'var(--fg-2)' }
+            }
           >
             Sí
           </button>
           <button
             type="button"
             onClick={() => onChange('offers_discount', false)}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium border-2 transition-all duration-200"
+            style={
               !data.offers_discount
-                ? 'bg-pink-500 border-pink-500 text-white'
-                : 'bg-white border-gray-300 text-gray-600 hover:border-pink-200'
-            }`}
+                ? { background: 'var(--accent)', borderColor: 'var(--accent)', color: 'var(--sw-cream)' }
+                : { background: 'var(--sw-paper)', borderColor: 'var(--sw-line-strong)', color: 'var(--fg-2)' }
+            }
           >
             No
           </button>
@@ -368,25 +395,31 @@ function Step3Form({
   onChange: (field: keyof Step3State, value: string | File | null | boolean) => void
 }) {
   const isPaid = selectedProduct !== null && selectedProduct.price_cop > 0
+  const showPostScreenshot = isSinglePublicationProduct(selectedProduct)
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-gray-900">Plan y envío</h2>
+      <div className="mb-6">
+        <p className="sw-eyebrow mb-1">Paso 3 de 3</p>
+        <h2 className="sw-display sw-h3 text-[--fg]">Plan y envío</h2>
+      </div>
 
       {/* Plan selector */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700">Plan de membresía</label>
+        <label className="text-xs font-semibold tracking-wide uppercase text-[--fg-2]">
+          Plan de membresía
+        </label>
 
         {productsLoading && (
-          <p className="text-sm text-gray-500">Cargando planes disponibles...</p>
+          <p className="text-sm text-[--fg-3]">Cargando planes disponibles…</p>
         )}
 
         {productsError && (
-          <p className="text-sm text-red-600">{productsError}</p>
+          <p className="text-sm text-sw-burgundy">{productsError}</p>
         )}
 
         {!productsLoading && !productsError && products.length === 0 && (
-          <p className="text-sm text-gray-500">No hay planes disponibles en este momento.</p>
+          <p className="text-sm text-[--fg-3]">No hay planes disponibles en este momento.</p>
         )}
 
         {!productsLoading && !productsError && products.length > 0 && (
@@ -394,7 +427,9 @@ function Step3Form({
             {products.map((product) => {
               const isSelected = data.product_id === product.id
               const priceLabel =
-                product.price_cop === 0 ? 'Gratuito' : `$${product.price_cop.toLocaleString('es-CO')} COP`
+                product.price_cop === 0
+                  ? 'Gratuito'
+                  : `$${product.price_cop.toLocaleString('es-CO')} COP`
               const durationLabel =
                 product.duration_days !== null ? ` · ${product.duration_days} días` : ''
 
@@ -403,21 +438,21 @@ function Step3Form({
                   key={product.id}
                   type="button"
                   onClick={() => onChange('product_id', product.id)}
-                  className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${
+                  className={`w-full text-left px-4 py-3.5 rounded-xl border-2 transition-all duration-200 ${
                     isSelected
-                      ? 'border-pink-500 bg-pink-50'
-                      : 'border-gray-200 bg-white hover:border-pink-200'
+                      ? 'border-[--accent] bg-sw-blush-mist'
+                      : 'border-[--sw-line] bg-sw-paper hover:border-[--accent]'
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-800">{product.name}</span>
+                    <span className="text-sm font-medium text-[--fg]">{product.name}</span>
                     <span
                       className={`text-sm font-semibold ${
-                        product.price_cop === 0 ? 'text-pink-500' : 'text-gray-800'
+                        product.price_cop === 0 ? 'text-[--accent]' : 'text-[--fg]'
                       }`}
                     >
                       {priceLabel}
-                      <span className="font-normal text-gray-400">{durationLabel}</span>
+                      <span className="font-normal text-[--fg-3]">{durationLabel}</span>
                     </span>
                   </div>
                 </button>
@@ -427,13 +462,19 @@ function Step3Form({
         )}
 
         {errors.product_id && (
-          <p className="text-xs text-red-600">{errors.product_id}</p>
+          <p className="text-xs text-sw-burgundy">{errors.product_id}</p>
         )}
       </div>
 
       {/* Payment instructions — only for paid plans */}
       {isPaid && (
-        <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+        <div
+          className="rounded-xl px-4 py-3 text-sm text-[--fg-2] border"
+          style={{
+            background: 'var(--sw-blush-mist)',
+            borderColor: 'var(--sw-rose-pale)',
+          }}
+        >
           Una vez seleccionado tu plan, realiza el pago y adjunta el comprobante a continuación.
         </div>
       )}
@@ -447,42 +488,42 @@ function Step3Form({
           type="file"
           accept="image/*,application/pdf"
           onChange={(e) => onChange('receipt', e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer"
+          className="w-full text-sm text-[--fg-2] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sw-blush-mist file:text-[--accent] hover:file:bg-sw-rose-pale cursor-pointer"
         />
         {data.receipt && (
-          <p className="text-xs text-gray-500 mt-1">
-            Archivo seleccionado: {data.receipt.name}
-          </p>
+          <p className="text-xs text-[--fg-3] mt-1">Archivo seleccionado: {data.receipt.name}</p>
         )}
       </Field>
 
       {/* Post screenshot */}
-      <Field label="Captura de tu publicación en el grupo SW (opcional)">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer"
-        />
-        {data.post_screenshot && (
-          <p className="text-xs text-gray-500 mt-1">
-            Archivo seleccionado: {data.post_screenshot.name}
-          </p>
-        )}
-      </Field>
+      {showPostScreenshot && (
+        <Field label="Captura de tu publicación en el grupo SW (opcional)">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
+            className="w-full text-sm text-[--fg-2] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sw-blush-mist file:text-[--accent] hover:file:bg-sw-rose-pale cursor-pointer"
+          />
+          {data.post_screenshot && (
+            <p className="text-xs text-[--fg-3] mt-1">
+              Archivo seleccionado: {data.post_screenshot.name}
+            </p>
+          )}
+        </Field>
+      )}
 
       {/* Consent checkbox */}
       <div className="flex flex-col gap-1">
         <label
           className={`flex items-start gap-3 cursor-pointer group ${
-            errors.consent_accepted ? 'text-red-700' : 'text-gray-700'
+            errors.consent_accepted ? 'text-sw-burgundy' : 'text-[--fg-2]'
           }`}
         >
           <input
             type="checkbox"
             checked={data.consent_accepted}
             onChange={(e) => onChange('consent_accepted', e.target.checked)}
-            className="mt-0.5 w-4 h-4 rounded accent-pink-500 shrink-0"
+            className="mt-0.5 w-4 h-4 rounded shrink-0 accent-[--accent]"
           />
           <span className="text-sm leading-snug">
             Acepto los términos de uso y autorizo a SW Mujeres a publicar mi información en el
@@ -490,7 +531,7 @@ function Step3Form({
           </span>
         </label>
         {errors.consent_accepted && (
-          <p className="text-xs text-red-600 ml-7">{errors.consent_accepted}</p>
+          <p className="text-xs text-sw-burgundy ml-7">{errors.consent_accepted}</p>
         )}
       </div>
     </div>
@@ -543,7 +584,6 @@ export default function InscripcionPage() {
   const [productsLoading, setProductsLoading] = useState(true)
   const [productsError, setProductsError] = useState<string | null>(null)
 
-  // Load products once on mount
   useEffect(() => {
     async function loadProducts() {
       setProductsLoading(true)
@@ -563,7 +603,6 @@ export default function InscripcionPage() {
       const opts = (data ?? []) as ProductOption[]
       setProducts(opts)
 
-      // Pre-select when there is exactly one option
       if (opts.length === 1) {
         setStep3((prev) => ({ ...prev, product_id: opts[0].id }))
       }
@@ -580,37 +619,145 @@ export default function InscripcionPage() {
 
   function validateStep1(): boolean {
     const errs: Step1Errors = {}
-    if (!step1.cedula.trim()) errs.cedula = 'La cédula es obligatoria.'
-    if (!step1.full_name.trim()) errs.full_name = 'El nombre completo es obligatorio.'
-    if (!step1.email.trim()) errs.email = 'El correo electrónico es obligatorio.'
-    if (!step1.phone.trim()) errs.phone = 'El teléfono personal es obligatorio.'
-    if (!step1.fb_profile_url.trim()) errs.fb_profile_url = 'La URL de tu perfil de Facebook es obligatoria.'
+
+    const cedula = step1.cedula.trim()
+    if (!cedula) {
+      errs.cedula = 'El número de cédula es obligatorio.'
+    } else if (!/^\d{6,12}$/.test(cedula)) {
+      errs.cedula = 'La cédula debe tener entre 6 y 12 dígitos numéricos.'
+    }
+
+    const fullName = step1.full_name.trim()
+    if (!fullName) {
+      errs.full_name = 'El nombre completo es obligatorio.'
+    } else if (/\d/.test(fullName)) {
+      errs.full_name = 'El nombre no puede contener números.'
+    } else if (fullName.split(/\s+/).filter(Boolean).length < 2) {
+      errs.full_name = 'Ingresa tu nombre y apellido.'
+    }
+
+    const email = step1.email.trim()
+    if (!email) {
+      errs.email = 'El correo electrónico es obligatorio.'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errs.email = 'Ingresa un correo electrónico válido.'
+    }
+
+    // phone is stored as dialCode+digits e.g. "+573001234567"
+    const phoneDigits = step1.phone.replace(/^\+\d{1,4}/, '')
+    if (!phoneDigits) {
+      errs.phone = 'El teléfono es obligatorio.'
+    } else if (!/^\d{7,15}$/.test(phoneDigits)) {
+      errs.phone = 'Ingresa un número de teléfono válido (7–15 dígitos).'
+    }
+
+    const fbUrl = step1.fb_profile_url.trim()
+    if (!fbUrl) {
+      errs.fb_profile_url = 'El perfil de Facebook es obligatorio.'
+    } else {
+      try {
+        const url = new URL(fbUrl)
+        const hostname = url.hostname.replace(/^www\./, '')
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error()
+        if (hostname !== 'facebook.com') {
+          errs.fb_profile_url = 'Ingresa un enlace válido de Facebook (facebook.com/tu-perfil).'
+        }
+      } catch {
+        errs.fb_profile_url = 'Ingresa una URL válida de Facebook.'
+      }
+    }
+
     setErrors1(errs)
     return Object.keys(errs).length === 0
   }
 
   function validateStep2(): boolean {
-    const errs: Step2Errors = {}
-    if (!step2.business_name.trim()) errs.business_name = 'El nombre del negocio es obligatorio.'
-    if (!step2.category) errs.category = 'Selecciona una categoría.'
-    if (!step2.description.trim()) errs.description = 'La descripción es obligatoria.'
-    else if (step2.description.length > 300)
-      errs.description = 'La descripción no puede superar 300 caracteres.'
-    if (!step2.business_phone.trim()) errs.business_phone = 'El WhatsApp del negocio es obligatorio.'
-    if (step2.offers_discount && !step2.discount_details.trim())
-      errs.discount_details = 'Describe el descuento que ofreces.'
-    setErrors2(errs)
-    return Object.keys(errs).length === 0
+    const newErrors: Step2Errors = {}
+
+    const businessName = step2.business_name.trim()
+    if (!businessName) {
+      newErrors.business_name = 'El nombre del negocio es obligatorio.'
+    } else if (businessName.length < 2) {
+      newErrors.business_name = 'El nombre del negocio debe tener al menos 2 caracteres.'
+    }
+
+    if (!step2.category) {
+      newErrors.category = 'Selecciona una categoría.'
+    } else if (!CATEGORIES.includes(step2.category as typeof CATEGORIES[number])) {
+      newErrors.category = 'Categoría no válida.'
+    }
+
+    const description = step2.description.trim()
+    if (!description) {
+      newErrors.description = 'La descripción es obligatoria.'
+    } else if (description.length < 10) {
+      newErrors.description = 'La descripción debe tener al menos 10 caracteres.'
+    } else if (description.length > 300) {
+      newErrors.description = 'La descripción no puede superar los 300 caracteres.'
+    }
+
+    const businessPhoneDigits = step2.business_phone.replace(/^\+\d{1,4}/, '')
+    if (!businessPhoneDigits) {
+      newErrors.business_phone = 'El teléfono de WhatsApp es obligatorio.'
+    } else if (!/^\d{7,15}$/.test(businessPhoneDigits)) {
+      newErrors.business_phone = 'Ingresa un número válido (7–15 dígitos).'
+    }
+
+    const instagram = step2.instagram_handle?.trim()
+    if (instagram) {
+      const usernameOnly = instagram
+        .replace(/^https?:\/\/(www\.)?instagram\.com\//, '')
+        .replace(/^@/, '')
+        .replace(/\/$/, '')
+      if (!/^[\w.]{1,30}$/.test(usernameOnly)) {
+        newErrors.instagram_handle = 'Usuario de Instagram no válido. Usa @usuario o el enlace de tu perfil.'
+      }
+    }
+
+    const website = step2.website_url?.trim()
+    if (website) {
+      try {
+        const url = new URL(website)
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error()
+      } catch {
+        newErrors.website_url = 'Ingresa una URL válida para el sitio web.'
+      }
+    }
+
+    if (step2.offers_discount && !step2.discount_details?.trim()) {
+      newErrors.discount_details = 'Describe el descuento que ofreces.'
+    }
+
+    setErrors2(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   function validateStep3(): boolean {
-    const errs: Step3Errors = {}
-    if (!step3.product_id) errs.product_id = 'Selecciona un plan.'
-    const isPaid = selectedProduct !== null && selectedProduct.price_cop > 0
-    if (isPaid && !step3.receipt) errs.receipt = 'El comprobante de pago es obligatorio.'
-    if (!step3.consent_accepted) errs.consent_accepted = 'Debes aceptar los términos para continuar.'
-    setErrors3(errs)
-    return Object.keys(errs).length === 0
+    const newErrors: Step3Errors = {}
+
+    if (!step3.product_id) {
+      newErrors.product_id = 'Selecciona un plan.'
+    }
+
+    const selectedPlan = products.find(p => p.id === step3.product_id)
+    const isPaid = selectedPlan && selectedPlan.price_cop > 0
+
+    if (isPaid) {
+      if (!step3.receipt) {
+        newErrors.receipt = 'El comprobante de pago es obligatorio para este plan.'
+      } else if (!ALLOWED_RECEIPT_TYPES.includes(step3.receipt.type)) {
+        newErrors.receipt = 'El comprobante debe ser una imagen (JPG, PNG, WebP) o PDF.'
+      } else if (step3.receipt.size > MAX_FILE_SIZE) {
+        newErrors.receipt = 'El archivo no puede superar los 5 MB.'
+      }
+    }
+
+    if (!step3.consent_accepted) {
+      newErrors.consent_accepted = 'Debes aceptar los términos para continuar.'
+    }
+
+    setErrors3(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
@@ -642,14 +789,12 @@ export default function InscripcionPage() {
 
     const fd = new FormData()
 
-    // Step 1 fields
     fd.append('cedula', step1.cedula.trim())
     fd.append('full_name', step1.full_name.trim())
     fd.append('email', step1.email.trim())
     fd.append('phone', step1.phone.trim())
     fd.append('fb_profile_url', step1.fb_profile_url.trim())
 
-    // Step 2 fields
     fd.append('business_name', step2.business_name.trim())
     fd.append('description', step2.description.trim())
     fd.append('category', step2.category)
@@ -662,7 +807,6 @@ export default function InscripcionPage() {
       fd.append('discount_details', step2.discount_details.trim())
     }
 
-    // Step 3 fields
     fd.append('product_id', step3.product_id)
     fd.append('consent_accepted', 'true')
     if (step3.receipt) fd.append('receipt', step3.receipt)
@@ -688,13 +832,16 @@ export default function InscripcionPage() {
 
   if (submitted) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
-        <div className="max-w-md w-full text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mx-auto text-2xl">
+      <main className="min-h-screen bg-[--bg] flex items-center justify-center px-4 py-16">
+        <div className="max-w-md w-full text-center space-y-5">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto text-xl text-sw-cream"
+            style={{ background: 'var(--accent)' }}
+          >
             ✓
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">¡Solicitud recibida!</h1>
-          <p className="text-gray-600 leading-relaxed">
+          <h1 className="sw-display sw-h2 text-[--fg]">¡Solicitud recibida!</h1>
+          <p className="text-[--fg-2] leading-relaxed text-sm">
             Revisaremos tu información y te contactaremos en los próximos días. Estamos emocionadas
             de conocer tu emprendimiento.
           </p>
@@ -706,12 +853,13 @@ export default function InscripcionPage() {
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-12">
+    <main className="min-h-screen bg-[--bg] px-4 py-12">
       <div className="max-w-[600px] mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Inscríbete al directorio</h1>
-          <p className="text-gray-500 text-sm mt-1">
+        <div className="text-center mb-10">
+          <p className="sw-eyebrow mb-2">SW Mujeres</p>
+          <h1 className="sw-display sw-h2 text-[--fg]">Inscríbete al directorio</h1>
+          <p className="text-[--fg-3] text-sm mt-2">
             Comparte tu emprendimiento con la comunidad SW Mujeres
           </p>
         </div>
@@ -719,7 +867,13 @@ export default function InscripcionPage() {
         <StepIndicator current={currentStep} />
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8">
+        <div
+          className="bg-sw-paper rounded-2xl border p-6 md:p-8"
+          style={{
+            borderColor: 'var(--sw-line)',
+            boxShadow: 'var(--shadow-md)',
+          }}
+        >
           {currentStep === 1 && (
             <Step1Form
               data={step1}
@@ -752,7 +906,20 @@ export default function InscripcionPage() {
               productsError={productsError}
               selectedProduct={selectedProduct}
               onChange={(field, value) => {
-                setStep3((prev) => ({ ...prev, [field]: value }))
+                setStep3((prev) => {
+                  if (field !== 'product_id') {
+                    return { ...prev, [field]: value }
+                  }
+
+                  const nextProduct = products.find((product) => product.id === value) ?? null
+                  return {
+                    ...prev,
+                    product_id: String(value),
+                    post_screenshot: isSinglePublicationProduct(nextProduct)
+                      ? prev.post_screenshot
+                      : null,
+                  }
+                })
                 const key = field as keyof Step3Errors
                 if (errors3[key]) setErrors3((prev) => ({ ...prev, [key]: undefined }))
               }}
@@ -760,13 +927,15 @@ export default function InscripcionPage() {
           )}
 
           {/* Navigation */}
-          <div className={`flex mt-8 ${currentStep > 1 ? 'justify-between' : 'justify-end'}`}>
+          <div className={`flex mt-8 pt-6 border-t ${currentStep > 1 ? 'justify-between' : 'justify-end'}`}
+            style={{ borderColor: 'var(--sw-line)' }}
+          >
             {currentStep > 1 && (
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={submitting}
-                className="px-5 py-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-50"
+                className="px-5 py-2 text-sm font-medium text-[--fg-3] hover:text-[--fg] transition-colors disabled:opacity-50"
               >
                 ← Volver
               </button>
@@ -776,7 +945,8 @@ export default function InscripcionPage() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="px-6 py-2 bg-pink-500 text-white text-sm font-semibold rounded-lg hover:bg-pink-600 transition-colors"
+                className="px-6 py-2.5 text-sm font-semibold rounded-lg text-sw-cream transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                style={{ background: 'var(--accent)' }}
               >
                 Continuar →
               </button>
@@ -785,15 +955,16 @@ export default function InscripcionPage() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting || productsLoading}
-                className="px-6 py-2 bg-pink-500 text-white text-sm font-semibold rounded-lg hover:bg-pink-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2.5 text-sm font-semibold rounded-lg text-sw-cream transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'var(--accent)' }}
               >
-                {submitting ? 'Enviando...' : 'Enviar solicitud'}
+                {submitting ? 'Enviando…' : 'Enviar solicitud'}
               </button>
             )}
           </div>
 
           {submitError && (
-            <p className="mt-4 text-sm text-red-600 text-center">{submitError}</p>
+            <p className="mt-4 text-sm text-sw-burgundy text-center">{submitError}</p>
           )}
         </div>
       </div>

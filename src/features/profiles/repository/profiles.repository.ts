@@ -1,5 +1,6 @@
 import { supabasePublic } from '@src/shared/lib/supabase'
 import { slugify } from '@src/shared/utils/slugify'
+import { getPublicImageUrl } from '@src/shared/utils/getPublicImageUrl'
 import type { DirectoryProfile, ProfileFilters } from '../types'
 
 type BusinessProfileRow = {
@@ -76,7 +77,7 @@ function mapToDirectoryProfile(row: EntrepreneurRow): DirectoryProfile | null {
     instagram_handle: profile.instagram_handle,
     website_url: profile.website_url,
     other_socials: profile.other_socials,
-    directory_image_path: profile.directory_image_path,
+    directory_image_path: getPublicImageUrl(profile.directory_image_path),
     offers_discount: profile.offers_discount ?? false,
     discount_details: profile.discount_details,
     full_name: row.full_name,

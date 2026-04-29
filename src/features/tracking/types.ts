@@ -15,3 +15,20 @@ export type ProfileStats = {
     total: number
   }
 }
+
+export type TimeSeriesPoint = {
+  date: string   // formato 'YYYY-MM-DD'
+  views: number
+  clicks: number
+}
+
+export type DirectoryAverages = {
+  avgViews: number
+  avgClicks: number
+}
+
+export type FullStats = ProfileStats & {
+  businessName: string
+  timeSeries: TimeSeriesPoint[]
+  averages: DirectoryAverages
+}

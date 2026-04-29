@@ -160,10 +160,10 @@ export default async function AdminPerfilDetailPage({
     <div className="space-y-8 max-w-3xl">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <a href="/admin/perfiles" className="text-sm text-gray-500 hover:text-gray-700">
+        <a href="/admin/perfiles" className="text-sm text-sw-fg3 hover:text-sw-fg2">
           ← Perfiles
         </a>
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-sw-negro">
           {profile.business_name ?? profile.full_name ?? 'Sin nombre'}
         </h1>
       </div>
@@ -174,53 +174,53 @@ export default async function AdminPerfilDetailPage({
         {/* ------------------------------------------------------------------ */}
         {/* Sección 1 — Datos personales                                        */}
         {/* ------------------------------------------------------------------ */}
-        <section className="rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h2 className="text-base font-semibold text-gray-800">Datos personales</h2>
+        <section className="rounded-lg border border-sw-line bg-sw-paper">
+          <div className="border-b border-sw-line px-6 py-4">
+            <h2 className="text-base font-semibold text-sw-negro">Datos personales</h2>
           </div>
           <div className="grid gap-4 px-6 py-5 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Nombre completo
               </label>
               <input
                 type="text"
                 name="full_name"
                 defaultValue={profile.full_name ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Correo electrónico
               </label>
               <input
                 type="email"
                 name="email"
                 defaultValue={profile.email ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Teléfono personal
               </label>
               <input
                 type="text"
                 name="phone"
                 defaultValue={profile.phone ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Perfil de Facebook
               </label>
               <input
                 type="text"
                 name="fb_profile_url"
                 defaultValue={profile.fb_profile_url ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
           </div>
@@ -229,30 +229,30 @@ export default async function AdminPerfilDetailPage({
         {/* ------------------------------------------------------------------ */}
         {/* Sección 2 — Datos del negocio                                       */}
         {/* ------------------------------------------------------------------ */}
-        <section className="rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h2 className="text-base font-semibold text-gray-800">Datos del negocio</h2>
+        <section className="rounded-lg border border-sw-line bg-sw-paper">
+          <div className="border-b border-sw-line px-6 py-4">
+            <h2 className="text-base font-semibold text-sw-negro">Datos del negocio</h2>
           </div>
           <div className="grid gap-4 px-6 py-5 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Nombre del negocio
               </label>
               <input
                 type="text"
                 name="business_name"
                 defaultValue={profile.business_name ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Categoría
               </label>
               <select
                 name="category"
                 defaultValue={profile.category ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               >
                 <option value="">Seleccionar…</option>
                 {CATEGORIES.map((cat) => (
@@ -263,30 +263,30 @@ export default async function AdminPerfilDetailPage({
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción <span className="font-normal text-gray-400">(máx. 300 caracteres)</span>
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
+                Descripción <span className="font-normal text-sw-fg3">(máx. 300 caracteres)</span>
               </label>
               <textarea
                 name="description"
                 defaultValue={profile.description ?? ''}
                 maxLength={300}
                 rows={4}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 WhatsApp del negocio
               </label>
               <input
                 type="text"
                 name="business_phone"
                 defaultValue={profile.business_phone ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Instagram
               </label>
               <input
@@ -294,29 +294,29 @@ export default async function AdminPerfilDetailPage({
                 name="instagram_handle"
                 defaultValue={profile.instagram_handle ?? ''}
                 placeholder="minegocio"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Sitio web
               </label>
               <input
                 type="text"
                 name="website_url"
                 defaultValue={profile.website_url ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-sw-fg2 mb-1">
                 Otras redes sociales
               </label>
               <input
                 type="text"
                 name="other_socials"
                 defaultValue={profile.other_socials ?? ''}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
               />
             </div>
             <div className="sm:col-span-2 space-y-3">
@@ -326,22 +326,22 @@ export default async function AdminPerfilDetailPage({
                   id="offers_discount"
                   name="offers_discount"
                   defaultChecked={profile.offers_discount}
-                  className="h-4 w-4 rounded border-gray-300 text-pink-500 focus:ring-pink-500"
+                  className="h-4 w-4 rounded border-sw-line text-sw-burgundy focus:ring-sw-burgundy"
                 />
-                <label htmlFor="offers_discount" className="text-sm font-medium text-gray-700">
+                <label htmlFor="offers_discount" className="text-sm font-medium text-sw-fg2">
                   Ofrece descuento a miembros SW
                 </label>
               </div>
               {profile.offers_discount && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-sw-fg2 mb-1">
                     Detalle del descuento
                   </label>
                   <input
                     type="text"
                     name="discount_details"
                     defaultValue={profile.discount_details ?? ''}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    className="w-full rounded-lg border border-sw-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sw-burgundy"
                   />
                 </div>
               )}
@@ -352,15 +352,15 @@ export default async function AdminPerfilDetailPage({
         {/* ------------------------------------------------------------------ */}
         {/* Sección 3 — Imagen del directorio                                   */}
         {/* ------------------------------------------------------------------ */}
-        <section className="rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h2 className="text-base font-semibold text-gray-800">Imagen del directorio</h2>
+        <section className="rounded-lg border border-sw-line bg-sw-paper">
+          <div className="border-b border-sw-line px-6 py-4">
+            <h2 className="text-base font-semibold text-sw-negro">Imagen del directorio</h2>
           </div>
           <div className="flex items-start gap-6 px-6 py-5">
             {/* Preview */}
             <div className="flex-shrink-0">
               {imageUrl ? (
-                <div className="relative h-24 w-24 rounded-lg overflow-hidden border border-gray-200">
+                <div className="relative h-24 w-24 rounded-lg overflow-hidden border border-sw-line">
                   <Image
                     src={imageUrl}
                     alt={profile.business_name ?? 'Imagen del negocio'}
@@ -370,23 +370,23 @@ export default async function AdminPerfilDetailPage({
                   />
                 </div>
               ) : (
-                <div className="h-24 w-24 rounded-lg bg-pink-100 flex items-center justify-center text-pink-500 text-2xl font-bold border border-pink-200">
+                <div className="h-24 w-24 rounded-lg bg-sw-blush-mist flex items-center justify-center text-sw-burgundy text-2xl font-bold border border-sw-rose-pale">
                   {initials}
                 </div>
               )}
             </div>
             {/* Upload */}
             <div className="flex-1 space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-sw-fg2">
                 {imageUrl ? 'Reemplazar imagen' : 'Subir imagen'}
               </label>
               <input
                 type="file"
                 name="directory_image"
                 accept="image/*"
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100"
+                className="block w-full text-sm text-sw-fg3 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sw-blush-mist file:text-sw-burgundy hover:file:bg-sw-rose-pale"
               />
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-sw-fg3">
                 La nueva imagen reemplaza la anterior. Solo imágenes.
               </p>
             </div>
@@ -397,7 +397,7 @@ export default async function AdminPerfilDetailPage({
         <div className="flex justify-end">
           <button
             type="submit"
-            className="rounded-lg bg-pink-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
+            className="rounded-lg bg-sw-burgundy px-6 py-2.5 text-sm font-medium text-sw-paper hover:bg-sw-burgundy-dark transition-colors"
           >
             Guardar cambios
           </button>
@@ -405,41 +405,91 @@ export default async function AdminPerfilDetailPage({
       </form>
 
       {/* -------------------------------------------------------------------- */}
-      {/* Sección 4 — Membresía (formulario separado para el toggle)            */}
+      {/* Sección 4 — Estadísticas del perfil                                  */}
       {/* -------------------------------------------------------------------- */}
-      <section className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-4">
-          <h2 className="text-base font-semibold text-gray-800">Membresía</h2>
+      <section className="rounded-lg border border-sw-line bg-sw-paper">
+        <div className="border-b border-sw-line px-6 py-4">
+          <h2 className="text-base font-semibold text-sw-negro">Estadísticas del perfil</h2>
+        </div>
+        <div className="px-6 py-5">
+          {profile.stats_token ? (
+            <div className="space-y-3">
+              <p className="text-sm text-sw-fg3">
+                Página privada de métricas — vistas y clicks de los últimos 30 días.
+              </p>
+              <div className="flex items-center gap-2 rounded-lg border border-sw-line bg-sw-cream px-3 py-2">
+                <code className="flex-1 truncate text-xs text-sw-fg3">
+                  {`${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'}/estadisticas/${profile.stats_token}`}
+                </code>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={`/estadisticas/${profile.stats_token}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-sw-burgundy px-4 py-2 text-sm font-medium text-sw-paper hover:bg-sw-burgundy-dark transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                    <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                    <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clipRule="evenodd" />
+                  </svg>
+                  Ver estadísticas
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3">
+              <p className="text-sm text-yellow-800">
+                Esta empresaria no tiene un token de estadísticas generado.
+                Fue inscrita antes de que se implementara esta función.
+              </p>
+              <p className="mt-1 text-xs text-yellow-600">
+                Ejecuta este SQL en Supabase para asignarle uno:
+              </p>
+              <code className="mt-2 block rounded bg-yellow-100 px-3 py-2 text-xs text-yellow-800 font-mono">
+                {`UPDATE business_profiles SET stats_token = gen_random_uuid() WHERE entrepreneur_id = '${profile.entrepreneur_id}' AND stats_token IS NULL;`}
+              </code>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------- */}
+      {/* Sección 5 — Membresía (formulario separado para el toggle)            */}
+      {/* -------------------------------------------------------------------- */}
+      <section className="rounded-lg border border-sw-line bg-sw-paper">
+        <div className="border-b border-sw-line px-6 py-4">
+          <h2 className="text-base font-semibold text-sw-negro">Membresía</h2>
         </div>
         <div className="px-6 py-5 space-y-4">
           <div className="grid gap-3 sm:grid-cols-3 text-sm">
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Estado</p>
+              <p className="text-sw-fg3 text-xs uppercase tracking-wide mb-1">Estado</p>
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                   isActive
                     ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-sw-cream text-sw-fg3'
                 }`}
               >
                 {isActive ? 'Activa' : 'Inactiva'}
               </span>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Inicio</p>
-              <p className="text-gray-900">
+              <p className="text-sw-fg3 text-xs uppercase tracking-wide mb-1">Inicio</p>
+              <p className="text-sw-negro">
                 {profile.membership_start ? formatDate(profile.membership_start) : '—'}
               </p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Vencimiento</p>
-              <p className="text-gray-900">
+              <p className="text-sw-fg3 text-xs uppercase tracking-wide mb-1">Vencimiento</p>
+              <p className="text-sw-negro">
                 {profile.membership_end ? formatDate(profile.membership_end) : '—'}
               </p>
             </div>
           </div>
           {profile.membership_end && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-sw-fg2">
               {memDays !== null && memDays >= 0
                 ? `${memDays} día${memDays !== 1 ? 's' : ''} restante${memDays !== 1 ? 's' : ''}`
                 : `Venció hace ${Math.abs(memDays ?? 0)} día${Math.abs(memDays ?? 0) !== 1 ? 's' : ''}`}

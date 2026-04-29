@@ -1,8 +1,4 @@
 // app/admin/(panel)/layout.tsx
-// Layout protegido del panel de administración.
-// Verifica la sesión en cada render. Si no hay sesión válida, redirige a /admin/login.
-// IMPORTANTE: cookies() en Next.js 15 devuelve una Promise — se usa con await.
-
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -16,31 +12,29 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
-  if (!sessionToken) {
-    redirect('/admin/login')
-  }
+  if (!sessionToken) redirect('/admin/login')
 
-  // verifySession devuelve null si el JWT es inválido o expiró.
-  // redirect() lanza una excepción internamente — no atrapar en un catch general.
   const adminEmail = await verifySession(sessionToken)
+  if (!adminEmail) redirect('/admin/login')
 
-  if (!adminEmail) {
-    redirect('/admin/login')
-  }
+  const adminName = adminEmail.split('@')[0]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col shrink-0">
-        {/* Logo / título */}
-        <div className="px-5 py-5 border-b border-gray-100">
-          <span className="text-sm font-bold text-gray-900 tracking-wide uppercase">
-            SW Admin
-          </span>
+    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', minHeight: '100vh', background: 'var(--bg)', fontFamily: 'var(--font-body)' }}>
+      {/* Sidebar oscuro */}
+      <aside style={{ background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', padding: '28px 20px', display: 'flex', flexDirection: 'column', gap: 32 }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 8px' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-sw-4.svg" alt="SW" width={32} height={32} style={{ filter: 'brightness(0) invert(1)', opacity: 0.9 }} />
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.22em', color: 'var(--sw-cream)' }}>MUJERES</div>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', color: 'var(--accent-soft)' }}>ADMIN</div>
+          </div>
         </div>
 
-        {/* Navegación */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        {/* Nav */}
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <NavLink href="/admin">Dashboard</NavLink>
           <NavLink href="/admin/solicitudes">Solicitudes</NavLink>
           <NavLink href="/admin/perfiles">Perfiles</NavLink>
@@ -48,24 +42,12 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
           <NavLink href="/admin/finanzas">Finanzas</NavLink>
         </nav>
 
-        {/* Footer del sidebar: email + logout */}
-        <div className="px-4 py-4 border-t border-gray-100 space-y-3">
-          <p
-            className="text-xs text-gray-400 truncate"
-            title={adminEmail}
-          >
-            {adminEmail}
-          </p>
-
-          {/*
-            Form con method POST hacia la API route de logout.
-            Funciona sin JavaScript del lado del cliente.
-          */}
+        {/* Footer */}
+        <div style={{ marginTop: 'auto', padding: '14px 12px', borderTop: '1px solid rgba(247,239,233,0.12)', fontSize: 12, color: 'var(--fg-on-dark-2)' }}>
+          <div style={{ fontWeight: 600, color: 'var(--sw-cream)', textTransform: 'capitalize' }}>{adminName}</div>
+          <div style={{ fontSize: 11, marginBottom: 10 }}>{adminEmail}</div>
           <form action="/api/admin/logout" method="POST">
-            <button
-              type="submit"
-              className="w-full text-left text-xs text-red-500 hover:text-red-700 transition-colors"
-            >
+            <button type="submit" style={{ fontSize: 11, color: 'var(--fg-on-dark-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'var(--font-body)' }}>
               Cerrar sesión
             </button>
           </form>
@@ -73,28 +55,18 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Contenido principal */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          {children}
-        </div>
+      <main style={{ padding: '32px 48px 80px', overflow: 'hidden' }}>
+        {children}
       </main>
     </div>
   )
 }
 
-// Componente auxiliar para los ítems de navegación.
-// No maneja active state aquí — se puede agregar con usePathname si se necesita.
-function NavLink({
-  href,
-  children,
-}: {
-  href: string
-  children: React.ReactNode
-}) {
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+      className="admin-nav-link"
     >
       {children}
     </Link>

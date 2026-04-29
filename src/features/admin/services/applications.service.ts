@@ -23,7 +23,8 @@ export const applicationsService = {
     durationDays: number,
     entrepreneurEmail: string,
     entrepreneurName: string,
-    businessName: string
+    businessName: string,
+    statsToken?: string
   ): Promise<void> {
     await approveApplication(applicationId, entrepreneurId, durationDays)
     await activateMembership(entrepreneurId, applicationId, durationDays)
@@ -32,6 +33,7 @@ export const applicationsService = {
         to: entrepreneurEmail,
         entrepreneurName,
         businessName,
+        statsToken,
       })
     } catch {
       // email fails silently

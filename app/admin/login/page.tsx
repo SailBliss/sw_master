@@ -1,9 +1,26 @@
 'use client'
 
-// Página de login del panel de administración.
-// Flujo de dos pasos: primero el email, luego el código OTP de 6 dígitos.
-
 import { useState } from 'react'
+
+const darkInput: React.CSSProperties = {
+  padding: '12px 14px',
+  borderRadius: 6,
+  border: '1px solid rgba(247,239,233,0.20)',
+  background: 'rgba(247,239,233,0.06)',
+  color: 'var(--sw-cream)',
+  fontFamily: 'var(--font-body)',
+  fontSize: 14,
+  outline: 'none',
+  width: '100%',
+}
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'var(--fg-on-dark-2)',
+}
 
 export default function AdminLoginPage() {
   const [step, setStep] = useState<'email' | 'code'>('email')
@@ -16,19 +33,13 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-
     try {
       const response = await fetch('/api/admin/solicitar-acceso', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       })
-
-      if (!response.ok) {
-        setError('Ocurrió un error. Intenta de nuevo.')
-        return
-      }
-
+      if (!response.ok) { setError('Ocurrió un error. Intenta de nuevo.'); return }
       setStep('code')
     } catch {
       setError('No se pudo conectar. Verifica tu conexión e intenta de nuevo.')
@@ -41,20 +52,17 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-
     try {
       const response = await fetch('/api/admin/verificar-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), code: code.trim() }),
       })
-
       if (!response.ok) {
         const data = await response.json() as { error?: string }
         setError(data.error ?? 'Código inválido o expirado.')
         return
       }
-
       window.location.href = '/admin'
     } catch {
       setError('No se pudo conectar. Verifica tu conexión e intenta de nuevo.')
@@ -64,115 +72,80 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        {/* Logo / nombre */}
-        <div className="text-center mb-8">
-          <span className="inline-block text-2xl font-bold tracking-tight text-pink-600">
-            SW Mujeres
-          </span>
-          <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest">
-            Panel de administración
-          </p>
+    <main style={{ minHeight: '100vh', background: 'var(--bg-dark)', color: 'var(--fg-on-dark)', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}>
+      <div style={{ width: 420, textAlign: 'center' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-sw-4.svg" alt="SW Mujeres" width={48} height={48} style={{ filter: 'brightness(0) invert(1)', opacity: 0.85, marginBottom: 24 }} />
+
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 12 }}>
+          Acceso administrativo
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {step === 'email' ? (
-            <>
-              <h1 className="text-lg font-semibold text-gray-800 mb-6 text-center">
-                Acceso al panel
-              </h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 44, lineHeight: 1.05, margin: '0 0 12px', letterSpacing: '-0.01em', color: 'var(--sw-cream)' }}>
+          {step === 'email' ? 'Bienvenida.' : 'Tu código.'}
+        </h1>
 
-              <form onSubmit={handleSendCode} noValidate>
-                <div className="mb-4">
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Correo electrónico
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                    placeholder="tu@correo.com"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
-                  />
-                </div>
+        <p style={{ fontSize: 14, color: 'var(--fg-on-dark-2)', marginBottom: 36 }}>
+          {step === 'email'
+            ? 'Solo personal autorizado. Cada acceso queda registrado.'
+            : <>Enviamos un código de 6 dígitos a <strong style={{ color: 'var(--sw-cream)' }}>{email}</strong></>
+          }
+        </p>
 
-                {error && (
-                  <p className="text-sm text-red-600 mb-3">{error}</p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading || !email.trim()}
-                  className="w-full rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Enviando…' : 'Enviar código'}
-                </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <h1 className="text-lg font-semibold text-gray-800 mb-1 text-center">
-                Ingresa tu código
-              </h1>
-              <p className="text-sm text-gray-500 mb-6 text-center">
-                Enviamos un código de 6 dígitos a{' '}
-                <span className="font-medium text-gray-700">{email}</span>
-              </p>
-
-              <form onSubmit={handleVerifyCode} noValidate>
-                <div className="mb-4">
-                  <label
-                    htmlFor="code"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Código de verificación
-                  </label>
-                  <input
-                    id="code"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    autoComplete="one-time-code"
-                    required
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                    disabled={loading}
-                    placeholder="123456"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50 tracking-widest text-center text-lg"
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-sm text-red-600 mb-3">{error}</p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading || code.length !== 6}
-                  className="w-full rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Verificando…' : 'Entrar'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setStep('email'); setCode(''); setError(null) }}
-                  className="w-full mt-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  Volver
-                </button>
-              </form>
-            </>
-          )}
-        </div>
+        {step === 'email' ? (
+          <form onSubmit={handleSendCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14, textAlign: 'left' }}>
+            <label style={labelStyle}>Correo</label>
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              placeholder="tu@correo.com"
+              style={{ ...darkInput, opacity: loading ? 0.5 : 1 }}
+            />
+            {error && <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{error}</p>}
+            <button
+              type="submit"
+              disabled={loading || !email.trim()}
+              style={{ width: '100%', padding: '14px 24px', borderRadius: 6, background: 'var(--accent)', color: 'var(--sw-cream)', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, marginTop: 14, opacity: loading || !email.trim() ? 0.5 : 1, fontFamily: 'var(--font-body)' }}
+            >
+              {loading ? 'Enviando…' : 'Enviar código →'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14, textAlign: 'left' }}>
+            <label style={labelStyle}>Código de verificación</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              disabled={loading}
+              placeholder="123456"
+              style={{ ...darkInput, letterSpacing: '0.3em', textAlign: 'center', fontSize: 20, opacity: loading ? 0.5 : 1 }}
+            />
+            {error && <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{error}</p>}
+            <button
+              type="submit"
+              disabled={loading || code.length !== 6}
+              style={{ width: '100%', padding: '14px 24px', borderRadius: 6, background: 'var(--accent)', color: 'var(--sw-cream)', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, marginTop: 14, opacity: loading || code.length !== 6 ? 0.5 : 1, fontFamily: 'var(--font-body)' }}
+            >
+              {loading ? 'Verificando…' : 'Entrar →'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep('email'); setCode(''); setError(null) }}
+              style={{ fontSize: 13, color: 'var(--fg-on-dark-3)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', marginTop: 4 }}
+            >
+              ← Volver
+            </button>
+          </form>
+        )}
       </div>
     </main>
   )
