@@ -77,7 +77,6 @@ export default async function ProfilePage({ params }: Props) {
         </Link>
         <nav style={{ display: 'flex', gap: 36 }}>
           <Link href="/directorio" style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)' }}>Directorio</Link>
-          <Link href="/inscripcion" style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.85 }}>Inscríbete</Link>
         </nav>
       </header>
 
