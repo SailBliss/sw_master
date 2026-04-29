@@ -50,3 +50,5 @@ CLAUDE.md
 AGENTS.md
 /BITACORA.md
 /docs
+/.agents
+/skills-lock.json
