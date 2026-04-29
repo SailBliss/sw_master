@@ -7,7 +7,6 @@ import { CATEGORIES } from '@src/shared/utils/categories'
 import type {
   ApplicationFormStep1,
   ApplicationFormStep2,
-  ApplicationFormStep3,
   ProductOption,
 } from '@src/features/enrollment/types'
 
@@ -51,6 +50,16 @@ type Step3State = {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_RECEIPT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+
+function isSinglePublicationProduct(product: ProductOption | null): boolean {
+  const normalizedName =
+    product?.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase() ?? ''
+
+  return normalizedName.includes('unica publicacion')
+}
 
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
@@ -386,6 +395,7 @@ function Step3Form({
   onChange: (field: keyof Step3State, value: string | File | null | boolean) => void
 }) {
   const isPaid = selectedProduct !== null && selectedProduct.price_cop > 0
+  const showPostScreenshot = isSinglePublicationProduct(selectedProduct)
 
   return (
     <div className="space-y-6">
@@ -486,19 +496,21 @@ function Step3Form({
       </Field>
 
       {/* Post screenshot */}
-      <Field label="Captura de tu publicación en el grupo SW (opcional)">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-[--fg-2] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sw-blush-mist file:text-[--accent] hover:file:bg-sw-rose-pale cursor-pointer"
-        />
-        {data.post_screenshot && (
-          <p className="text-xs text-[--fg-3] mt-1">
-            Archivo seleccionado: {data.post_screenshot.name}
-          </p>
-        )}
-      </Field>
+      {showPostScreenshot && (
+        <Field label="Captura de tu publicación en el grupo SW (opcional)">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
+            className="w-full text-sm text-[--fg-2] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sw-blush-mist file:text-[--accent] hover:file:bg-sw-rose-pale cursor-pointer"
+          />
+          {data.post_screenshot && (
+            <p className="text-xs text-[--fg-3] mt-1">
+              Archivo seleccionado: {data.post_screenshot.name}
+            </p>
+          )}
+        </Field>
+      )}
 
       {/* Consent checkbox */}
       <div className="flex flex-col gap-1">
@@ -894,7 +906,20 @@ export default function InscripcionPage() {
               productsError={productsError}
               selectedProduct={selectedProduct}
               onChange={(field, value) => {
-                setStep3((prev) => ({ ...prev, [field]: value }))
+                setStep3((prev) => {
+                  if (field !== 'product_id') {
+                    return { ...prev, [field]: value }
+                  }
+
+                  const nextProduct = products.find((product) => product.id === value) ?? null
+                  return {
+                    ...prev,
+                    product_id: String(value),
+                    post_screenshot: isSinglePublicationProduct(nextProduct)
+                      ? prev.post_screenshot
+                      : null,
+                  }
+                })
                 const key = field as keyof Step3Errors
                 if (errors3[key]) setErrors3((prev) => ({ ...prev, [key]: undefined }))
               }}

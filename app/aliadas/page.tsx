@@ -10,7 +10,6 @@ import { CATEGORIES } from '@src/shared/utils/categories'
 import type {
   ApplicationFormStep1,
   ApplicationFormStep2,
-  ApplicationFormStep3,
   ProductOption,
 } from '@src/features/enrollment/types'
 
@@ -107,6 +106,16 @@ type Step3State = {
   receipt: File | null
   post_screenshot: File | null
   consent_accepted: boolean
+}
+
+function isSinglePublicationProduct(product: ProductOption | null): boolean {
+  const normalizedName =
+    product?.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase() ?? ''
+
+  return normalizedName.includes('unica publicacion')
 }
 
 // ─── UI primitives ────────────────────────────────────────────────────────────
@@ -414,6 +423,7 @@ function Step3Form({
   onChange: (field: keyof Step3State, value: string | File | null | boolean) => void
 }) {
   const isPaid = selectedProduct !== null && selectedProduct.price_cop > 0
+  const showPostScreenshot = isSinglePublicationProduct(selectedProduct)
 
   return (
     <div className="space-y-6">
@@ -485,19 +495,21 @@ function Step3Form({
           <p className="text-xs text-gray-500 mt-1">Archivo seleccionado: {data.receipt.name}</p>
         )}
       </Field>
-      <Field label="Captura de tu publicación en el grupo SW (opcional)">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer"
-        />
-        {data.post_screenshot && (
-          <p className="text-xs text-gray-500 mt-1">
-            Archivo seleccionado: {data.post_screenshot.name}
-          </p>
-        )}
-      </Field>
+      {showPostScreenshot && (
+        <Field label="Captura de tu publicación en el grupo SW (opcional)">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onChange('post_screenshot', e.target.files?.[0] ?? null)}
+            className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 cursor-pointer"
+          />
+          {data.post_screenshot && (
+            <p className="text-xs text-gray-500 mt-1">
+              Archivo seleccionado: {data.post_screenshot.name}
+            </p>
+          )}
+        </Field>
+      )}
       <div className="flex flex-col gap-1">
         <label
           className={`flex items-start gap-3 cursor-pointer group ${
@@ -811,7 +823,20 @@ export default function AliadasPage() {
                 productsError={productsError}
                 selectedProduct={selectedProduct}
                 onChange={(field, value) => {
-                  setStep3((prev) => ({ ...prev, [field]: value }))
+                  setStep3((prev) => {
+                    if (field !== 'product_id') {
+                      return { ...prev, [field]: value }
+                    }
+
+                    const nextProduct = products.find((product) => product.id === value) ?? null
+                    return {
+                      ...prev,
+                      product_id: String(value),
+                      post_screenshot: isSinglePublicationProduct(nextProduct)
+                        ? prev.post_screenshot
+                        : null,
+                    }
+                  })
                   const key = field as keyof Step3Errors
                   if (errors3[key]) setErrors3((prev) => ({ ...prev, [key]: undefined }))
                 }}
