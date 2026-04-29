@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { DirectoryProfile } from '@src/features/profiles/types'
@@ -30,7 +30,10 @@ interface PreviewCardProps {
 }
 
 export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }: PreviewCardProps) {
+  const cardRef = useRef<HTMLAnchorElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const baseHeightRef = useRef<number | null>(null)
+  const [isRowExpanded, setIsRowExpanded] = useState(false)
 
   const handleMouseEnter = () => videoRef.current?.play().catch(() => {})
   const handleMouseLeave = () => {
@@ -40,12 +43,31 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
     v.currentTime = 0
   }
 
-  const shortDesc = profile.description ? truncate(profile.description, descMaxLen) : null
   const gradient = CARD_GRADIENTS[idx % CARD_GRADIENTS.length]
   const src = videoSrc ?? '/preview-placeholder.mp4'
+  const description = profile.description ?? ''
+  const visibleDescription = isRowExpanded ? description : truncate(description, descMaxLen)
+
+  useEffect(() => {
+    const card = cardRef.current
+    if (!card) return
+
+    const observer = new ResizeObserver(([entry]) => {
+      const height = entry.contentRect.height
+      if (baseHeightRef.current === null || height < baseHeightRef.current) {
+        baseHeightRef.current = height
+      }
+
+      setIsRowExpanded(height > baseHeightRef.current + 24)
+    })
+
+    observer.observe(card)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <Link
+        ref={cardRef}
         href={`/directorio/${profile.slug}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -113,8 +135,8 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
           }}>
             {profile.business_name}
           </div>
-          {shortDesc && (
-            <div style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55 }}>{shortDesc}</div>
+          {visibleDescription && (
+            <div className="swpc-desc" style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.55 }}>{visibleDescription}</div>
           )}
           {profile.city && (
             <div style={{ marginTop: 10, fontSize: 12, color: 'var(--fg-3)' }}>{profile.city}</div>
