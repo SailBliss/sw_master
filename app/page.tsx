@@ -211,8 +211,8 @@ export default async function LandingPage() {
       </div>
 
       {/* ── Métricas ─────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-alt)', padding: '56px 64px', borderBottom: '1px solid var(--sw-line)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 36 }}>
+      <section style={{ background: 'var(--bg-alt)', padding: '26px 64px', borderBottom: '1px solid var(--sw-line)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 24 }}>
           {[
             { n: '13.500', l: 'Mujeres en la comunidad' },
             { n: '6 años',  l: 'Construyendo confianza' },
@@ -220,8 +220,8 @@ export default async function LandingPage() {
             { n: businessCount, l: 'Negocios verificados' },
           ].map((m) => (
             <div key={m.l}>
-              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 48, color: 'var(--accent)', lineHeight: 1, letterSpacing: '-0.01em' }}>{m.n}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', color: 'var(--fg-2)', textTransform: 'uppercase', marginTop: 14 }}>{m.l}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 36, color: 'var(--accent)', lineHeight: 1, letterSpacing: '-0.01em' }}>{m.n}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: 'var(--fg-2)', textTransform: 'uppercase', marginTop: 8 }}>{m.l}</div>
             </div>
           ))}
         </div>
