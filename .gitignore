@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+.npmrc
 
 # vercel
 .vercel
@@ -43,6 +45,10 @@ next-env.d.ts
 # project context docs
 /context/
 /contexto/
+/_design-demos/
+/exports/
+/tmp/
+/temp/
 
 # claude artifacts
 /.claude/
