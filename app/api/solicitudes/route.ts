@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { enrollmentService } from '@src/features/enrollment/services/enrollment.service'
 import { enrollmentSchema } from '@src/features/enrollment/validators'
 import type { SubmissionResult } from '@src/features/enrollment/types'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest): Promise<NextResponse<SubmissionResult>> {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown'
+  const allowed = await checkRateLimit(`enrollment:${ip}`, 3, 3600)
+  if (!allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Demasiados envíos. Espera una hora e intenta de nuevo.' },
+      { status: 429 },
+    )
+  }
   let formData: FormData
   try {
     formData = await request.formData()

@@ -10,6 +10,9 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max).trimEnd() + '…'
 }
 
+// 1×1 SVG in rose-pale (#E6B6C6) used as blur placeholder for remote images
+const BLUR_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNFNkI2QzYiLz48L3N2Zz4='
+
 const CARD_GRADIENTS = [
   'linear-gradient(160deg,#C7A89C,#5F1F3C)',
   'linear-gradient(160deg,#A98072,#3a1d22)',
@@ -93,6 +96,8 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
               fill
               className="swpc-img object-cover"
               sizes="(max-width: 768px) 100vw, 25vw"
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
             />
           )}
 

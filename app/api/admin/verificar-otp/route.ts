@@ -4,8 +4,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyOtp, createSession, SESSION_COOKIE_NAME } from '@src/shared/lib/auth'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown'
+  const allowed = await checkRateLimit(`otp-verify:${ip}`, 10, 600)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Demasiados intentos. Espera 10 minutos e intenta de nuevo.' },
+      { status: 429 },
+    )
+  }
   let body: unknown
 
   try {
