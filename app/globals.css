@@ -1,4 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "./";
+@source "../components";
+@source "../context";
+@source "../lib";
+@source "../src";
 
 /* ── SW Mujeres brand fonts ──────────────────────────────────────── */
 @theme inline {
@@ -24,6 +29,9 @@
 
 /* ── Raw tokens (available everywhere, including inline styles) ─── */
 :root {
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
   --sw-negro-profundo:  #391125;
   --sw-burgundy-dark:   #5F1F3C;
   --sw-burgundy:        #821641;
@@ -119,7 +127,7 @@ input, textarea, select { font-family: inherit; }
 .swpc {
   contain: layout style;
   box-shadow: var(--shadow-xs);
-  border-color: var(--sw-line);
+  border-color: transparent;
   transition: box-shadow var(--dur-base), border-color var(--dur-base);
 }
 .swpc:hover {
