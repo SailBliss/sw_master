@@ -4,7 +4,7 @@ import type { ReviewRequest, ReviewResult } from './types'
 
 const MAX_REVIEWS_PER_SESSION = 3
 const PROVIDER = 'gemini'
-const MODEL = 'gemini-1.5-flash'
+const MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'
 
 type ServiceResult =
   | { ok: true; data: ReviewResult }

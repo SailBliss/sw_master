@@ -9,12 +9,12 @@ type GeminiReviewResponse = {
   editorialStatus: AIEditorialStatus
 }
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
-
 export async function callGeminiReview(description: string): Promise<GeminiReviewResponse> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
+
+  const model = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
 
   const prompt = `Eres un editor de contenido especializado en emprendimientos latinoamericanos.
 Recibiste la siguiente descripción de un negocio escrita por su dueña:
