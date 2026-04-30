@@ -1,3 +1,13 @@
+import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
+
+export type ExistingReview = {
+  suggested_text: string | null
+  seo_tags: string[]
+  search_keywords: string[]
+  seo_description: string | null
+  ai_summary: string | null
+}
+
 export type AdminApplication = {
   id: string
   status: 'pendiente' | 'aprobado' | 'rechazado'
@@ -7,6 +17,10 @@ export type AdminApplication = {
   notes: string | null
   receipt_path: string
   post_screenshot_path: string | null
+  description_editorial_status: ApplicationEditorialStatus | null
+  description_reviewed: boolean
+  description_review_id: string | null
+  existing_review: ExistingReview | null
   entrepreneur: {
     id: string
     full_name: string | null
@@ -26,6 +40,10 @@ export type AdminApplication = {
     directory_image_path: string | null
     offers_discount: boolean
     discount_details: string | null
+    seo_tags: string[]
+    search_keywords: string[]
+    seo_description: string | null
+    ai_summary: string | null
   }
   product: {
     id: string

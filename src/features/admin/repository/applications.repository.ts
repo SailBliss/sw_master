@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
-import type { AdminApplication } from '../types'
+import type { AdminApplication, ExistingReview } from '../types'
+import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
 
 // ---------------------------------------------------------------------------
 // Helpers internos
@@ -35,6 +36,10 @@ type RawBusinessProfile = {
   directory_image_path: string | null
   offers_discount: boolean
   discount_details: string | null
+  seo_tags: string[] | null
+  search_keywords: string[] | null
+  seo_description: string | null
+  ai_summary: string | null
 }
 
 type RawProduct = {
@@ -54,6 +59,9 @@ type RawApplication = {
   receipt_path: string
   post_screenshot_path: string | null
   entrepreneur_id: string
+  description_editorial_status: ApplicationEditorialStatus | null
+  description_reviewed: boolean | null
+  description_review_id: string | null
   entrepreneurs: RawEntrepreneur | RawEntrepreneur[] | null
   products: RawProduct | RawProduct[] | null
 }
@@ -70,6 +78,7 @@ export async function listApplications(
     .select(`
       id, status, amount_cop, submitted_at, reviewed_at, notes,
       receipt_path, post_screenshot_path, entrepreneur_id,
+      description_editorial_status, description_reviewed, description_review_id,
       entrepreneurs (
         id, full_name, email, phone, cedula, fb_profile_url
       ),
@@ -91,7 +100,8 @@ export async function listApplications(
     .select(`
       id, entrepreneur_id, business_name, category, description,
       business_phone, instagram_handle, website_url,
-      directory_image_path, offers_discount, discount_details
+      directory_image_path, offers_discount, discount_details,
+      seo_tags, search_keywords, seo_description, ai_summary
     `)
     .in('entrepreneur_id', entrepreneurIds)
     .returns<(RawBusinessProfile & { entrepreneur_id: string })[]>()
@@ -120,6 +130,10 @@ export async function listApplications(
       notes: app.notes,
       receipt_path: app.receipt_path,
       post_screenshot_path: app.post_screenshot_path,
+      description_editorial_status: app.description_editorial_status ?? null,
+      description_reviewed: app.description_reviewed ?? false,
+      description_review_id: app.description_review_id ?? null,
+      existing_review: null,
       entrepreneur: {
         id: entrepreneur.id,
         full_name: entrepreneur.full_name,
@@ -139,6 +153,10 @@ export async function listApplications(
         directory_image_path: bp?.directory_image_path ?? null,
         offers_discount: bp?.offers_discount ?? false,
         discount_details: bp?.discount_details ?? null,
+        seo_tags: bp?.seo_tags ?? [],
+        search_keywords: bp?.search_keywords ?? [],
+        seo_description: bp?.seo_description ?? null,
+        ai_summary: bp?.ai_summary ?? null,
       },
       product: {
         id: product.id,
@@ -160,6 +178,7 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
     .select(`
       id, status, amount_cop, submitted_at, reviewed_at, notes,
       receipt_path, post_screenshot_path, entrepreneur_id,
+      description_editorial_status, description_reviewed, description_review_id,
       entrepreneurs (
         id, full_name, email, phone, cedula, fb_profile_url
       ),
@@ -179,7 +198,8 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
     .select(`
       id, business_name, category, description, business_phone,
       instagram_handle, website_url, directory_image_path,
-      offers_discount, discount_details
+      offers_discount, discount_details,
+      seo_tags, search_keywords, seo_description, ai_summary
     `)
     .eq('entrepreneur_id', app.entrepreneur_id)
     .single<RawBusinessProfile>()
@@ -192,6 +212,26 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
   if (!entrepreneur) throw new Error(`Entrepreneur missing for application ${app.id}`)
   if (!product) throw new Error(`Product missing for application ${app.id}`)
 
+  // Third query: fetch review assets if a review_id is present
+  let existingReview: ExistingReview | null = null
+  if (app.description_review_id) {
+    const { data: review } = await supabaseAdmin
+      .from('profile_description_reviews')
+      .select('suggested_text, seo_tags, search_keywords, seo_description, ai_summary')
+      .eq('id', app.description_review_id)
+      .maybeSingle()
+
+    if (review) {
+      existingReview = {
+        suggested_text: review.suggested_text as string | null,
+        seo_tags: (review.seo_tags as string[]) ?? [],
+        search_keywords: (review.search_keywords as string[]) ?? [],
+        seo_description: review.seo_description as string | null,
+        ai_summary: review.ai_summary as string | null,
+      }
+    }
+  }
+
   return {
     id: app.id,
     status: app.status,
@@ -201,6 +241,10 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
     notes: app.notes,
     receipt_path: app.receipt_path,
     post_screenshot_path: app.post_screenshot_path,
+    description_editorial_status: app.description_editorial_status ?? null,
+    description_reviewed: app.description_reviewed ?? false,
+    description_review_id: app.description_review_id ?? null,
+    existing_review: existingReview,
     entrepreneur: {
       id: entrepreneur.id,
       full_name: entrepreneur.full_name,
@@ -220,6 +264,10 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
       directory_image_path: bp?.directory_image_path ?? null,
       offers_discount: bp?.offers_discount ?? false,
       discount_details: bp?.discount_details ?? null,
+      seo_tags: bp?.seo_tags ?? [],
+      search_keywords: bp?.search_keywords ?? [],
+      seo_description: bp?.seo_description ?? null,
+      ai_summary: bp?.ai_summary ?? null,
     },
     product: {
       id: product.id,
