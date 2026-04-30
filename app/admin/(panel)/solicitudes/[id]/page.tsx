@@ -2,6 +2,10 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { applicationsService } from '@src/features/admin/services/applications.service'
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
+import { applyApprovedDescription } from '@src/features/admin/repository/applications.repository'
+import { getReview, markUsed } from '@src/features/profile-editorial-review/repository'
+import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
+import type { ExistingReview } from '@src/features/admin/types'
 
 // ---------------------------------------------------------------------------
 // Server Actions
@@ -38,6 +42,58 @@ async function rejectApplicationAction(formData: FormData) {
   redirect('/admin/solicitudes')
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function applyDescriptionAction(formData: FormData) {
+  'use server'
+  const applicationId       = formData.get('applicationId') as string
+  const approvedDescription = (formData.get('approvedDescription') as string | null) ?? ''
+  const rawReviewId         = (formData.get('reviewId') as string | null) ?? ''
+
+  const trimmed = approvedDescription.trim()
+  if (trimmed.length < 10 || trimmed.length > 1000) {
+    redirect(`/admin/solicitudes/${applicationId}?editorialError=invalid_description`)
+  }
+
+  // Verify reviewId and retrieve assets from DB — never trust client for SEO data
+  let reviewAssets: { seoTags: string[]; searchKeywords: string[]; seoDescription: string | null; aiSummary: string | null } | null = null
+  let verifiedReviewId: string | null = null
+
+  if (UUID_RE.test(rawReviewId)) {
+    try {
+      const review = await getReview(rawReviewId)
+      if (review) {
+        verifiedReviewId = rawReviewId
+        reviewAssets = {
+          seoTags:        review.seoTags,
+          searchKeywords: review.searchKeywords,
+          seoDescription: review.seoDescription,
+          aiSummary:      review.aiSummary,
+        }
+      }
+    } catch {
+      // getReview failure is non-blocking — proceed without SEO assets
+    }
+  }
+
+  await applyApprovedDescription({
+    applicationId,
+    description: trimmed,
+    reviewAssets,
+  })
+
+  if (verifiedReviewId) {
+    try {
+      const review = await getReview(verifiedReviewId)
+      if (review && !review.accepted) await markUsed(verifiedReviewId)
+    } catch {
+      // markUsed failure is non-blocking
+    }
+  }
+
+  redirect(`/admin/solicitudes/${applicationId}`)
+}
+
 // ---------------------------------------------------------------------------
 // Helpers UI
 // ---------------------------------------------------------------------------
@@ -69,15 +125,184 @@ function Field({ label, value }: { label: string; value: string | null | undefin
 }
 
 // ---------------------------------------------------------------------------
+// Editorial status badge
+// ---------------------------------------------------------------------------
+
+const EDITORIAL_BADGE: Record<string, string> = {
+  requiere_revision_manual: 'bg-yellow-100 text-yellow-800',
+  ia_sugerida:              'bg-blue-100 text-blue-800',
+  ia_aceptada:              'bg-emerald-100 text-emerald-800',
+  admin_aprobada:           'bg-green-100 text-green-800',
+}
+
+const EDITORIAL_LABEL: Record<string, string> = {
+  requiere_revision_manual: 'Requiere revisión manual',
+  ia_sugerida:              'Sugerencia IA disponible',
+  ia_aceptada:              'IA aceptada por aliada',
+  admin_aprobada:           'Aprobada por admin',
+}
+
+function EditorialBadge({ status }: { status: ApplicationEditorialStatus | null }) {
+  if (!status) {
+    return (
+      <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">
+        Sin revisión
+      </span>
+    )
+  }
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${EDITORIAL_BADGE[status] ?? 'bg-gray-100 text-gray-500'}`}>
+      {EDITORIAL_LABEL[status] ?? status}
+    </span>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Editorial review section (read-only)
+// ---------------------------------------------------------------------------
+
+function Pills({ items, emptyText }: { items: string[]; emptyText?: string }) {
+  if (items.length === 0) return <span className="text-sm text-sw-fg3">{emptyText ?? '—'}</span>
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {items.map((item) => (
+        <span key={item} className="inline-block rounded px-2 py-0.5 text-xs bg-gray-100 text-sw-fg2">
+          {item}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function DescriptionReviewSection({
+  editorialStatus,
+  descriptionReviewed,
+  reviewId,
+  existingReview,
+  applicationId,
+  currentDescription,
+  applyAction,
+  errorMessage,
+}: {
+  editorialStatus: ApplicationEditorialStatus | null
+  descriptionReviewed: boolean
+  reviewId: string | null
+  existingReview: ExistingReview | null
+  applicationId?: string
+  currentDescription?: string | null
+  applyAction?: (fd: FormData) => Promise<void>
+  errorMessage?: string | null
+}) {
+  return (
+    <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-4">
+      <div className="flex items-center justify-between border-b border-sw-line pb-3">
+        <h2 className="text-base font-semibold text-sw-negro">Revisión de descripción</h2>
+        <EditorialBadge status={editorialStatus} />
+      </div>
+
+      <p className="text-xs text-sw-fg3">
+        Descripción revisada:{' '}
+        <span className={descriptionReviewed ? 'text-emerald-700 font-medium' : 'text-yellow-700 font-medium'}>
+          {descriptionReviewed ? 'Sí' : 'No'}
+        </span>
+      </p>
+
+      {!existingReview ? (
+        <p className="text-sm text-sw-fg3">No hay revisión IA asociada a esta solicitud.</p>
+      ) : (
+        <div className="space-y-4">
+          {existingReview.suggested_text && (
+            <div>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide mb-1.5">
+                Texto sugerido por IA
+              </dt>
+              <div className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2.5 text-sm text-sw-negro leading-relaxed">
+                {existingReview.suggested_text}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide mb-1.5">SEO Tags</dt>
+              <Pills items={existingReview.seo_tags} />
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide mb-1.5">Keywords de búsqueda</dt>
+              <Pills items={existingReview.search_keywords} />
+            </div>
+          </div>
+
+          {existingReview.seo_description && (
+            <div>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide mb-1.5">Descripción SEO</dt>
+              <dd className="text-sm text-sw-fg2 leading-relaxed">{existingReview.seo_description}</dd>
+            </div>
+          )}
+
+          {existingReview.ai_summary && (
+            <div>
+              <dt className="text-xs font-medium text-sw-fg3 uppercase tracking-wide mb-1.5">Resumen IA</dt>
+              <dd className="text-sm text-sw-fg2 leading-relaxed">{existingReview.ai_summary}</dd>
+            </div>
+          )}
+
+          {reviewId && (
+            <p className="text-xs text-sw-fg3 font-mono">Review ID: {reviewId}</p>
+          )}
+        </div>
+      )}
+
+      {applyAction && applicationId && (
+        <div className="border-t border-sw-line pt-4 space-y-3">
+          {errorMessage && (
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {errorMessage}
+            </p>
+          )}
+          <form action={applyAction} className="space-y-3">
+            <input type="hidden" name="applicationId" value={applicationId} />
+            <input type="hidden" name="reviewId" value={reviewId ?? ''} />
+            <div>
+              <label className="text-xs font-medium text-sw-fg3 uppercase tracking-wide block mb-1.5">
+                Descripción aprobada
+              </label>
+              <textarea
+                name="approvedDescription"
+                rows={5}
+                minLength={10}
+                maxLength={1000}
+                defaultValue={existingReview?.suggested_text ?? currentDescription ?? ''}
+                className="w-full rounded-md border border-sw-line px-3 py-2 text-sm text-sw-negro placeholder-sw-fg3 focus:outline-none focus:ring-2 focus:ring-sw-burgundy resize-none"
+                placeholder="Escribe o confirma la descripción aprobada…"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-md bg-sw-burgundy px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+            >
+              Aplicar descripción aprobada
+            </button>
+          </form>
+        </div>
+      )}
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
 export default async function AdminSolicitudDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ editorialError?: string }>
 }) {
   const { id } = await params
+  const { editorialError } = await searchParams
   const solicitud = await applicationsService.getById(id)
 
   if (!solicitud) notFound()
@@ -172,6 +397,18 @@ export default async function AdminSolicitudDetailPage({
           )}
         </dl>
       </section>
+
+      {/* Revisión de descripción */}
+      <DescriptionReviewSection
+        editorialStatus={solicitud.description_editorial_status}
+        descriptionReviewed={solicitud.description_reviewed}
+        reviewId={solicitud.description_review_id}
+        existingReview={solicitud.existing_review}
+        applicationId={solicitud.id}
+        currentDescription={bp.description}
+        applyAction={status === 'pendiente' ? applyDescriptionAction : undefined}
+        errorMessage={editorialError === 'invalid_description' ? 'La descripción debe tener entre 10 y 1000 caracteres.' : null}
+      />
 
       {/* Plan y pago */}
       <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-4">

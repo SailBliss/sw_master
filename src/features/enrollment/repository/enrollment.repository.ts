@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
+import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
 
 export async function checkDuplicate(cedula: string): Promise<boolean> {
   const { data, error } = await supabaseAdmin
@@ -45,6 +46,9 @@ type CreateAllParams = {
   amount_cop: number
   receipt_path: string
   post_screenshot_path: string | null
+  description_editorial_status: ApplicationEditorialStatus
+  description_review_id: string | null
+  description_reviewed: boolean
 }
 
 export async function createAll(params: CreateAllParams): Promise<string> {
@@ -54,6 +58,7 @@ export async function createAll(params: CreateAllParams): Promise<string> {
     business_name, description, category, business_phone,
     instagram_handle, website_url, other_socials, offers_discount, discount_details,
     product_id, amount_cop, receipt_path, post_screenshot_path,
+    description_editorial_status, description_review_id, description_reviewed,
   } = params
 
   // a) entrepreneurs
@@ -89,6 +94,7 @@ export async function createAll(params: CreateAllParams): Promise<string> {
     .insert({
       entrepreneur_id: entrepreneurId, product_id,
       status: 'pendiente', amount_cop, receipt_path, post_screenshot_path,
+      description_editorial_status, description_review_id, description_reviewed,
     })
     .select('id')
     .single()

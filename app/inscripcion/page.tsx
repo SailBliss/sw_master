@@ -9,6 +9,9 @@ import type {
   ApplicationFormStep2,
   ProductOption,
 } from '@src/features/enrollment/types'
+import { DescriptionReviewPanel } from '@src/features/profile-editorial-review/components/DescriptionReviewPanel'
+import type { AcceptedReview } from '@src/features/profile-editorial-review/components/DescriptionReviewPanel'
+import type { ReviewResult } from '@src/features/profile-editorial-review/types'
 
 // ─── Error shape types ────────────────────────────────────────────────────────
 
@@ -226,10 +229,16 @@ function Step2Form({
   data,
   errors,
   onChange,
+  acceptedReview,
+  onReviewResult,
+  onReviewAccepted,
 }: {
   data: Step2State
   errors: Step2Errors
   onChange: (field: keyof Step2State, value: string | boolean) => void
+  acceptedReview: AcceptedReview | null
+  onReviewResult: (result: ReviewResult) => void
+  onReviewAccepted: (result: AcceptedReview) => void
 }) {
   const descLen = data.description.length
   const descOver = descLen > 300
@@ -283,6 +292,17 @@ function Step2Form({
             {descLen} / 300
           </span>
         </div>
+        {acceptedReview && (
+          <p className="text-xs text-[--accent] mt-1">
+            Texto revisado con IA aplicado. Puedes seguir editándolo.
+          </p>
+        )}
+        <DescriptionReviewPanel
+          description={data.description}
+          source="user_form"
+          onResult={onReviewResult}
+          onAccept={onReviewAccepted}
+        />
       </Field>
 
       <Field
@@ -579,6 +599,10 @@ export default function InscripcionPage() {
   })
   const [errors3, setErrors3] = useState<Step3Errors>({})
 
+  // Editorial review state — used in Task 5B for submission
+  const [acceptedReview, setAcceptedReview] = useState<AcceptedReview | null>(null)
+  const [latestReviewResult, setLatestReviewResult] = useState<ReviewResult | null>(null)
+
   // Products
   const [products, setProducts] = useState<ProductOption[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
@@ -614,6 +638,26 @@ export default function InscripcionPage() {
   }, [])
 
   const selectedProduct = products.find((p) => p.id === step3.product_id) ?? null
+
+  // ─── Editorial review handlers ──────────────────────────────────────────────
+
+  function handleReviewResult(result: ReviewResult) {
+    setLatestReviewResult(result)
+  }
+
+  function handleReviewAccepted(result: AcceptedReview) {
+    setAcceptedReview(result)
+    setLatestReviewResult({
+      reviewId: result.reviewId,
+      suggestedText: result.acceptedText,
+      seoTags: result.seoTags,
+      searchKeywords: result.searchKeywords,
+      seoDescription: result.seoDescription,
+      aiSummary: result.aiSummary,
+      editorialStatus: result.editorialStatus,
+    })
+    setStep2((prev) => ({ ...prev, description: result.acceptedText }))
+  }
 
   // ─── Validation ─────────────────────────────────────────────────────────────
 
@@ -812,6 +856,17 @@ export default function InscripcionPage() {
     if (step3.receipt) fd.append('receipt', step3.receipt)
     if (step3.post_screenshot) fd.append('post_screenshot', step3.post_screenshot)
 
+    const editorialStatus =
+      acceptedReview !== null
+        ? 'ia_aceptada'
+        : latestReviewResult !== null
+        ? 'ia_sugerida'
+        : 'requiere_revision_manual'
+    fd.append('description_editorial_status', editorialStatus)
+
+    const reviewId = acceptedReview?.reviewId ?? latestReviewResult?.reviewId ?? null
+    if (reviewId) fd.append('description_review_id', reviewId)
+
     try {
       const res = await fetch('/api/solicitudes', { method: 'POST', body: fd })
       const json = (await res.json()) as { success: boolean; message: string }
@@ -891,9 +946,15 @@ export default function InscripcionPage() {
               errors={errors2}
               onChange={(field, value) => {
                 setStep2((prev) => ({ ...prev, [field]: value }))
+                if (field === 'description' && acceptedReview !== null) {
+                  setAcceptedReview(null)
+                }
                 const key = field as Step2Fields
                 if (errors2[key]) setErrors2((prev) => ({ ...prev, [key]: undefined }))
               }}
+              acceptedReview={acceptedReview}
+              onReviewResult={handleReviewResult}
+              onReviewAccepted={handleReviewAccepted}
             />
           )}
 

@@ -1,7 +1,11 @@
 import { checkDuplicate, getProduct, createAll } from '../repository/enrollment.repository'
 import { uploadReceipt, uploadPostScreenshot } from '@src/shared/lib/storage'
 import { notifyAdminNewApplication } from '@src/shared/lib/email'
+import { getReview, markUsed } from '@src/features/profile-editorial-review/repository'
 import type { SubmissionResult } from '../types'
+import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 type EnrollmentInput = {
   cedula: string
@@ -21,6 +25,8 @@ type EnrollmentInput = {
   product_id: string
   receipt: File | null
   post_screenshot: File | null
+  description_editorial_status?: string
+  description_review_id?: string
 }
 
 export const enrollmentService = {
@@ -59,6 +65,31 @@ export const enrollmentService = {
       }
     }
 
+    // ─── Verify editorial review fields ─────────────────────────────────────────
+
+    let editorialStatus: ApplicationEditorialStatus = 'requiere_revision_manual'
+    let verifiedReviewId: string | null = null
+
+    const rawStatus = input.description_editorial_status ?? ''
+    const rawReviewId = input.description_review_id ?? ''
+
+    if (UUID_REGEX.test(rawReviewId)) {
+      try {
+        const review = await getReview(rawReviewId)
+        if (review) {
+          verifiedReviewId = rawReviewId
+          // Only elevate status when reviewId is verified server-side
+          editorialStatus = rawStatus === 'ia_aceptada' ? 'ia_aceptada' : 'ia_sugerida'
+        }
+        // review not found → stays requiere_revision_manual, verifiedReviewId stays null
+      } catch {
+        // getReview failure → stays requiere_revision_manual
+      }
+    }
+    // UUID invalid or absent → stays requiere_revision_manual
+
+    const descriptionReviewed = editorialStatus !== 'requiere_revision_manual'
+
     const applicationId = await createAll({
       entrepreneurId,
       cedula: input.cedula,
@@ -79,7 +110,18 @@ export const enrollmentService = {
       amount_cop: product.price_cop,
       receipt_path: receiptPath,
       post_screenshot_path: postScreenshotPath,
+      description_editorial_status: editorialStatus,
+      description_review_id: verifiedReviewId,
+      description_reviewed: descriptionReviewed,
     })
+
+    if (editorialStatus === 'ia_aceptada' && verifiedReviewId) {
+      try {
+        await markUsed(verifiedReviewId)
+      } catch {
+        // markUsed failure is non-blocking
+      }
+    }
 
     try {
       await notifyAdminNewApplication({
