@@ -2,6 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { applicationsService } from '@src/features/admin/services/applications.service'
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
+import { applyApprovedDescription } from '@src/features/admin/repository/applications.repository'
+import { getReview, markUsed } from '@src/features/profile-editorial-review/repository'
 import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
 import type { ExistingReview } from '@src/features/admin/types'
 
@@ -38,6 +40,58 @@ async function rejectApplicationAction(formData: FormData) {
 
   await applicationsService.reject(applicationId, notes, entrepreneurEmail, entrepreneurName)
   redirect('/admin/solicitudes')
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function applyDescriptionAction(formData: FormData) {
+  'use server'
+  const applicationId       = formData.get('applicationId') as string
+  const approvedDescription = (formData.get('approvedDescription') as string | null) ?? ''
+  const rawReviewId         = (formData.get('reviewId') as string | null) ?? ''
+
+  const trimmed = approvedDescription.trim()
+  if (trimmed.length < 10 || trimmed.length > 1000) {
+    redirect(`/admin/solicitudes/${applicationId}?editorialError=invalid_description`)
+  }
+
+  // Verify reviewId and retrieve assets from DB — never trust client for SEO data
+  let reviewAssets: { seoTags: string[]; searchKeywords: string[]; seoDescription: string | null; aiSummary: string | null } | null = null
+  let verifiedReviewId: string | null = null
+
+  if (UUID_RE.test(rawReviewId)) {
+    try {
+      const review = await getReview(rawReviewId)
+      if (review) {
+        verifiedReviewId = rawReviewId
+        reviewAssets = {
+          seoTags:        review.seoTags,
+          searchKeywords: review.searchKeywords,
+          seoDescription: review.seoDescription,
+          aiSummary:      review.aiSummary,
+        }
+      }
+    } catch {
+      // getReview failure is non-blocking — proceed without SEO assets
+    }
+  }
+
+  await applyApprovedDescription({
+    applicationId,
+    description: trimmed,
+    reviewAssets,
+  })
+
+  if (verifiedReviewId) {
+    try {
+      const review = await getReview(verifiedReviewId)
+      if (review && !review.accepted) await markUsed(verifiedReviewId)
+    } catch {
+      // markUsed failure is non-blocking
+    }
+  }
+
+  redirect(`/admin/solicitudes/${applicationId}`)
 }
 
 // ---------------------------------------------------------------------------
@@ -125,11 +179,19 @@ function DescriptionReviewSection({
   descriptionReviewed,
   reviewId,
   existingReview,
+  applicationId,
+  currentDescription,
+  applyAction,
+  errorMessage,
 }: {
   editorialStatus: ApplicationEditorialStatus | null
   descriptionReviewed: boolean
   reviewId: string | null
   existingReview: ExistingReview | null
+  applicationId?: string
+  currentDescription?: string | null
+  applyAction?: (fd: FormData) => Promise<void>
+  errorMessage?: string | null
 }) {
   return (
     <section className="rounded-lg border border-sw-line bg-sw-paper p-6 space-y-4">
@@ -190,6 +252,40 @@ function DescriptionReviewSection({
           )}
         </div>
       )}
+
+      {applyAction && applicationId && (
+        <div className="border-t border-sw-line pt-4 space-y-3">
+          {errorMessage && (
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {errorMessage}
+            </p>
+          )}
+          <form action={applyAction} className="space-y-3">
+            <input type="hidden" name="applicationId" value={applicationId} />
+            <input type="hidden" name="reviewId" value={reviewId ?? ''} />
+            <div>
+              <label className="text-xs font-medium text-sw-fg3 uppercase tracking-wide block mb-1.5">
+                Descripción aprobada
+              </label>
+              <textarea
+                name="approvedDescription"
+                rows={5}
+                minLength={10}
+                maxLength={1000}
+                defaultValue={existingReview?.suggested_text ?? currentDescription ?? ''}
+                className="w-full rounded-md border border-sw-line px-3 py-2 text-sm text-sw-negro placeholder-sw-fg3 focus:outline-none focus:ring-2 focus:ring-sw-burgundy resize-none"
+                placeholder="Escribe o confirma la descripción aprobada…"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-md bg-sw-burgundy px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+            >
+              Aplicar descripción aprobada
+            </button>
+          </form>
+        </div>
+      )}
     </section>
   )
 }
@@ -200,10 +296,13 @@ function DescriptionReviewSection({
 
 export default async function AdminSolicitudDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ editorialError?: string }>
 }) {
   const { id } = await params
+  const { editorialError } = await searchParams
   const solicitud = await applicationsService.getById(id)
 
   if (!solicitud) notFound()
@@ -305,6 +404,10 @@ export default async function AdminSolicitudDetailPage({
         descriptionReviewed={solicitud.description_reviewed}
         reviewId={solicitud.description_review_id}
         existingReview={solicitud.existing_review}
+        applicationId={solicitud.id}
+        currentDescription={bp.description}
+        applyAction={status === 'pendiente' ? applyDescriptionAction : undefined}
+        errorMessage={editorialError === 'invalid_description' ? 'La descripción debe tener entre 10 y 1000 caracteres.' : null}
       />
 
       {/* Plan y pago */}

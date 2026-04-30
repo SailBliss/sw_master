@@ -332,3 +332,59 @@ export async function rejectApplication(
 
   if (memError) throw new Error(`Error al desactivar membresía: ${memError.message}`)
 }
+
+// ---------------------------------------------------------------------------
+// applyApprovedDescription
+// ---------------------------------------------------------------------------
+
+type ReviewAssets = {
+  seoTags: string[]
+  searchKeywords: string[]
+  seoDescription: string | null
+  aiSummary: string | null
+}
+
+type ApplyDescriptionParams = {
+  applicationId: string
+  description: string
+  reviewAssets: ReviewAssets | null
+}
+
+export async function applyApprovedDescription(params: ApplyDescriptionParams): Promise<void> {
+  const { applicationId, description, reviewAssets } = params
+
+  // Resolve entrepreneur_id server-side from applicationId — never trust client input
+  const { data: appRow, error: readError } = await supabaseAdmin
+    .from('applications')
+    .select('entrepreneur_id')
+    .eq('id', applicationId)
+    .single<{ entrepreneur_id: string }>()
+
+  if (readError || !appRow) throw new Error(`Solicitud no encontrada: ${readError?.message ?? 'sin datos'}`)
+
+  const entrepreneurId = appRow.entrepreneur_id
+
+  // 1. Update business_profiles.description (always) + SEO fields (only if verified assets)
+  const profileUpdate: Record<string, unknown> = { description }
+  if (reviewAssets) {
+    profileUpdate.seo_tags        = reviewAssets.seoTags
+    profileUpdate.search_keywords = reviewAssets.searchKeywords
+    profileUpdate.seo_description = reviewAssets.seoDescription
+    profileUpdate.ai_summary      = reviewAssets.aiSummary
+  }
+
+  const { error: bpError } = await supabaseAdmin
+    .from('business_profiles')
+    .update(profileUpdate)
+    .eq('entrepreneur_id', entrepreneurId)
+
+  if (bpError) throw new Error(`Error al actualizar perfil: ${bpError.message}`)
+
+  // 2. Update applications: mark as admin_aprobada + description_reviewed = true
+  const { error: appError } = await supabaseAdmin
+    .from('applications')
+    .update({ description_editorial_status: 'admin_aprobada', description_reviewed: true })
+    .eq('id', applicationId)
+
+  if (appError) throw new Error(`Error al actualizar solicitud: ${appError.message}`)
+}
