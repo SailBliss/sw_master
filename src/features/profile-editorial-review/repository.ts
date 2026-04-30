@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
-import type { ReviewRecord } from './types'
+import type { ReviewRecord, ReviewSource, AIEditorialStatus } from './types'
 
 export async function countRecentReviews(sessionKey: string): Promise<number> {
   const since = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
@@ -15,17 +15,31 @@ export async function countRecentReviews(sessionKey: string): Promise<number> {
 
 export async function saveReview(params: {
   sessionKey: string
-  originalText: string
+  inputHash: string
   suggestedText: string
-  suggestedTags: string[]
+  seoTags: string[]
+  searchKeywords: string[]
+  seoDescription: string
+  aiSummary: string
+  editorialStatus: AIEditorialStatus
+  reviewSource: ReviewSource
+  provider: string
+  model: string
 }): Promise<string> {
   const { data, error } = await supabaseAdmin
     .from('profile_description_reviews')
     .insert({
-      session_key: params.sessionKey,
-      original_text: params.originalText,
-      suggested_text: params.suggestedText,
-      suggested_tags: params.suggestedTags,
+      session_key:      params.sessionKey,
+      input_hash:       params.inputHash,
+      suggested_text:   params.suggestedText,
+      seo_tags:         params.seoTags,
+      search_keywords:  params.searchKeywords,
+      seo_description:  params.seoDescription,
+      ai_summary:       params.aiSummary,
+      editorial_status: params.editorialStatus,
+      review_source:    params.reviewSource,
+      provider:         params.provider,
+      model:            params.model,
     })
     .select('id')
     .single()
@@ -45,14 +59,22 @@ export async function getReview(reviewId: string): Promise<ReviewRecord | null> 
   if (!data) return null
 
   return {
-    id: data.id as string,
-    sessionKey: data.session_key as string,
-    originalText: data.original_text as string,
-    suggestedText: data.suggested_text as string | null,
-    suggestedTags: (data.suggested_tags as string[]) ?? [],
-    accepted: data.accepted as boolean,
-    createdAt: data.created_at as string,
-    expiresAt: data.expires_at as string,
+    id:              data.id as string,
+    sessionKey:      data.session_key as string,
+    inputHash:       data.input_hash as string,
+    suggestedText:   data.suggested_text as string | null,
+    seoTags:         (data.seo_tags as string[]) ?? [],
+    searchKeywords:  (data.search_keywords as string[]) ?? [],
+    seoDescription:  data.seo_description as string | null,
+    aiSummary:       data.ai_summary as string | null,
+    editorialStatus: data.editorial_status as AIEditorialStatus | null,
+    reviewSource:    data.review_source as ReviewSource,
+    provider:        data.provider as string,
+    model:           data.model as string,
+    attempts:        data.attempts as number,
+    accepted:        data.accepted as boolean,
+    createdAt:       data.created_at as string,
+    expiresAt:       data.expires_at as string,
   }
 }
 
