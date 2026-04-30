@@ -232,7 +232,6 @@ function Step2Form({
   acceptedReview,
   onReviewResult,
   onReviewAccepted,
-  onReviewDismissed,
 }: {
   data: Step2State
   errors: Step2Errors
@@ -240,7 +239,6 @@ function Step2Form({
   acceptedReview: AcceptedReview | null
   onReviewResult: (result: ReviewResult) => void
   onReviewAccepted: (result: AcceptedReview) => void
-  onReviewDismissed: () => void
 }) {
   const descLen = data.description.length
   const descOver = descLen > 300
@@ -304,7 +302,6 @@ function Step2Form({
           source="user_form"
           onResult={onReviewResult}
           onAccept={onReviewAccepted}
-          onDismiss={onReviewDismissed}
         />
       </Field>
 
@@ -605,7 +602,6 @@ export default function InscripcionPage() {
   // Editorial review state — used in Task 5B for submission
   const [acceptedReview, setAcceptedReview] = useState<AcceptedReview | null>(null)
   const [latestReviewResult, setLatestReviewResult] = useState<ReviewResult | null>(null)
-  const [reviewDismissed, setReviewDismissed] = useState(false)
 
   // Products
   const [products, setProducts] = useState<ProductOption[]>([])
@@ -647,7 +643,6 @@ export default function InscripcionPage() {
 
   function handleReviewResult(result: ReviewResult) {
     setLatestReviewResult(result)
-    setReviewDismissed(false)
   }
 
   function handleReviewAccepted(result: AcceptedReview) {
@@ -661,12 +656,7 @@ export default function InscripcionPage() {
       aiSummary: result.aiSummary,
       editorialStatus: result.editorialStatus,
     })
-    setReviewDismissed(false)
     setStep2((prev) => ({ ...prev, description: result.acceptedText }))
-  }
-
-  function handleReviewDismissed() {
-    setReviewDismissed(true)
   }
 
   // ─── Validation ─────────────────────────────────────────────────────────────
@@ -866,6 +856,17 @@ export default function InscripcionPage() {
     if (step3.receipt) fd.append('receipt', step3.receipt)
     if (step3.post_screenshot) fd.append('post_screenshot', step3.post_screenshot)
 
+    const editorialStatus =
+      acceptedReview !== null
+        ? 'ia_aceptada'
+        : latestReviewResult !== null
+        ? 'ia_sugerida'
+        : 'requiere_revision_manual'
+    fd.append('description_editorial_status', editorialStatus)
+
+    const reviewId = acceptedReview?.reviewId ?? latestReviewResult?.reviewId ?? null
+    if (reviewId) fd.append('description_review_id', reviewId)
+
     try {
       const res = await fetch('/api/solicitudes', { method: 'POST', body: fd })
       const json = (await res.json()) as { success: boolean; message: string }
@@ -947,7 +948,6 @@ export default function InscripcionPage() {
                 setStep2((prev) => ({ ...prev, [field]: value }))
                 if (field === 'description' && acceptedReview !== null) {
                   setAcceptedReview(null)
-                  setReviewDismissed(false)
                 }
                 const key = field as Step2Fields
                 if (errors2[key]) setErrors2((prev) => ({ ...prev, [key]: undefined }))
@@ -955,7 +955,6 @@ export default function InscripcionPage() {
               acceptedReview={acceptedReview}
               onReviewResult={handleReviewResult}
               onReviewAccepted={handleReviewAccepted}
-              onReviewDismissed={handleReviewDismissed}
             />
           )}
 
