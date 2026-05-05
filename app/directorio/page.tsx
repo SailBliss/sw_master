@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 import { CATEGORIES } from '@src/shared/utils/categories'
 import PreviewCard from '@/components/directorio/PreviewCard'
+import ChatBubble from '@/components/directorio/ChatBubble'
 
 export const revalidate = 3600
 
@@ -235,6 +236,9 @@ export default async function DirectorioPage({ searchParams }: { searchParams: S
           <Link href="/inscripcion" style={{ fontSize: 12, color: 'var(--accent-soft)', fontWeight: 500 }}>Inscribir mi negocio →</Link>
         </div>
       </footer>
+
+      {/* ── AI Chat Bubble ──────────────────────────────────────────── */}
+      <ChatBubble />
     </div>
   )
 }

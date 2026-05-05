@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { EB_Garamond, Montserrat } from 'next/font/google'
 import './globals.css'
+import ChatBubble from '@/components/directorio/ChatBubble'
 
 const ebGaramond = EB_Garamond({
   variable: '--font-display',
@@ -57,7 +58,10 @@ export default function RootLayout({
           <link rel="preconnect" href={SUPABASE_URL} />
         )}
       </head>
-      <body className="min-h-full flex flex-col font-body">{children}</body>
+      <body className="min-h-full flex flex-col font-body">
+        {children}
+        <ChatBubble />
+      </body>
     </html>
   )
 }
