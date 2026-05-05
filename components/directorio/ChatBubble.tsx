@@ -30,6 +30,12 @@ type ChatMatch = {
   similarity: number | null
 }
 
+type ChatResponsePayload = {
+  reply?: unknown
+  error?: unknown
+  matches?: unknown
+}
+
 const SUGGESTIONS = [
   'Busco joyeria hecha a mano en Medellin',
   'Quiero negocios de tecnologia para emprender',
@@ -43,6 +49,10 @@ function makeId(): string {
 function formatSimilarity(value: number | null): string {
   if (typeof value !== 'number' || Number.isNaN(value)) return '—'
   return `${Math.round(value * 100)}%`
+}
+
+function isChatResponsePayload(value: unknown): value is ChatResponsePayload {
+  return typeof value === 'object' && value !== null
 }
 
 export default function ChatBubble() {
@@ -112,6 +122,10 @@ export default function ChatBubble() {
         payload = await response.json()
       } catch {
         throw new Error('La respuesta del servidor no fue válida (JSON inválido)')
+      }
+
+      if (!isChatResponsePayload(payload)) {
+        throw new Error('Respuesta inválida del servidor')
       }
 
       if (!response.ok) {

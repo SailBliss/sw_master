@@ -58,9 +58,9 @@ as $$
     )
     and exists (
       select 1
-      from public.profile_reviews pr
-      where pr.entrepreneur_id = bp.entrepreneur_id
-        and pr.status = 'aprobado'
+      from public.applications a
+      where a.entrepreneur_id = bp.entrepreneur_id
+        and a.status = 'aprobado'
     )
     and (1 - (bp.embedding::halfvec(3072) <=> query_embedding)) >= similarity_threshold
   order by bp.embedding::halfvec(3072) <=> query_embedding
