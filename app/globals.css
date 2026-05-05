@@ -236,6 +236,46 @@ input, textarea, select { font-family: inherit; }
 }
 .sw-header-nav-link:hover { opacity: 1; }
 
+.sw-ref-category-item {
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.sw-ref-category-item:hover {
+  background: var(--accent);
+}
+
+.sw-ref-category-link {
+  width: 100%;
+  height: 100%;
+  color: var(--fg);
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.sw-ref-category-icon {
+  color: var(--accent);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.sw-ref-category-item:hover .sw-ref-category-link,
+.sw-ref-category-link:hover,
+.sw-ref-category-link:focus-visible {
+  background: var(--accent);
+  color: var(--sw-cream) !important;
+}
+
+.sw-ref-category-item:hover .sw-ref-category-icon,
+.sw-ref-category-link:hover .sw-ref-category-icon,
+.sw-ref-category-link:focus-visible .sw-ref-category-icon {
+  color: var(--sw-cream) !important;
+}
+
+.sw-ref-category-link:focus-visible {
+  outline: 2px solid var(--sw-burgundy-dark);
+  outline-offset: -2px;
+}
+
 /* Reference hero override */
 .sw-ref-community-seal {
   position: absolute;
