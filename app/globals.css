@@ -127,7 +127,7 @@ input, textarea, select { font-family: inherit; }
 .swpc {
   contain: layout style;
   box-shadow: var(--shadow-xs);
-  border-color: transparent;
+  border: 1px solid transparent;
   transition: box-shadow var(--dur-base), border-color var(--dur-base);
 }
 .swpc:hover {
@@ -139,18 +139,18 @@ input, textarea, select { font-family: inherit; }
   transition: aspect-ratio 380ms cubic-bezier(0.16,1,0.3,1);
   will-change: aspect-ratio;
 }
-.swpc:hover .swpc-media { aspect-ratio: 3/5; }
+.swpc-has-video:hover .swpc-media { aspect-ratio: 3/5; }
 .swpc-img {
   opacity: 1;
   transition: opacity 280ms ease;
 }
-.swpc:hover .swpc-img { opacity: 0; }
+.swpc-has-video:hover .swpc-img { opacity: 0; }
 .swpc-video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; opacity: 0; pointer-events: none;
   transition: opacity 280ms ease;
 }
-.swpc:hover .swpc-video { opacity: 1; }
+.swpc-has-video:hover .swpc-video { opacity: 1; }
 .swpc-body {
   max-height: 200px;
   padding: 20px 22px 22px;
@@ -164,7 +164,7 @@ input, textarea, select { font-family: inherit; }
 .swpc-desc {
   overflow: hidden;
 }
-.swpc:hover .swpc-body { max-height: 0; padding: 0 22px; }
+.swpc-has-video:hover .swpc-body { max-height: 0; padding: 0 22px; }
 
 /* ── Landing interactive elements ──────────────────────────────── */
 .sw-cta-primary {
