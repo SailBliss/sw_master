@@ -47,7 +47,6 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
   }
 
   const gradient = CARD_GRADIENTS[idx % CARD_GRADIENTS.length]
-  const src = videoSrc ?? '/preview-placeholder.mp4'
   const description = profile.description ?? ''
   const visibleDescription = isRowExpanded ? description : truncate(description, descMaxLen)
 
@@ -74,10 +73,9 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
         href={`/directorio/${profile.slug}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="swpc"
+        className={videoSrc ? 'swpc swpc-has-video' : 'swpc'}
         style={{
           background: 'var(--sw-paper)',
-          border: '1px solid',
           borderRadius: 10,
           overflow: 'hidden',
           display: 'flex',
@@ -101,15 +99,17 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
             />
           )}
 
-          <video
-            ref={videoRef}
-            src={src}
-            muted
-            playsInline
-            loop
-            preload="none"
-            className="swpc-video"
-          />
+          {videoSrc && (
+            <video
+              ref={videoRef}
+              src={videoSrc}
+              muted
+              playsInline
+              loop
+              preload="none"
+              className="swpc-video"
+            />
+          )}
 
           <span style={{
             position: 'absolute', top: 12, right: 12,

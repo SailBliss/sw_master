@@ -1,4 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "./";
+@source "../components";
+@source "../context";
+@source "../lib";
+@source "../src";
 
 /* ── SW Mujeres brand fonts ──────────────────────────────────────── */
 @theme inline {
@@ -24,6 +29,9 @@
 
 /* ── Raw tokens (available everywhere, including inline styles) ─── */
 :root {
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
   --sw-negro-profundo:  #391125;
   --sw-burgundy-dark:   #5F1F3C;
   --sw-burgundy:        #821641;
@@ -119,7 +127,7 @@ input, textarea, select { font-family: inherit; }
 .swpc {
   contain: layout style;
   box-shadow: var(--shadow-xs);
-  border-color: var(--sw-line);
+  border: 1px solid transparent;
   transition: box-shadow var(--dur-base), border-color var(--dur-base);
 }
 .swpc:hover {
@@ -131,18 +139,18 @@ input, textarea, select { font-family: inherit; }
   transition: aspect-ratio 380ms cubic-bezier(0.16,1,0.3,1);
   will-change: aspect-ratio;
 }
-.swpc:hover .swpc-media { aspect-ratio: 3/5; }
+.swpc-has-video:hover .swpc-media { aspect-ratio: 3/5; }
 .swpc-img {
   opacity: 1;
   transition: opacity 280ms ease;
 }
-.swpc:hover .swpc-img { opacity: 0; }
+.swpc-has-video:hover .swpc-img { opacity: 0; }
 .swpc-video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; opacity: 0; pointer-events: none;
   transition: opacity 280ms ease;
 }
-.swpc:hover .swpc-video { opacity: 1; }
+.swpc-has-video:hover .swpc-video { opacity: 1; }
 .swpc-body {
   max-height: 200px;
   padding: 20px 22px 22px;
@@ -156,7 +164,7 @@ input, textarea, select { font-family: inherit; }
 .swpc-desc {
   overflow: hidden;
 }
-.swpc:hover .swpc-body { max-height: 0; padding: 0 22px; }
+.swpc-has-video:hover .swpc-body { max-height: 0; padding: 0 22px; }
 
 /* ── Landing interactive elements ──────────────────────────────── */
 .sw-cta-primary {
@@ -227,6 +235,46 @@ input, textarea, select { font-family: inherit; }
   transition: opacity var(--dur-base) var(--ease-out);
 }
 .sw-header-nav-link:hover { opacity: 1; }
+
+.sw-ref-category-item {
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.sw-ref-category-item:hover {
+  background: var(--accent);
+}
+
+.sw-ref-category-link {
+  width: 100%;
+  height: 100%;
+  color: var(--fg);
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.sw-ref-category-icon {
+  color: var(--accent);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.sw-ref-category-item:hover .sw-ref-category-link,
+.sw-ref-category-link:hover,
+.sw-ref-category-link:focus-visible {
+  background: var(--accent);
+  color: var(--sw-cream) !important;
+}
+
+.sw-ref-category-item:hover .sw-ref-category-icon,
+.sw-ref-category-link:hover .sw-ref-category-icon,
+.sw-ref-category-link:focus-visible .sw-ref-category-icon {
+  color: var(--sw-cream) !important;
+}
+
+.sw-ref-category-link:focus-visible {
+  outline: 2px solid var(--sw-burgundy-dark);
+  outline-offset: -2px;
+}
 
 /* Reference hero override */
 .sw-ref-community-seal {

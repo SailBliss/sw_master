@@ -1,22 +1,6 @@
 import type { Metadata } from 'next'
-import { EB_Garamond, Montserrat } from 'next/font/google'
+import { ebGaramond, montserrat } from './fonts'
 import './globals.css'
-
-const ebGaramond = EB_Garamond({
-  variable: '--font-display',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-})
-
-const montserrat = Montserrat({
-  variable: '--font-body',
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-})
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'
 
