@@ -7,9 +7,11 @@
     "dev:webpack": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:embeddings": "tsx scripts/sync-business-profile-embeddings.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.103.0",
     "jose": "^6.2.2",
     "next": "16.2.3",
@@ -28,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
+    "tsx": "^4.20.4",
     "typescript": "^5"
   }
 }
