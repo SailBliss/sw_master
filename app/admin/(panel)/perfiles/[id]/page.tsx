@@ -3,6 +3,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Image from 'next/image'
+import Link from 'next/link'
 import { adminProfilesService } from '@src/features/admin/services/profiles.admin.service'
 import { membershipsService } from '@src/features/admin/services/memberships.service'
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
@@ -160,9 +161,9 @@ export default async function AdminPerfilDetailPage({
     <div className="space-y-8 max-w-3xl">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <a href="/admin/perfiles" className="text-sm text-sw-fg3 hover:text-sw-fg2">
+        <Link href="/admin/perfiles" className="text-sm text-sw-fg3 hover:text-sw-fg2">
           ← Perfiles
-        </a>
+        </Link>
         <h1 className="text-2xl font-semibold text-sw-negro">
           {profile.business_name ?? profile.full_name ?? 'Sin nombre'}
         </h1>
