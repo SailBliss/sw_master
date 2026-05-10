@@ -32,6 +32,7 @@ Abrir [http://localhost:3000](http://localhost:3000).
 - `npm run build`: build de produccion.
 - `npm run start`: servir el build.
 - `npm run lint`: lint del proyecto.
+- `npm run sync:embeddings`: genera embeddings Gemini para perfiles de negocio existentes.
 
 ## Variables de entorno
 
@@ -40,6 +41,10 @@ Ver `.env.example` para la lista completa. No commitear `.env.local`, llaves de 
 ## Base de datos
 
 Los scripts SQL versionados viven en `supabase/sql/`.
+
+## Chatbot y busqueda semantica
+
+La rama `chatbot` agrega un asistente con Gemini y busqueda semantica sobre negocios del directorio. Ver [CHATBOT_SEMANTIC_SEARCH.md](CHATBOT_SEMANTIC_SEARCH.md) para arquitectura, setup, SQL, sincronizacion de embeddings y riesgos conocidos.
 
 ## Notas para colaboradores
 

@@ -1,22 +1,7 @@
 import type { Metadata } from 'next'
-import { EB_Garamond, Montserrat } from 'next/font/google'
+import { ebGaramond, montserrat } from './fonts'
 import './globals.css'
-
-const ebGaramond = EB_Garamond({
-  variable: '--font-display',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-})
-
-const montserrat = Montserrat({
-  variable: '--font-body',
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-})
+import ChatBubble from '@/components/directorio/ChatBubble'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'
 
@@ -57,7 +42,10 @@ export default function RootLayout({
           <link rel="preconnect" href={SUPABASE_URL} />
         )}
       </head>
-      <body className="min-h-full flex flex-col font-body">{children}</body>
+      <body className="min-h-full flex flex-col font-body">
+        {children}
+        <ChatBubble />
+      </body>
     </html>
   )
 }

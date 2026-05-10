@@ -72,9 +72,9 @@ export default async function AdminPerfilesPage({
             style={{ padding: '10px 16px', borderRadius: 999, border: '1px solid var(--sw-line-strong)', background: 'var(--sw-paper)', fontSize: 13, outline: 'none', width: 260, fontFamily: 'var(--font-body)', color: 'var(--fg)' }}
           />
           {q && (
-            <a href="/admin/perfiles" style={{ padding: '10px 16px', borderRadius: 6, border: '1px solid var(--sw-line)', fontSize: 13, color: 'var(--fg-2)', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            <Link href="/admin/perfiles" style={{ padding: '10px 16px', borderRadius: 6, border: '1px solid var(--sw-line)', fontSize: 13, color: 'var(--fg-2)', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
               Limpiar
-            </a>
+            </Link>
           )}
         </form>
       </div>

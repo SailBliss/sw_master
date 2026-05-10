@@ -285,9 +285,9 @@ function CategoryRail() {
       </div>
       <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(64px, 1fr))', margin: 0, padding: 0, listStyle: 'none' }} className="sw-ref-category-list">
         {CATEGORY_NAMES.map((label) => (
-          <li key={label} style={{ borderLeft: '1px solid rgba(57,17,37,0.10)' }}>
-            <Link href={`/directorio?category=${encodeURIComponent(label)}`} style={{ minHeight: 112, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#391125', fontSize: 12, fontWeight: 500 }}>
-              <span style={{ color: '#821641', display: 'inline-flex', width: 30, height: 30, alignItems: 'center', justifyContent: 'center' }}>
+          <li key={label} className="sw-ref-category-item" style={{ borderLeft: '1px solid rgba(57,17,37,0.10)' }}>
+            <Link href={`/directorio?category=${encodeURIComponent(label)}`} className="sw-ref-category-link" style={{ width: '100%', height: '100%', minHeight: 112, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 12, fontWeight: 500 }}>
+              <span className="sw-ref-category-icon" style={{ display: 'inline-flex', width: 30, height: 30, alignItems: 'center', justifyContent: 'center' }}>
                 <CategoryIcon name={label} />
               </span>
               {label}
