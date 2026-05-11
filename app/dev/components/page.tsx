@@ -9,7 +9,7 @@ import {
 } from '@src/components/public'
 import ChatBubble from '@components/directorio/ChatBubble'
 import { CategoryIcon, CATEGORY_NAMES } from '@components/icons/categories'
-import { SearchIcon } from '@components/icons/ui'
+import { SearchIcon, SparkleIcon } from '@components/icons/ui'
 
 const categories = ['Belleza', 'Salud', 'Alimentos', 'Servicios']
 const uiIcons = [
@@ -18,6 +18,12 @@ const uiIcons = [
     importPath: '@components/icons/ui',
     filePath: 'components/icons/ui/SearchIcon.tsx',
     preview: <SearchIcon size={28} />,
+  },
+  {
+    name: 'SparkleIcon',
+    importPath: '@components/icons/ui',
+    filePath: 'components/icons/ui/SparkleIcon.tsx',
+    preview: <SparkleIcon size={28} />,
   },
 ]
 

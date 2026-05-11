@@ -15,6 +15,22 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 
 ---
 
+## Boton independiente de Asistente IA
+
+**Que hace:** rediseña `SmartSearchButton` como una pildora compacta con icono de brillo reusable, texto `Asistente IA` y subtitulo `Responde al instante`.
+**Por que existe:** el acceso al asistente debe parecer una accion propia y reutilizable, sin depender del buscador ni de estilos del contenedor.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `app/dev/components/page.tsx`
+- `components/icons/ui/SparkleIcon.tsx`
+- `components/icons/ui/index.ts`
+- `src/components/public/search/SmartSearchButton.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se mantuvo `SearchBar` sin cambios despues de la instruccion de ignorar el buscador; el nuevo icono se agrego al inventario compartido para cumplir la regla de reutilizacion.
+**Como probarlo:** ejecutar `npm run build` y `npm run lint`; abrir `/dev/components` y revisar el boton `SmartSearchButton`.
+
+---
+
 ## M0 — Foundations
 
 ### Tarea 1 — Estructura de carpetas
@@ -1002,5 +1018,31 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 - `BITACORA.md`
 **Decisiones tomadas:** se ajustaron solo medidas propias del componente en desktop y mobile; no se cambio comportamiento ni API.
 **Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que la barra se vea mas delgada sin cortar texto o iconos.
+
+---
+
+## Boton IA integrado en SearchBar
+
+**Que hace:** cambia el bloque derecho de IA de la SearchBar para que se vea como una accion integrada con divisor vertical, icono suelto y texto `Preguntale a MIA`.
+**Por que existe:** la referencia visual pide un boton mas limpio, sin pildora interna ni borde propio, y el texto debe nombrar a MIA.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `src/components/public/search/SearchBar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** el estilo queda en las clases propias de `SearchBar`; se reutiliza `SparkleIcon` del sistema de iconos y no se agregan selectores dependientes del padre.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar el boton derecho de la SearchBar contra la referencia.
+
+---
+
+## SearchBar con icono MIA solamente
+
+**Que hace:** elimina el texto y cualquier burbuja del lado derecho de la SearchBar, dejando solo el icono de estrellitas.
+**Por que existe:** el buscador debe mostrar la accion de MIA como un icono discreto dentro de la barra, sin pildora ni label.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `src/components/public/search/SearchBar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se mantiene `showAiButton` como API para ocultar o mostrar el icono; el icono sigue viniendo de `SparkleIcon` compartido.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que el lado derecho de la SearchBar tenga solo el icono de estrellitas.
 
 ---

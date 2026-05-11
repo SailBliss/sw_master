@@ -1,5 +1,7 @@
 'use client'
 
+import { SparkleIcon } from '@components/icons/ui'
+
 type SmartSearchButtonProps = {
   label?: string
   hint?: string
@@ -7,8 +9,8 @@ type SmartSearchButtonProps = {
 }
 
 export function SmartSearchButton({
-  label = 'Buscar con IA',
-  hint = 'Busqueda conversacional',
+  label = 'Asistente IA',
+  hint = 'Responde al instante',
   className,
 }: SmartSearchButtonProps) {
   function openSmartSearch() {
@@ -22,7 +24,9 @@ export function SmartSearchButton({
       onClick={openSmartSearch}
       aria-label="Abrir chat con IA para recibir ayuda de busqueda"
     >
-      <span className="sw-smart-search-mark" aria-hidden="true" />
+      <span className="sw-smart-search-mark" aria-hidden="true">
+        <SparkleIcon size={19} />
+      </span>
       <span className="sw-smart-search-copy">
         <span>{label}</span>
         <span>{hint}</span>

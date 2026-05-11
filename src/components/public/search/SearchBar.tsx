@@ -1,4 +1,4 @@
-import { SearchIcon } from '@components/icons/ui'
+import { SearchIcon, SparkleIcon } from '@components/icons/ui'
 
 type SearchBarProps = {
   action?: string
@@ -6,7 +6,6 @@ type SearchBarProps = {
   placeholder?: string
   defaultValue?: string
   buttonLabel?: string
-  aiButtonLabel?: string
   variant?: 'default' | 'navbar'
   showAiButton?: boolean
   showSubmit?: boolean
@@ -20,7 +19,6 @@ export function SearchBar({
   placeholder = 'Buscar por nombre, categoria o servicio...',
   defaultValue,
   buttonLabel = 'Buscar',
-  aiButtonLabel = 'Busqueda con IA',
   variant = 'default',
   showAiButton = true,
   showSubmit = false,
@@ -53,8 +51,9 @@ export function SearchBar({
           />
           {showAiButton && (
             <span className="sw-search-popover-ai" aria-hidden="true">
-              <span className="sw-search-popover-ai-mark" />
-              <span>{aiButtonLabel}</span>
+              <span className="sw-search-popover-ai-mark">
+                <SparkleIcon size={17} />
+              </span>
             </span>
           )}
           {showSubmit && (
