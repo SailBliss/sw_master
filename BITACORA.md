@@ -866,3 +866,141 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** `npm run lint`; abrir `/dev/components`, verificar que la SearchBar no muestra boton IA y que el boton inteligente abre el panel de chat.
 
 ---
+
+## Lockup Directorio en navbar publica
+
+**Que hace:** agrega el texto `Directorio` con divisor junto al logo SW en la navbar publica y elimina el link duplicado de Directorio del grupo de navegacion.
+**Por que existe:** la marca de la cabecera debe leerse como `SW | Directorio`, siguiendo el estilo editorial y discreto de la pagina.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** el lockup vive dentro del propio componente `PublicNavbar` con clases propias, sin depender de selectores de contexto; el enlace de marca conserva la ruta principal al directorio.
+**Como probarlo:** `npm run lint`; abrir `/` y verificar que la navbar muestre el logo, divisor y texto `Directorio` alineados.
+
+---
+
+## Correccion tipografica del lockup de navbar
+
+**Que hace:** reemplaza el monograma SVG alto por un lockup tipografico horizontal `SW | Directorio` dentro de la navbar publica.
+**Por que existe:** el SVG anterior hacia que `Directorio` se leyera debajo del logo; la referencia pide una marca baja, horizontal y discreta.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** se usa EB Garamond para `SW` y Montserrat uppercase para `Directorio`, con ancho sin wrap y divisor de tono calido; la variacion queda encapsulada en clases propias del componente.
+**Como probarlo:** `npm run lint`; abrir `/` y verificar que el texto `Directorio` quede a la derecha del logo, no debajo.
+
+---
+
+## Restauracion del logo real en navbar
+
+**Que hace:** restaura el logo SVG `principal_basic.svg` en el lockup de la navbar y mantiene `Directorio` a su derecha.
+**Por que existe:** el logo de marca debe conservarse; solo el texto `Directorio` debe agregarse como rótulo lateral.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** el logo queda como imagen con ancho, alto y `flex` fijos para evitar que el texto se apile debajo.
+**Como probarlo:** `npm run lint`; abrir `/` y revisar que se vea el logo original seguido del divisor y `Directorio`.
+
+---
+
+## Proporcion del lockup de navbar
+
+**Que hace:** reduce el logo del lockup publico y ajusta divisor, espaciado y tracking del texto `Directorio`.
+**Por que existe:** el conjunto `logo | Directorio` debe sentirse horizontal, equilibrado y cercano a la referencia visual.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** el logo queda en 36px, con divisor de 21px y texto uppercase pequeno para que el logo siga liderando sin verse desproporcionado.
+**Como probarlo:** `npm run lint`; abrir `/` y verificar que el lockup se vea compacto y alineado en la navbar.
+
+---
+
+## Reduccion fina del lockup de navbar
+
+**Que hace:** reduce nuevamente el tamano del lockup `logo | Directorio` en la navbar publica.
+**Por que existe:** el conjunto seguia viendose ligeramente grande frente al resto de la cabecera.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** el logo baja a 32px, el divisor a 19px y el label a 7px para mantener una presencia discreta.
+**Como probarlo:** `npm run lint`; abrir `/` y comprobar que el lockup se vea mas fino sin perder legibilidad.
+
+---
+
+## Lockup integrado en componente Navbar
+
+**Que hace:** mueve las proporciones visuales del lockup `logo | Directorio` desde CSS global al JSX de `PublicNavbar`.
+**Por que existe:** la navbar general debe definir directamente su comportamiento visual por defecto como componente reutilizable.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** se eliminaron las clases globales `sw-navbar-brand*`; el tamaño del logo, divisor y label queda explícito en el componente mediante utilidades Tailwind.
+**Como probarlo:** `npm run lint`; abrir `/` y verificar que el lockup mantiene `logo | Directorio` en una sola línea.
+
+---
+
+## SearchBar con boton IA visual
+
+**Que hace:** ajusta la SearchBar publica para que tenga una barra mas amplia, clara y redondeada con una pildora visual de `Busqueda con IA` al lado derecho.
+**Por que existe:** el buscador debe parecerse a la referencia enviada y dejar preparado el espacio del boton IA sin activar una interaccion todavia.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `src/components/public/search/SearchBar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** la variacion vive en la API del componente con `showAiButton` y `aiButtonLabel`; el control IA se renderiza como elemento visual sin `onClick`, sin submit y sin depender de selectores de navbar o homepage.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que la SearchBar muestre el boton visual a la derecha.
+
+---
+
+## Ajuste fino de altura de SearchBar
+
+**Que hace:** reduce la altura, el padding y la sombra de la SearchBar publica para que la estructura se vea mas delgada y balanceada.
+**Por que existe:** la primera version quedaba visualmente pesada frente al input y la pildora de IA.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** se mantuvo intacta la API del componente y se ajustaron solo medidas propias de la SearchBar, incluyendo mobile.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y comparar la barra en desktop y mobile.
+
+---
+
+## Limpieza del laboratorio de boton IA
+
+**Que hace:** deja una sola instancia de `SmartSearchButton` en el laboratorio de componentes.
+**Por que existe:** por ahora se esta trabajando la base de componentes y no conviene mostrar variantes duplicadas que parezcan dos acciones distintas.
+**Archivos creados o modificados:**
+- `app/dev/components/page.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se conserva el componente reutilizable con sus props, pero el laboratorio muestra solo el estado base.
+**Como probarlo:** abrir `/dev/components` y verificar que en la seccion `SearchBar y boton inteligente` aparezca un solo boton de IA.
+
+---
+
+## Icono reusable en SearchBar
+
+**Que hace:** reemplaza la lupa dibujada con CSS en la SearchBar por el `SearchIcon` existente de `components/icons/ui`.
+**Por que existe:** los iconos deben venir de la libreria reusable del proyecto y solo crearse nuevos cuando no exista el icono necesario.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `src/components/public/search/SearchBar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se cambio solo la lupa principal; las lupas pequeñas del panel de sugerencias quedan como estilos internos del dropdown hasta que se definan como iconos reutilizables.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que la SearchBar renderice la lupa desde el componente de iconos.
+
+---
+
+## SearchBar mas delgada
+
+**Que hace:** reduce nuevamente la altura interna de la SearchBar y de la pildora visual de IA.
+**Por que existe:** el buscador necesitaba una proporcion mas ligera dentro de la navbar y el laboratorio de componentes.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `BITACORA.md`
+**Decisiones tomadas:** se ajustaron solo medidas propias del componente en desktop y mobile; no se cambio comportamiento ni API.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que la barra se vea mas delgada sin cortar texto o iconos.
+
+---

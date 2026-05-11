@@ -1,10 +1,14 @@
+import { SearchIcon } from '@components/icons/ui'
+
 type SearchBarProps = {
   action?: string
   name?: string
   placeholder?: string
   defaultValue?: string
   buttonLabel?: string
+  aiButtonLabel?: string
   variant?: 'default' | 'navbar'
+  showAiButton?: boolean
   showSubmit?: boolean
 }
 
@@ -16,7 +20,9 @@ export function SearchBar({
   placeholder = 'Buscar por nombre, categoria o servicio...',
   defaultValue,
   buttonLabel = 'Buscar',
+  aiButtonLabel = 'Busqueda con IA',
   variant = 'default',
+  showAiButton = true,
   showSubmit = false,
 }: SearchBarProps) {
   const suiteClassName = variant === 'navbar' ? 'sw-search-suite sw-search-suite-navbar' : 'sw-search-suite'
@@ -31,7 +37,9 @@ export function SearchBar({
         autoComplete="off"
       >
         <div className="sw-search-popover-bar">
-          <span className="sw-search-popover-icon" aria-hidden="true" />
+          <span className="sw-search-popover-icon" aria-hidden="true">
+            <SearchIcon size={17} />
+          </span>
           <input
             type="text"
             name={name}
@@ -43,6 +51,12 @@ export function SearchBar({
             spellCheck={false}
             aria-autocomplete="none"
           />
+          {showAiButton && (
+            <span className="sw-search-popover-ai" aria-hidden="true">
+              <span className="sw-search-popover-ai-mark" />
+              <span>{aiButtonLabel}</span>
+            </span>
+          )}
           {showSubmit && (
             <button type="submit" className="sw-search-popover-submit" aria-label={buttonLabel}>
               <span aria-hidden="true" />

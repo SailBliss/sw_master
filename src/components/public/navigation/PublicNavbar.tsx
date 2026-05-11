@@ -8,7 +8,6 @@ type PublicNavbarProps = {
 }
 
 const navItems = [
-  { href: '/', label: 'Directorio' },
   { href: '/inscripcion', label: 'Registro' },
 ]
 
@@ -16,15 +15,23 @@ export function PublicNavbar({ activePath, searchDefaultValue }: PublicNavbarPro
   return (
     <header className="bg-[--bg]">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 py-4 sm:px-6 lg:flex-nowrap">
-        <Link href="/" className="flex h-11 w-11 items-center justify-center" aria-label="Inicio">
+        <Link
+          href="/"
+          className="inline-flex min-h-[30px] flex-none items-center gap-2.5 whitespace-nowrap text-[--fg]"
+          aria-label="Inicio del directorio SW"
+        >
           <Image
             src="/principal_basic.svg"
             alt="SW Mujeres"
             width={44}
             height={44}
             unoptimized
-            className="h-full w-full object-contain"
+            className="block h-8 w-8 flex-none object-contain"
           />
+          <span className="h-[19px] w-px bg-[rgba(230,177,165,0.54)]" aria-hidden="true" />
+          <span className="text-[7px] font-semibold uppercase leading-none tracking-[0.25em] text-[--fg-3]">
+            Directorio
+          </span>
         </Link>
 
         <div className="order-3 w-full lg:order-none lg:min-w-0 lg:flex-1">

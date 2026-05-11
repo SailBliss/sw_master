@@ -41,7 +41,6 @@ export default function ComponentsLabPage() {
               <SearchBar />
               <div className="flex flex-wrap items-center gap-3">
                 <SmartSearchButton />
-                <SmartSearchButton label="Abrir asistente" hint="Variante con texto largo" />
               </div>
             </div>
           </div>
