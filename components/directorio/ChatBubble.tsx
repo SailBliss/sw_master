@@ -68,6 +68,17 @@ export default function ChatBubble() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    function handleOpenChat() {
+      setIsOpen(true)
+      window.setTimeout(() => inputRef.current?.focus(), 80)
+    }
+
+    window.addEventListener('sw:open-chat', handleOpenChat)
+    return () => window.removeEventListener('sw:open-chat', handleOpenChat)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
@@ -245,6 +256,7 @@ export default function ChatBubble() {
             }}
           >
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder="Ej. joyeria artesanal en Medellin"

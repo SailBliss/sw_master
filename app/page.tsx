@@ -3,9 +3,7 @@ import {
   BusinessCard,
   PagePlaceholder,
   PublicNavbar,
-  SearchBar,
   SectionShell,
-  SmartSearchButton,
 } from '@src/components/public'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 
@@ -33,12 +31,10 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
 
   return (
     <main className="min-h-screen bg-[--bg] text-[--fg]">
-      <PublicNavbar activePath="/" />
+      <PublicNavbar activePath="/" searchDefaultValue={q} />
 
       <SectionShell eyebrow="Directorio" title="Listado publico en blanco">
         <div className="grid gap-4">
-          <SearchBar defaultValue={q} />
-          <SmartSearchButton label="Probar entrada de chat inteligente" />
           <PagePlaceholder
             title="Pagina principal del directorio"
             description="Aqui ira el listado y filtrado de negocios. Esta rama deja el espacio preparado sin definir la UI final."

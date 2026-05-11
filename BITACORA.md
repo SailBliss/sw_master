@@ -836,3 +836,16 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** `npm run dev` -> abrir `/` y revisar que la navbar muestre el logo en el extremo izquierdo.
 
 ---
+
+## Motion de SearchBar publica
+
+**Que hace:** cambia el panel de sugerencias de la SearchBar a un dropdown flotante en foco, reduce sombras y micro-movimientos, corrige el boton IA en mobile y desactiva el autocompletado nativo del navegador.
+**Por que existe:** la animacion anterior abria el panel por hover con `max-height`, empujaba el layout de la navbar y el autocompletado nativo podia mostrar un recuadro oscuro que competia con las sugerencias de marca.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `src/components/public/search/SearchBar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** el componente conserva su API; la variacion visual vive en las clases propias de la SearchBar, sin selectores dependientes de navbar/home. Se evita animar altura, se respeta `prefers-reduced-motion` y se declara `autocomplete` apagado en form/input.
+**Como probarlo:** `npm run lint`; abrir `/`, enfocar la SearchBar en desktop y mobile, y verificar que las sugerencias aparezcan sin mover la cabecera ni mostrar el dropdown nativo del navegador.
+
+---
