@@ -6,7 +6,7 @@ type SearchBarProps = {
   buttonLabel?: string
 }
 
-const quickSearches = ['Belleza', 'Hogar', 'Alimentos', 'Servicios']
+const suggestedSearches = ['Belleza a domicilio', 'Reposteria artesanal', 'Decoracion para eventos', 'Asesoria contable']
 
 export function SearchBar({
   action = '/directorio',
@@ -29,22 +29,18 @@ export function SearchBar({
           placeholder={placeholder}
           className="sw-search-popover-input"
         />
-        <button type="submit" className="sw-search-popover-submit">
-          {buttonLabel}
+        <button type="submit" className="sw-search-popover-submit" aria-label={buttonLabel}>
+          <span aria-hidden="true" />
         </button>
       </div>
       <div className="sw-search-popover-panel">
         <div className="sw-search-popover-content">
-          <div className="sw-search-popover-empty">
-            <span className="sw-search-popover-lens" aria-hidden="true" />
-            <strong>Empieza a buscar</strong>
-            <span>Escribe una categoria, ciudad, producto o servicio.</span>
-          </div>
-          <div className="sw-search-popover-options" aria-label="Busquedas rapidas">
-            {quickSearches.map((search) => (
+          <p className="sw-search-popover-label">Sugerencias</p>
+          <div className="sw-search-popover-options" aria-label="Busquedas sugeridas">
+            {suggestedSearches.map((search) => (
               <button key={search} type="submit" name={name} value={search}>
+                <span className="sw-search-popover-lens" aria-hidden="true" />
                 <span>{search}</span>
-                <small>Ver perfiles</small>
               </button>
             ))}
           </div>
