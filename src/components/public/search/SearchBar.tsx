@@ -1,11 +1,11 @@
-'use client'
-
 type SearchBarProps = {
   action?: string
   name?: string
   placeholder?: string
   defaultValue?: string
   buttonLabel?: string
+  variant?: 'default' | 'navbar'
+  showSubmit?: boolean
 }
 
 const suggestedSearches = ['Belleza a domicilio', 'Reposteria artesanal', 'Decoracion para eventos', 'Asesoria contable']
@@ -13,20 +13,21 @@ const suggestedSearches = ['Belleza a domicilio', 'Reposteria artesanal', 'Decor
 export function SearchBar({
   action = '/',
   name = 'q',
-  placeholder = 'Buscar negocio, categoria o palabra clave',
+  placeholder = 'Buscar por nombre, categoria o servicio...',
   defaultValue,
   buttonLabel = 'Buscar',
+  variant = 'default',
+  showSubmit = false,
 }: SearchBarProps) {
-  function openSmartSearch() {
-    window.dispatchEvent(new CustomEvent('sw:open-chat'))
-  }
+  const suiteClassName = variant === 'navbar' ? 'sw-search-suite sw-search-suite-navbar' : 'sw-search-suite'
+  const formClassName = variant === 'navbar' ? 'sw-search-popover sw-search-popover-navbar' : 'sw-search-popover'
 
   return (
-    <div className="sw-search-suite">
+    <div className={suiteClassName}>
       <form
         action={action}
         method="get"
-        className="sw-search-popover"
+        className={formClassName}
         autoComplete="off"
       >
         <div className="sw-search-popover-bar">
@@ -42,21 +43,11 @@ export function SearchBar({
             spellCheck={false}
             aria-autocomplete="none"
           />
-          <button
-            type="button"
-            className="sw-search-ai-nudge"
-            onClick={openSmartSearch}
-            aria-label="Abrir chat con IA para recibir ayuda de busqueda"
-          >
-            <span className="sw-search-ai-mark" aria-hidden="true" />
-            <span className="sw-search-ai-copy">
-              <span>IA</span>
-              <span>Ayuda</span>
-            </span>
-          </button>
-          <button type="submit" className="sw-search-popover-submit" aria-label={buttonLabel}>
-            <span aria-hidden="true" />
-          </button>
+          {showSubmit && (
+            <button type="submit" className="sw-search-popover-submit" aria-label={buttonLabel}>
+              <span aria-hidden="true" />
+            </button>
+          )}
         </div>
         <div className="sw-search-popover-panel">
           <div className="sw-search-popover-content">

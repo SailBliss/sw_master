@@ -849,3 +849,20 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** `npm run lint`; abrir `/`, enfocar la SearchBar en desktop y mobile, y verificar que las sugerencias aparezcan sin mover la cabecera ni mostrar el dropdown nativo del navegador.
 
 ---
+
+## Separacion del boton de IA
+
+**Que hace:** separa el boton de IA de la SearchBar, elimina el launcher sticky global del chat y deja el asistente disponible en el laboratorio de componentes.
+**Por que existe:** la SearchBar debe ser un componente puro de busqueda textual, mientras el acceso al chat IA debe tener su propio componente reutilizable y no aparecer fijo en todas las paginas.
+**Archivos creados o modificados:**
+- `app/dev/components/page.tsx`
+- `app/globals.css`
+- `app/layout.tsx`
+- `components/directorio/ChatBubble.tsx`
+- `src/components/public/search/SearchBar.tsx`
+- `src/components/public/search/SmartSearchButton.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** `SmartSearchButton` es el launcher explicito del chat mediante el evento `sw:open-chat`; `ChatBubble` ya no renderiza boton sticky propio ni se monta desde el layout global.
+**Como probarlo:** `npm run lint`; abrir `/dev/components`, verificar que la SearchBar no muestra boton IA y que el boton inteligente abre el panel de chat.
+
+---

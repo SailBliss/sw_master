@@ -168,16 +168,6 @@ export default function ChatBubble() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen((value) => !value)}
-        className="sw-chat-launcher"
-        aria-label={isOpen ? 'Cerrar chat de busqueda' : 'Abrir chat de busqueda'}
-      >
-        <span className="sw-chat-launcher-dot" aria-hidden="true" />
-        <span className="sw-chat-launcher-text">Buscar con IA</span>
-      </button>
-
       {isOpen && (
         <section className="sw-chat-panel" aria-label="Asistente de SW Mujeres">
           <header className="sw-chat-header">

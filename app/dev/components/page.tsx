@@ -7,6 +7,7 @@ import {
   SectionShell,
   SmartSearchButton,
 } from '@src/components/public'
+import ChatBubble from '@components/directorio/ChatBubble'
 import { CategoryIcon, CATEGORY_NAMES } from '@components/icons/categories'
 import { SearchIcon } from '@components/icons/ui'
 
@@ -35,10 +36,13 @@ export default function ComponentsLabPage() {
       <SectionShell eyebrow="Laboratorio interno" title="Componentes publicos base">
         <div className="grid gap-6">
           <div className="rounded-lg border border-[--sw-line] bg-sw-paper p-4">
-            <h2 className="mb-3 text-sm font-semibold">SearchBar y chat inteligente</h2>
-            <div className="grid gap-3">
+            <h2 className="mb-3 text-sm font-semibold">SearchBar y boton inteligente</h2>
+            <div className="grid gap-4">
               <SearchBar />
-              <SmartSearchButton />
+              <div className="flex flex-wrap items-center gap-3">
+                <SmartSearchButton />
+                <SmartSearchButton label="Abrir asistente" hint="Variante con texto largo" />
+              </div>
             </div>
           </div>
 
@@ -148,6 +152,7 @@ export default function ComponentsLabPage() {
           />
         </div>
       </SectionShell>
+      <ChatBubble />
     </main>
   )
 }
