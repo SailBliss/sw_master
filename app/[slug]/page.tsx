@@ -33,7 +33,7 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-[--bg] text-[--fg]">
-      <PublicNavbar activePath="/directorio" />
+      <PublicNavbar activePath="/" />
       <SectionShell eyebrow="Perfil publico" title={profile.business_name}>
         <PagePlaceholder
           title="Perfil publico de negocio"

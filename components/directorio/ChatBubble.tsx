@@ -208,7 +208,7 @@ export default function ChatBubble() {
                 <div className="sw-chat-results-title">Resultados encontrados</div>
                 <div className="sw-chat-results-list">
                   {matches.map((match) => (
-                    <Link key={match.id} href={`/directorio/${match.slug}`} className="sw-chat-result-card">
+                    <Link key={match.id} href={`/${match.slug}`} className="sw-chat-result-card">
                       <div className="sw-chat-result-media">
                         {match.directory_image_path ? (
                           <Image

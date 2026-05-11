@@ -9,7 +9,7 @@ type SearchBarProps = {
 const suggestedSearches = ['Belleza a domicilio', 'Reposteria artesanal', 'Decoracion para eventos', 'Asesoria contable']
 
 export function SearchBar({
-  action = '/directorio',
+  action = '/',
   name = 'q',
   placeholder = 'Buscar negocio, categoria o palabra clave',
   defaultValue,

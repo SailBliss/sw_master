@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import {
   BusinessCard,
-  CategoryChip,
   PagePlaceholder,
   PublicNavbar,
   SearchBar,
@@ -11,77 +10,62 @@ import {
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 
 export const metadata: Metadata = {
-  title: 'SW Mujeres - Directorio publico',
-  description:
-    'Canvas base para reconstruir la experiencia publica del directorio conectado al backend actual.',
+  title: 'Directorio publico',
+  description: 'Canvas base para el futuro listado y filtrado publico de negocios.',
 }
 
-const mockCategories = ['Belleza', 'Hogar', 'Salud', 'Alimentos', 'Servicios']
+export const revalidate = 3600
 
-const fallbackBusinesses = [
-  {
-    name: 'Marca ejemplo',
-    category: 'Categoria',
-    city: 'Medellin',
-    description: 'Tarjeta mock para probar el nuevo sistema visual del directorio.',
-  },
-  {
-    name: 'Servicio ejemplo',
-    category: 'Servicios',
-    city: 'Envigado',
-    description: 'Espacio temporal para definir informacion, jerarquia y acciones.',
-  },
-  {
-    name: 'Negocio ejemplo',
-    category: 'Hogar',
-    city: 'Sabaneta',
-    description: 'Luego se conectara con perfiles aprobados y membresias activas.',
-  },
-]
+type SearchParams = Promise<{ q?: string; categoria?: string; ciudad?: string }>
 
-export default async function HomePage() {
-  // Conexion conservada: la home anterior consumia perfiles publicos desde Supabase.
-  const profiles = await profilesService.findAll()
-  const cards =
-    profiles.length > 0
-      ? profiles.slice(0, 3).map((profile) => ({
-          name: profile.business_name,
-          category: profile.category ?? undefined,
-          city: profile.city ?? undefined,
-          description: profile.description ?? 'Perfil publico conectado desde Supabase.',
-        }))
-      : fallbackBusinesses
+export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams
+  const q = params.q?.trim() ?? ''
+  const categoria = params.categoria?.trim() ?? ''
+  const ciudad = params.ciudad?.trim() ?? ''
+
+  // Conexion conservada: la home ahora es el directorio publico con la regla de visibilidad.
+  const profiles = await profilesService.findAll({
+    q: q || undefined,
+    categoria: categoria || undefined,
+    ciudad: ciudad || undefined,
+  })
 
   return (
     <main className="min-h-screen bg-[--bg] text-[--fg]">
       <PublicNavbar activePath="/" />
 
-      <SectionShell eyebrow="Home publica" title="Nuevo canvas del directorio">
-        <div className="grid gap-5">
-          <SearchBar placeholder="Buscar negocios, categorias o palabras clave" />
-          <SmartSearchButton />
-          <div className="flex flex-wrap gap-2">
-            {mockCategories.map((category, index) => (
-              <CategoryChip key={category} label={category} selected={index === 0} />
+      <SectionShell eyebrow="Directorio" title="Listado publico en blanco">
+        <div className="grid gap-4">
+          <SearchBar defaultValue={q} />
+          <SmartSearchButton label="Probar entrada de chat inteligente" />
+          <PagePlaceholder
+            title="Pagina principal del directorio"
+            description="Aqui ira el listado y filtrado de negocios. Esta rama deja el espacio preparado sin definir la UI final."
+            backendNote={`Conexion backend conservada: profilesService.findAll() devolvio ${profiles.length} perfiles para los filtros actuales.`}
+          />
+        </div>
+      </SectionShell>
+
+      <SectionShell eyebrow="Salida temporal" title="Vista minima de perfiles conectados">
+        {profiles.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {profiles.slice(0, 6).map((profile) => (
+              <BusinessCard
+                key={profile.id}
+                name={profile.business_name}
+                category={profile.category ?? undefined}
+                city={profile.city ?? undefined}
+                description={profile.description ?? undefined}
+              />
             ))}
           </div>
-        </div>
-      </SectionShell>
-
-      <SectionShell eyebrow="Tarjetas mock" title="Grid inicial de negocios">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map((business) => (
-            <BusinessCard key={business.name} {...business} />
-          ))}
-        </div>
-      </SectionShell>
-
-      <SectionShell>
-        <PagePlaceholder
-          title="Home publica / directorio"
-          description="Aqui ira la nueva experiencia principal con busqueda, categorias, chat inteligente y tarjetas de negocios."
-          backendNote={`Conexion backend conservada: profilesService.findAll() devolvio ${profiles.length} perfiles publicos visibles.`}
-        />
+        ) : (
+          <PagePlaceholder
+            title="Estado vacio del directorio"
+            description="Aqui ira el estado vacio cuando no haya resultados o cuando el directorio aun no tenga negocios visibles."
+          />
+        )}
       </SectionShell>
     </main>
   )

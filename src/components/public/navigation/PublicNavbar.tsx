@@ -6,8 +6,7 @@ type PublicNavbarProps = {
 }
 
 const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/directorio', label: 'Directorio' },
+  { href: '/', label: 'Directorio' },
   { href: '/inscripcion', label: 'Registro' },
 ]
 
