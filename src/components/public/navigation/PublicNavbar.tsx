@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 type PublicNavbarProps = {
@@ -12,10 +13,17 @@ const navItems = [
 
 export function PublicNavbar({ activePath }: PublicNavbarProps) {
   return (
-    <header className="border-b border-[--sw-line] bg-[--bg]">
+    <header className="bg-[--bg]">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="text-sm font-semibold text-[--fg]">
-          DirectorioSW
+        <Link href="/" className="flex h-11 w-11 items-center justify-center" aria-label="Inicio">
+          <Image
+            src="/principal_basic.svg"
+            alt="SW Mujeres"
+            width={44}
+            height={44}
+            unoptimized
+            className="h-full w-full object-contain"
+          />
         </Link>
         <nav className="flex items-center gap-4 text-sm" aria-label="Navegacion publica">
           {navItems.map((item) => {

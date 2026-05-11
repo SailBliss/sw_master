@@ -823,3 +823,16 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** ejecutar `npm run lint` y `npm run build`; abrir `/`, `/directorio`, un `/directorio/[slug]` existente, `/inscripcion`, `/aliadas`, `/estadisticas/[token]` valido y `/dev/components`.
 
 ---
+
+## Logo en navbar publica
+
+**Que hace:** reemplaza el texto `DirectorioSW` de la navbar publica por el asset `principal_basic.svg`, aumenta ligeramente el logo, aplica el color profundo de marca y elimina el divisor inferior.
+**Por que existe:** la cabecera debe reservar el espacio de marca para el logo en lugar de mostrar el nombre textual anterior, con una apariencia mas limpia.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `public/principal_basic.svg`
+- `BITACORA.md`
+**Decisiones tomadas:** se usa el SVG existente desde `public/` dentro de un enlace con dimensiones estables para evitar saltos de layout; el relleno negro del asset se cambia a `#391125`, alineado con `--sw-negro-profundo`.
+**Como probarlo:** `npm run dev` -> abrir `/` y revisar que la navbar muestre el logo en el extremo izquierdo.
+
+---

@@ -6,6 +6,8 @@ type SearchBarProps = {
   buttonLabel?: string
 }
 
+const quickSearches = ['Belleza', 'Hogar', 'Alimentos', 'Servicios']
+
 export function SearchBar({
   action = '/directorio',
   name = 'q',
@@ -17,20 +19,37 @@ export function SearchBar({
     <form
       action={action}
       method="get"
-      className="flex w-full flex-col gap-2 rounded-lg border border-[--sw-line-strong] bg-sw-paper p-2 sm:flex-row"
+      className="sw-search-popover"
     >
-      <input
-        name={name}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        className="min-h-11 flex-1 rounded-md border border-transparent bg-transparent px-3 text-sm text-[--fg] outline-none focus:border-[--accent]"
-      />
-      <button
-        type="submit"
-        className="min-h-11 rounded-md bg-[--accent] px-5 text-sm font-semibold text-sw-cream"
-      >
-        {buttonLabel}
-      </button>
+      <div className="sw-search-popover-bar">
+        <span className="sw-search-popover-icon" aria-hidden="true" />
+        <input
+          name={name}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          className="sw-search-popover-input"
+        />
+        <button type="submit" className="sw-search-popover-submit">
+          {buttonLabel}
+        </button>
+      </div>
+      <div className="sw-search-popover-panel">
+        <div className="sw-search-popover-content">
+          <div className="sw-search-popover-empty">
+            <span className="sw-search-popover-lens" aria-hidden="true" />
+            <strong>Empieza a buscar</strong>
+            <span>Escribe una categoria, ciudad, producto o servicio.</span>
+          </div>
+          <div className="sw-search-popover-options" aria-label="Busquedas rapidas">
+            {quickSearches.map((search) => (
+              <button key={search} type="submit" name={name} value={search}>
+                <span>{search}</span>
+                <small>Ver perfiles</small>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </form>
   )
 }

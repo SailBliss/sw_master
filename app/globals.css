@@ -226,6 +226,205 @@ input, textarea, select { font-family: inherit; }
 .sw-search-submit:hover { background: #d4a0b0 !important; }
 .sw-search-submit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+.sw-search-popover {
+  width: min(100%, 760px);
+  border: 1px solid rgba(57,17,37,0.12);
+  border-radius: 999px;
+  background: rgba(250,244,240,0.92);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  transition:
+    border-radius 360ms var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow 360ms var(--ease-out);
+}
+
+.sw-search-popover:hover,
+.sw-search-popover:focus-within {
+  border-color: rgba(130,22,65,0.20);
+  border-radius: 26px;
+  box-shadow: 0 24px 54px rgba(57,17,37,0.16);
+}
+
+.sw-search-popover-bar {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px;
+}
+
+.sw-search-popover-icon,
+.sw-search-popover-lens {
+  position: relative;
+  flex: 0 0 auto;
+  border: 2px solid rgba(107,63,79,0.58);
+  border-radius: 999px;
+}
+
+.sw-search-popover-icon {
+  width: 17px;
+  height: 17px;
+  margin-left: 12px;
+}
+
+.sw-search-popover-lens {
+  width: 22px;
+  height: 22px;
+}
+
+.sw-search-popover-icon::after,
+.sw-search-popover-lens::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(107,63,79,0.58);
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+.sw-search-popover-icon::after {
+  right: -6px;
+  bottom: -4px;
+}
+
+.sw-search-popover-lens::after {
+  right: -7px;
+  bottom: -5px;
+}
+
+.sw-search-popover-input {
+  min-width: 0;
+  min-height: 44px;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font-size: 14px;
+  outline: none;
+}
+
+.sw-search-popover-input::placeholder {
+  color: var(--fg-3);
+}
+
+.sw-search-popover-submit {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--sw-cream);
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.sw-search-popover-submit:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.sw-search-popover-submit:focus-visible,
+.sw-search-popover-options button:focus-visible {
+  outline: 2px solid rgba(130,22,65,0.32);
+  outline-offset: 2px;
+}
+
+.sw-search-popover-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  border-top: 1px solid transparent;
+  opacity: 0;
+  transition:
+    grid-template-rows 360ms var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    opacity 220ms var(--ease-out);
+}
+
+.sw-search-popover:hover .sw-search-popover-panel,
+.sw-search-popover:focus-within .sw-search-popover-panel {
+  grid-template-rows: 1fr;
+  border-color: rgba(57,17,37,0.09);
+  opacity: 1;
+}
+
+.sw-search-popover-content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sw-search-popover-empty {
+  display: flex;
+  min-height: 132px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 18px;
+  color: var(--fg-2);
+  text-align: center;
+}
+
+.sw-search-popover-empty strong {
+  margin-top: 8px;
+  color: var(--fg);
+  font-size: 15px;
+}
+
+.sw-search-popover-empty span {
+  max-width: 42ch;
+  color: var(--fg-3);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sw-search-popover-options {
+  display: grid;
+  gap: 1px;
+  padding: 0 10px 10px;
+}
+
+.sw-search-popover-options button {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--fg);
+  padding: 0 12px;
+  text-align: left;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.sw-search-popover-options button:hover {
+  background: rgba(130,22,65,0.09);
+  color: var(--accent);
+}
+
+.sw-search-popover-options span {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.sw-search-popover-options small {
+  color: var(--fg-3);
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .sw-header-nav-link {
   font-size: 12px;
   font-weight: 500;
@@ -761,6 +960,23 @@ input, textarea, select { font-family: inherit; }
 }
 
 @media (max-width: 560px) {
+  .sw-search-popover-bar {
+    min-height: auto;
+    flex-wrap: wrap;
+  }
+
+  .sw-search-popover-input {
+    flex-basis: calc(100% - 58px);
+  }
+
+  .sw-search-popover-submit {
+    width: 100%;
+  }
+
+  .sw-search-popover-empty {
+    min-height: 120px;
+  }
+
   .sw-ref-navlinks {
     display: none !important;
   }
