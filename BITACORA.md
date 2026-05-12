@@ -2,6 +2,20 @@
 
 Registro cronológico de decisiones, implementaciones y resultados por módulo y tarea.
 
+## SearchBar reducida a icono
+
+**Que hace:** elimina la barra de texto, panel desplegable, sugerencias y comportamiento client de `SearchBar`, dejando solo un boton visual con la lupa reusable.
+**Por que existe:** la direccion actual pide borrar la experiencia de busqueda anterior y conservar un unico icono simple en la navbar.
+**Archivos creados o modificados:**
+- `app/globals.css`
+- `src/components/public/search/SearchBar.tsx`
+- `components/icons/ui/index.ts`
+- `BITACORA.md`
+**Decisiones tomadas:** se mantiene `SearchBar` como componente universal, sin variantes ni estilos dependientes de navbar; se elimina el `CloseIcon` creado durante la exploracion porque ya no se usa.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que la zona de busqueda muestre solo la lupa.
+
+---
+
 ## Documentacion rama chatbot
 
 **Que hace:** documenta los cambios de la rama `chatbot` contra `master`: widget de chat, API, Gemini, embeddings, RPC SQL, setup y riesgos.

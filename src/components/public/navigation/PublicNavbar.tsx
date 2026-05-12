@@ -9,26 +9,25 @@ type PublicNavbarProps = {
 
 export function PublicNavbar({ searchDefaultValue }: PublicNavbarProps) {
   return (
-    <header>
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[1fr_minmax(0,640px)_1fr]">
+    <header className="relative bg-[var(--sw-paper)]">
+      <div className="flex w-full items-center py-1 pl-5 sm:pl-7">
         <Link
           href="/"
-          className="inline-flex min-h-[38px] justify-self-start items-center justify-center"
+          className="inline-flex min-h-[32px] items-center justify-center"
           aria-label="Inicio del directorio SW"
         >
           <Image
-            src="/logo-largo.svg"
+            src="/principal_basic.svg"
             alt="SW Mujeres"
-            width={145}
-            height={48}
+            width={58}
+            height={45}
             unoptimized
-            className="block h-10 w-auto flex-none object-contain"
+            className="block h-6 w-auto flex-none object-contain"
           />
         </Link>
-
-        <div className="w-full justify-self-center">
-          <SearchBar defaultValue={searchDefaultValue} />
-        </div>
+      </div>
+      <div className="absolute right-8 top-1/2 -translate-y-1/2">
+        <SearchBar defaultValue={searchDefaultValue} />
       </div>
     </header>
   )

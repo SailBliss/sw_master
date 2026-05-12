@@ -10,13 +10,20 @@ export default function SearchIcon({ size = 20 }: SearchIconProps) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m16.5 16.5 4 4" />
+      <circle
+        cx="10.25"
+        cy="10.25"
+        r="6.1"
+        stroke="currentColor"
+        strokeWidth={1.15}
+      />
+      <path
+        d="m14.95 14.95 5.05 5.05"
+        stroke="currentColor"
+        strokeWidth={1.55}
+        strokeLinecap="round"
+      />
     </svg>
   )
 }
