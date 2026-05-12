@@ -1046,3 +1046,27 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que el lado derecho de la SearchBar tenga solo el icono de estrellitas.
 
 ---
+
+## Navbar con fondo blanco
+
+**Que hace:** cambia el fondo base de la navbar publica al token blanco `var(--sw-paper)`.
+**Por que existe:** la barra superior debe verse blanca y separarse del fondo crema de la pagina.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** el fondo se define dentro del componente reutilizable `PublicNavbar`, usando la sintaxis CSS variable valida para Tailwind.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` o `/dev/components` y verificar que la navbar tenga fondo blanco.
+
+---
+
+## SmartSearchButton sin contenedor externo
+
+**Que hace:** cambia el componente `SmartSearchButton` a una composicion sin pildora: icono circular relleno, texto `Chat con IA`, divisor y texto `Consulta y descubre`.
+**Por que existe:** el boton debe parecerse a la referencia visual y mantener el contenido visible sin contenedor externo.
+**Archivos creados o modificados:**
+- `src/components/public/search/SmartSearchButton.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** el boton deja de depender de la clase global `sw-smart-search-button`; el layout vive dentro del componente usando utilidades y tokens del proyecto.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/dev/components` y verificar que el boton muestre `Chat con IA | Consulta y descubre` sin pildora externa.
+
+---

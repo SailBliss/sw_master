@@ -13,7 +13,7 @@ const navItems = [
 
 export function PublicNavbar({ activePath, searchDefaultValue }: PublicNavbarProps) {
   return (
-    <header className="bg-[--bg]">
+    <header className="bg-[var(--sw-paper)]">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 py-4 sm:px-6 lg:flex-nowrap">
         <Link
           href="/"
