@@ -323,46 +323,53 @@ select {
   outline-offset: 3px;
 }
 
-.sw-navbar-backdrop {
+.sw-navbar-page-blur {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 60px;
+  inset: 44px 0 0;
   z-index: 10;
-  background-color: rgba(57, 17, 37, 0.25);
-  backdrop-filter: blur(4px);
-  animation: sw-navbar-backdrop-in 260ms var(--ease-out) both;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(247, 239, 233, 0);
+  backdrop-filter: blur(0);
+  transition:
+    opacity 340ms var(--ease-out),
+    background 340ms var(--ease-out),
+    backdrop-filter 380ms var(--ease-out);
 }
 
-@keyframes sw-navbar-backdrop-in {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-
-  to {
-    opacity: 1;
-    backdrop-filter: blur(4px);
-  }
+.sw-navbar-page-blur--open {
+  opacity: 1;
+  background: rgba(247, 239, 233, 0.16);
+  backdrop-filter: blur(5px);
 }
 
 .sw-navbar-search-panel {
-  transform-origin: top center;
-  animation: sw-navbar-search-panel-in 260ms var(--ease-out) both;
+  max-height: 0;
+  overflow: hidden;
   box-shadow: none;
+  pointer-events: none;
+  transition: max-height 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes sw-navbar-search-panel-in {
-  from {
-    opacity: 0.98;
-    transform: scaleY(0.72);
-  }
+.sw-navbar-search-panel--open {
+  max-height: 160px;
+  pointer-events: auto;
+}
 
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
+.sw-navbar-search-panel-inner {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition:
+    opacity 240ms var(--ease-out),
+    transform 320ms var(--ease-out);
+}
+
+.sw-navbar-search-panel--open .sw-navbar-search-panel-inner {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 220ms var(--ease-out) 70ms,
+    transform 300ms var(--ease-out) 40ms;
 }
 
 .sw-search-trigger--hero {
@@ -389,19 +396,6 @@ select {
   transition:
     color 160ms var(--ease-out),
     transform 160ms var(--ease-out);
-  animation: sw-navbar-search-content-in 220ms var(--ease-out) 70ms both;
-}
-
-@keyframes sw-navbar-search-content-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .sw-search-trigger--hero svg {
@@ -423,14 +417,67 @@ select {
   overflow-wrap: anywhere;
 }
 
+.sw-search-input-wrapper {
+  display: inline-flex;
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.sw-search-input-wrapper svg {
+  flex: 0 0 auto;
+  color: rgba(57, 17, 37, 0.66);
+}
+
+.sw-search-input--hero {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  min-height: 58px;
+  border: none;
+  background: transparent;
+  color: rgba(57, 17, 37, 0.82);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 26px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.08;
+  padding: 0;
+  outline: none;
+  transition: color 160ms var(--ease-out);
+}
+
+.sw-search-input--hero::placeholder {
+  color: rgba(57, 17, 37, 0.66);
+  font-style: italic;
+}
+
+.sw-search-input--hero:focus {
+  color: rgba(57, 17, 37, 0.82);
+}
+
+.sw-search-input--hero:hover {}
+
 @media (min-width: 640px) {
   .sw-search-trigger--hero {
+    font-size: 32px;
+  }
+
+  .sw-search-input--hero {
     font-size: 32px;
   }
 }
 
 @media (min-width: 1024px) {
   .sw-search-trigger--hero {
+    font-size: 38px;
+  }
+
+  .sw-search-input--hero {
     font-size: 38px;
   }
 }
@@ -1025,12 +1072,56 @@ select {
 @media (prefers-reduced-motion: reduce) {
 
   .sw-navbar-search-panel,
-  .sw-search-trigger--hero,
+  .sw-navbar-search-panel-inner,
+  .sw-navbar-page-blur,
   .sw-search-trigger,
+  .sw-search-trigger--hero,
   .sw-smart-search-button,
   .sw-ref-category-link {
     animation-duration: 1ms !important;
     transition-duration: 1ms !important;
     transform: none !important;
   }
+}
+
+/* Force-remove any remaining shadows/filters on search controls (override specificity) */
+.sw-search-suite,
+.sw-search-trigger,
+.sw-search-trigger--hero,
+.sw-search-trigger svg,
+.sw-smart-search-button,
+.sw-smart-search-mark {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.sw-search-trigger:hover,
+.sw-search-trigger--hero:hover,
+.sw-smart-search-button:hover {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Highest-specificity header overrides to remove any visual shadow/backdrop */
+header .sw-search-suite,
+header .sw-search-trigger,
+header .sw-search-trigger *,
+header .sw-search-trigger::before,
+header .sw-search-trigger::after,
+header .sw-search-trigger--hero,
+header .sw-smart-search-button,
+header .sw-smart-search-mark {
+  box-shadow: none !important;
+  filter: none !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+header .sw-search-trigger:hover,
+header .sw-search-trigger--hero:hover,
+header .sw-smart-search-button:hover {
+  box-shadow: none !important;
+  filter: none !important;
+  background: transparent !important;
+  border: none !important;
 }
