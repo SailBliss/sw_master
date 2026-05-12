@@ -6,6 +6,7 @@ import {
   SectionShell,
 } from '@src/components/public'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
+import { buildSearchSuggestionSource } from '@src/components/public/search/searchSuggestions'
 
 export const metadata: Metadata = {
   title: 'Directorio publico',
@@ -22,16 +23,28 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const categoria = params.categoria?.trim() ?? ''
   const ciudad = params.ciudad?.trim() ?? ''
 
-  // Conexion conservada: la home ahora es el directorio publico con la regla de visibilidad.
-  const profiles = await profilesService.findAll({
+  const filters = {
     q: q || undefined,
     categoria: categoria || undefined,
     ciudad: ciudad || undefined,
-  })
+  }
+  const suggestionFilters = {
+    categoria: categoria || undefined,
+    ciudad: ciudad || undefined,
+  }
+
+  // Conexion conservada: la home ahora es el directorio publico con la regla de visibilidad.
+  const profiles = await profilesService.findAll(filters)
+  const suggestionProfiles = q ? await profilesService.findAll(suggestionFilters) : profiles
+  const searchSuggestionSource = buildSearchSuggestionSource(suggestionProfiles)
 
   return (
     <main className="min-h-screen bg-[--bg] text-[--fg]">
-      <PublicNavbar activePath="/" searchDefaultValue={q} />
+      <PublicNavbar
+        activePath="/"
+        searchDefaultValue={q}
+        searchSuggestionSource={searchSuggestionSource}
+      />
 
       <SectionShell eyebrow="Directorio" title="Listado publico en blanco">
         <div className="grid gap-4">

@@ -4,13 +4,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { SearchBar } from '../search/SearchBar'
+import type { SearchSuggestionSource } from '../search/searchSuggestions'
 
 type PublicNavbarProps = {
   activePath?: string
   searchDefaultValue?: string
+  searchSuggestionSource?: SearchSuggestionSource
 }
 
-export function PublicNavbar({ searchDefaultValue }: PublicNavbarProps) {
+export function PublicNavbar({ searchDefaultValue, searchSuggestionSource }: PublicNavbarProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   return (
@@ -40,6 +42,7 @@ export function PublicNavbar({ searchDefaultValue }: PublicNavbarProps) {
             <SearchBar
               defaultValue={searchDefaultValue}
               expanded={isSearchOpen}
+              suggestionSource={searchSuggestionSource}
               onClick={() => setIsSearchOpen((current) => !current)}
             />
           </div>
@@ -53,7 +56,14 @@ export function PublicNavbar({ searchDefaultValue }: PublicNavbarProps) {
           aria-hidden={!isSearchOpen}
         >
           <div className="sw-navbar-search-panel-inner px-5 pb-10 pt-8 sm:px-7 sm:pt-10 lg:px-12">
-            <SearchBar defaultValue={searchDefaultValue} size="hero" expanded={isSearchOpen} />
+            <SearchBar
+              key={searchDefaultValue ?? ''}
+              defaultValue={searchDefaultValue}
+              size="hero"
+              expanded={isSearchOpen}
+              suggestionSource={searchSuggestionSource}
+              onSearchSubmit={() => setIsSearchOpen(false)}
+            />
           </div>
         </div>
       </header>
