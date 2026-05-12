@@ -1168,3 +1168,15 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que el buscador quede centrado con el logo a la izquierda.
 
 ---
+
+## Skills locales de diseño para web publica
+
+**Que hace:** registra skills locales en `.agents/skills` para diseno frontend, accesibilidad, tokens, Next.js, revision UI, direccion visual premium/editorial/directorio boutique y motion refinado.
+**Por que existe:** Codex debe tener instrucciones especializadas para trabajar la web publica de SW Mujeres sin tocar `/admin` ni caer en estetica generica de IA, SaaS template, heroes innecesarios, cards planas o animaciones baratas.
+**Archivos creados o modificados:**
+- `.agents/skills/*/SKILL.md`
+- `BITACORA.md`
+**Decisiones tomadas:** las skills oficiales/curadas `playwright` y `playwright-interactive` quedan como instalacion global existente; las personalizadas se crean como skills locales del proyecto. Los alias `a11y`, `next-js` y `design-review` son delgados y apuntan al criterio canonico para evitar instrucciones duplicadas.
+**Como probarlo:** reiniciar Codex y pedir explicitamente una skill, por ejemplo `Usa premium-editorial-ui y luxury-directory-design para auditar /directorio sin tocar /admin`.
+
+---
