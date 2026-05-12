@@ -1070,3 +1070,87 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** ejecutar `npm run lint`; abrir `/dev/components` y verificar que el boton muestre `Chat con IA | Consulta y descubre` sin pildora externa.
 
 ---
+
+## Navbar publica simplificada
+
+**Que hace:** reemplaza el logo corto por `logo-largo`, centra la marca y elimina `Directorio`, el divisor vertical y `Registro`.
+**Por que existe:** la navbar publica debe quedar temporalmente enfocada en la marca y el buscador, sin enlaces secundarios.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** el ajuste vive dentro de `PublicNavbar`; `SearchBar` conserva sus propios estilos y no se agregan selectores dependientes del padre.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que la navbar muestre el logo largo centrado, sin `Directorio`, sin divisor y sin `Registro`.
+
+---
+
+## Navbar sin buscador
+
+**Que hace:** elimina la SearchBar de la navbar publica y deja solo el logo largo centrado.
+**Por que existe:** la barra superior debe quedar limpia por ahora, sin navegacion ni busqueda.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** `SearchBar` no se modifica; solo se deja de renderizar en `PublicNavbar` para conservar el componente reusable.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que la navbar solo muestre el logo centrado.
+
+---
+
+## Navbar sin fondo propio
+
+**Que hace:** elimina el fondo blanco propio de la navbar publica.
+**Por que existe:** la barra superior debe integrarse visualmente con el fondo de la pagina.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se quita solo la clase de fondo del `header`; no se agregan estilos globales ni selectores de contexto.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que la navbar no tenga fondo propio.
+
+---
+
+## Navbar con buscador junto al logo
+
+**Que hace:** vuelve a renderizar la SearchBar en la navbar publica, ubicada a la derecha del logo largo.
+**Por que existe:** la busqueda debe estar disponible en la barra superior sin recuperar los enlaces de navegacion.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** `SearchBar` mantiene sus estilos propios; la navbar solo controla la disposicion externa con un contenedor responsive.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que el buscador aparezca a la derecha del logo en desktop.
+
+---
+
+## Logo alineado a la izquierda en navbar
+
+**Que hace:** cambia la alineacion horizontal de la navbar para que el logo quede al inicio del contenedor.
+**Por que existe:** la marca debe ubicarse a la izquierda y la busqueda continuar a su derecha.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se ajusta solo la distribucion externa de `PublicNavbar`; no se modifican estilos internos de `SearchBar`.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que el logo aparezca a la izquierda de la navbar.
+
+---
+
+## SearchBar alineada a la derecha en navbar
+
+**Que hace:** empuja la SearchBar al extremo derecho del contenedor de la navbar.
+**Por que existe:** la marca debe quedar a la izquierda y la busqueda al lado derecho de la barra superior.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se usa margen automatico en el contenedor externo de `SearchBar`; no se cambian estilos internos del componente reusable.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que el buscador aparezca alineado a la derecha.
+
+---
+
+## SearchBar centrada en navbar
+
+**Que hace:** centra la SearchBar en la navbar mientras el logo largo permanece a la izquierda.
+**Por que existe:** la busqueda debe recuperar protagonismo visual en el centro de la barra superior.
+**Archivos creados o modificados:**
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se usa una grilla de tres columnas en desktop para centrar el buscador sin depender de estilos internos de `SearchBar`.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que el buscador quede centrado con el logo a la izquierda.
+
+---
