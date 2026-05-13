@@ -1,4 +1,6 @@
 export { BusinessCard } from './cards/BusinessCard'
+export { DirectoryFilterPills } from './directory/DirectoryFilterPills'
+export type { DirectoryFilterCategory, DirectorySortValue } from './directory/DirectoryFilterPills'
 export { SectionShell } from './layout/SectionShell'
 export { PublicNavbar } from './navigation/PublicNavbar'
 export { SearchBar } from './search/SearchBar'

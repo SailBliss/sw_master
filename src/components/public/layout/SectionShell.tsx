@@ -3,12 +3,13 @@ import type { ReactNode } from 'react'
 type SectionShellProps = {
   eyebrow?: string
   title?: string
+  className?: string
   children: ReactNode
 }
 
-export function SectionShell({ eyebrow, title, children }: SectionShellProps) {
+export function SectionShell({ eyebrow, title, className = '', children }: SectionShellProps) {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+    <section className={`mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 ${className}`}>
       {(eyebrow || title) && (
         <header className="mb-5">
           {eyebrow && (
