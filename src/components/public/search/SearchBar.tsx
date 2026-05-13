@@ -12,11 +12,15 @@ import {
   removeRecentSearch,
   writeRecentSearch,
 } from './recentSearches'
-import { getSearchSuggestions, type SearchSuggestionKind, type SearchSuggestionSource } from './searchSuggestions'
+import {
+  getSearchSuggestions,
+  type SearchSuggestionKind,
+  type SearchSuggestionSource,
+} from './searchSuggestions'
 
 type SearchBarProps = {
   defaultValue?: string
-  size?: 'icon' | 'hero'
+  size?: 'icon' | 'hero' | 'inline'
   onClick?: () => void
   onSearchSubmit?: () => void
   expanded?: boolean
@@ -44,9 +48,16 @@ export function SearchBar({
   const [isInputFocused, setIsInputFocused] = useState(false)
   const label = defaultValue && !resetOnCollapse
     ? `Buscar ${defaultValue}`
-    : 'Busca por nombre, servicio o categoría...'
+    : 'Buscar por negocio, categoria o necesidad...'
+  const isTextInputSearch = size === 'hero' || size === 'inline'
+  const isExpanded = size === 'inline' ? true : Boolean(expanded)
   const iconSize = size === 'hero' ? 34 : 21
-  const suiteClassName = size === 'hero' ? 'sw-search-suite--hero' : 'sw-search-suite'
+  const suiteClassName =
+    size === 'hero'
+      ? 'sw-search-suite--hero'
+      : size === 'inline'
+      ? 'sw-search-suite--inline'
+      : 'sw-search-suite'
   const triggerClassName = size === 'hero' ? 'sw-search-trigger--hero' : 'sw-search-trigger'
   const suggestions = useMemo(
     () => getSearchSuggestions(value, suggestionSource),
@@ -65,9 +76,10 @@ export function SearchBar({
       completion,
     }
   }, [suggestions, value])
-  const showSuggestions = expanded && value.trim().length > 0 && suggestions.length > 0
+  const showSuggestions =
+    isExpanded && isInputFocused && value.trim().length > 0 && suggestions.length > 0
   const showRecentSearches =
-    expanded && isInputFocused && value.trim().length === 0 && recentSearches.length > 0
+    isExpanded && isInputFocused && value.trim().length === 0 && recentSearches.length > 0
 
   useEffect(() => {
     if (size === 'hero' && expanded && inputRef.current) {
@@ -77,25 +89,26 @@ export function SearchBar({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    submitSearch(value)
+  }
 
-    const query = value.trim()
+  function submitSearch(nextValue: string) {
+    const query = nextValue.trim()
     const params = new URLSearchParams(window.location.search)
 
     if (query) {
       params.set('q', query)
       setRecentSearches(writeRecentSearch(query))
+      setValue(query)
     } else {
       params.delete('q')
+      setValue('')
     }
 
     const queryString = params.toString()
+    setIsInputFocused(false)
     onSearchSubmit?.()
     router.push(queryString ? `/?${queryString}` : '/')
-  }
-
-  function fillInput(nextValue: string) {
-    setValue(nextValue)
-    inputRef.current?.focus()
   }
 
   function acceptInlineSuggestion() {
@@ -106,11 +119,18 @@ export function SearchBar({
     return true
   }
 
-  if (size === 'hero') {
+  if (isTextInputSearch) {
     return (
       <form className={suiteClassName} role="search" onSubmit={handleSubmit}>
         <div className="sw-search-input-wrapper">
-          <SearchIcon size={iconSize} />
+          <button
+            type="submit"
+            className="sw-search-submit-button"
+            aria-label="Buscar"
+            disabled={size === 'hero' && !expanded}
+          >
+            <SearchIcon size={iconSize} />
+          </button>
           <div className="sw-search-input-field">
             {inlineSuggestion ? (
               <div className="sw-search-inline-suggestion" aria-hidden="true">
@@ -134,7 +154,10 @@ export function SearchBar({
                 setIsInputFocused(true)
                 setRecentSearches(readRecentSearches())
               }}
-              disabled={!expanded}
+              onBlur={() => {
+                window.setTimeout(() => setIsInputFocused(false), 120)
+              }}
+              disabled={size === 'hero' && !expanded}
               role="combobox"
               aria-label="Buscar en el directorio"
               aria-autocomplete="both"
@@ -146,12 +169,9 @@ export function SearchBar({
             <button
               type="button"
               className="sw-search-clear-button"
-              aria-label="Limpiar búsqueda"
-              disabled={!expanded}
-              onClick={() => {
-                setValue('')
-                inputRef.current?.focus()
-              }}
+              aria-label="Limpiar busqueda"
+              disabled={size === 'hero' && !expanded}
+              onClick={() => submitSearch('')}
             >
               <CloseIcon size={24} />
             </button>
@@ -163,7 +183,7 @@ export function SearchBar({
             {showRecentSearches && (
               <div className="sw-search-suggestion-section">
                 <div className="sw-search-suggestion-header">
-                  <span>Búsquedas recientes</span>
+                  <span>Busquedas recientes</span>
                   <button
                     type="button"
                     onMouseDown={(event) => event.preventDefault()}
@@ -180,13 +200,13 @@ export function SearchBar({
                         role="option"
                         aria-selected="false"
                         onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => fillInput(recent)}
+                        onClick={() => submitSearch(recent)}
                       >
                         {recent}
                       </button>
                       <button
                         type="button"
-                        aria-label={`Eliminar búsqueda reciente ${recent}`}
+                        aria-label={`Eliminar busqueda reciente ${recent}`}
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => setRecentSearches(removeRecentSearch(recent))}
                       >
@@ -212,7 +232,7 @@ export function SearchBar({
                       aria-selected="false"
                       className="sw-search-suggestion-option"
                       onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => fillInput(suggestion.label)}
+                      onClick={() => submitSearch(suggestion.label)}
                     >
                       <span>{suggestion.label}</span>
                       <span>{getSuggestionKindLabel(suggestion.kind)}</span>
@@ -233,7 +253,7 @@ export function SearchBar({
       <button
         type="button"
         className={triggerClassName}
-        aria-label={defaultValue ? `Búsqueda actual: ${defaultValue}` : 'Buscar'}
+        aria-label={defaultValue ? `Busqueda actual: ${defaultValue}` : 'Buscar'}
         aria-expanded={expanded}
         onClick={onClick}
       >
@@ -264,7 +284,7 @@ function getInlineCompletion(label: string, query: string): string | null {
 }
 
 function getSuggestionKindLabel(kind: SearchSuggestionKind): string {
-  if (kind === 'category') return 'Categoría'
+  if (kind === 'category') return 'Categoria'
   if (kind === 'business') return 'Negocio'
   if (kind === 'city') return 'Ciudad'
   if (kind === 'synonym') return 'Relacionado'

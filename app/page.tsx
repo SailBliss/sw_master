@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
+import ChatBubble from '@components/directorio/ChatBubble'
 import {
   BusinessCard,
   DirectoryFilterPills,
+  DirectoryMiaCard,
   type DirectoryFilterCategory,
-  PagePlaceholder,
   PublicNavbar,
-  SectionShell,
 } from '@src/components/public'
 import { profilesService } from '@src/features/profiles/services/profiles.service'
 import { buildSearchSuggestionSource } from '@src/components/public/search/searchSuggestions'
@@ -13,7 +13,7 @@ import { CATEGORIES } from '@src/shared/utils/categories'
 
 export const metadata: Metadata = {
   title: 'Directorio publico',
-  description: 'Canvas base para el futuro listado y filtrado publico de negocios.',
+  description: 'Directorio publico de negocios seleccionados por SW Mujeres.',
 }
 
 export const revalidate = 3600
@@ -22,14 +22,13 @@ type SearchParams = Promise<{ q?: string; categoria?: string; ciudad?: string }>
 
 const directoryCategories: DirectoryFilterCategory[] = [
   { label: 'Todos', value: '' },
-  { label: 'Moda', value: CATEGORIES[0] },
-  { label: 'Belleza', value: CATEGORIES[3] },
-  { label: 'Salud', value: CATEGORIES[1] },
+  { label: 'Belleza', value: 'Belleza y bienestar' },
+  { label: 'Moda', value: 'Moda' },
   { label: 'Hogar', value: CATEGORIES[4] },
-  { label: 'Comida', value: CATEGORIES[2] },
-  { label: 'Servicios', value: CATEGORIES[5] },
-  { label: 'Viajes', value: 'Viajes' },
-  { label: 'Otros', value: 'Otros' },
+  { label: 'Bienestar', value: CATEGORIES[1] },
+  { label: 'Servicios', value: 'Servicios profesionales' },
+  { label: 'Alimentos', value: CATEGORIES[2] },
+  { label: 'Otros', value: 'Otro' },
 ]
 
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
@@ -54,41 +53,50 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const searchSuggestionSource = buildSearchSuggestionSource(suggestionProfiles)
 
   return (
-    <main className="min-h-screen bg-[--bg] text-[--fg]">
+    <main className="sw-directory-page">
       <PublicNavbar
         activePath="/"
         searchDefaultValue={q}
         searchSuggestionSource={searchSuggestionSource}
       />
+
       <DirectoryFilterPills
         categories={directoryCategories}
         selectedCategory={categoria}
         sort="recent"
       />
 
-      <SectionShell className="pt-3 sm:pt-4">
-        {profiles.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {profiles.slice(0, 6).map((profile) => (
-              <BusinessCard
-                key={profile.id}
-                name={profile.business_name}
-                category={profile.category ?? undefined}
-                city={profile.city ?? undefined}
-                description={profile.description ?? undefined}
-                imageUrl={profile.directory_image_path ?? undefined}
-                slug={profile.slug}
-                isVerified={profile.is_verified}
-              />
-            ))}
-          </div>
-        ) : (
-          <PagePlaceholder
-            title="Estado vacio del directorio"
-            description="Aqui ira el estado vacio cuando no haya resultados o cuando el directorio aun no tenga negocios visibles."
-          />
-        )}
-      </SectionShell>
+      <section className="sw-directory-content" aria-label="Directorio SW Mujeres">
+        <div className="sw-directory-results">
+          {profiles.length > 0 ? (
+            <div className="sw-directory-grid">
+              <DirectoryMiaCard />
+              {profiles.map((profile) => (
+                <BusinessCard
+                  key={profile.id}
+                  name={profile.business_name}
+                  category={profile.category ?? undefined}
+                  city={profile.city ?? undefined}
+                  description={profile.description ?? undefined}
+                  imageUrl={profile.directory_image_path ?? undefined}
+                  slug={profile.slug}
+                  isVerified={profile.is_verified}
+                  offersDiscount={profile.offers_discount}
+                  discountDetails={profile.discount_details ?? undefined}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="sw-directory-empty">
+              <p>Sin resultados</p>
+              <h1>No encontramos resultados</h1>
+              <span>Prueba con otra busqueda o revisa una categoria distinta del directorio.</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <ChatBubble />
     </main>
   )
 }
