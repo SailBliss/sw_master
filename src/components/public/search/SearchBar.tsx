@@ -24,10 +24,7 @@ type SearchBarProps = {
 }
 
 const EMPTY_SUGGESTION_SOURCE: SearchSuggestionSource = {
-  categories: [],
-  businessNames: [],
-  cities: [],
-  descriptionTerms: [],
+  suggestions: [],
 }
 
 export function SearchBar({
@@ -273,5 +270,7 @@ function getSuggestionKindLabel(kind: SearchSuggestionKind): string {
   if (kind === 'business') return 'Negocio'
   if (kind === 'city') return 'Ciudad'
   if (kind === 'synonym') return 'Relacionado'
+  if (kind === 'phrase') return 'Servicio'
+  if (kind === 'keyword') return 'Servicio'
   return 'Servicio'
 }

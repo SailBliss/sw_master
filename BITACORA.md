@@ -1180,3 +1180,18 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** reiniciar Codex y pedir explicitamente una skill, por ejemplo `Usa premium-editorial-ui y luxury-directory-design para auditar /directorio sin tocar /admin`.
 
 ---
+
+## Directory Search Intelligence
+
+**Que hace:** crea un builder reutilizable de sugerencias de busqueda a partir de perfiles publicos visibles y lo combina con sinonimos manuales.
+**Por que existe:** el autocomplete debe usar informacion real del directorio sin meter extraccion de keywords dentro de `SearchBar`.
+**Archivos creados o modificados:**
+- `src/features/profiles/search/directory-search-intelligence.ts`
+- `src/components/public/search/searchSuggestions.ts`
+- `src/components/public/search/SearchBar.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** el indice usa solo `business_name`, `description`, `category`, `city` y `discount_details`; categorias, negocios y sinonimos no se recortan por el limite aplicado a keywords/frases generadas.
+**Como probarlo:** ejecutar `npm run lint`; abrir `/`, escribir en la busqueda y verificar sugerencias locales sin cambio de URL hasta Enter o boton Buscar.
+**Riesgos:** la calidad de frases depende de la calidad de las descripciones publicas; mas adelante puede migrarse a indice persistido con full-text search.
+
+---
