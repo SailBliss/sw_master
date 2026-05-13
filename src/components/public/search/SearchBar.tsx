@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { CloseIcon, SearchIcon } from '@components/icons/ui'
 import { normalizeSearchText } from '@src/shared/utils/searchText'
+import { SmartSearchButton } from './SmartSearchButton'
 import {
   clearRecentSearches,
   readRecentSearches,
@@ -228,10 +229,7 @@ export function SearchBar({
 
   return (
     <div className={suiteClassName}>
-      <span className="sw-search-trigger-copy" aria-hidden="true">
-        <span>¿No encuentra lo que busca?</span>
-        <span>Pregúntele a MIA</span>
-      </span>
+      <SmartSearchButton />
       <button
         type="button"
         className={triggerClassName}
