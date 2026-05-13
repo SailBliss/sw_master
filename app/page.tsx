@@ -76,6 +76,9 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                 category={profile.category ?? undefined}
                 city={profile.city ?? undefined}
                 description={profile.description ?? undefined}
+                imageUrl={profile.directory_image_path ?? undefined}
+                slug={profile.slug}
+                isVerified={profile.is_verified}
               />
             ))}
           </div>
