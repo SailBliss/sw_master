@@ -57,10 +57,11 @@ export function PublicNavbar({ searchDefaultValue, searchSuggestionSource }: Pub
         >
           <div className="sw-navbar-search-panel-inner px-5 pb-10 pt-8 sm:px-7 sm:pt-10 lg:px-12">
             <SearchBar
-              key={searchDefaultValue ?? ''}
+              key={`${searchDefaultValue ?? ''}-${isSearchOpen ? 'open' : 'closed'}`}
               defaultValue={searchDefaultValue}
               size="hero"
               expanded={isSearchOpen}
+              resetOnCollapse
               suggestionSource={searchSuggestionSource}
               onSearchSubmit={() => setIsSearchOpen(false)}
             />

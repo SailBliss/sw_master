@@ -19,6 +19,7 @@ type SearchBarProps = {
   onClick?: () => void
   onSearchSubmit?: () => void
   expanded?: boolean
+  resetOnCollapse?: boolean
   suggestionSource?: SearchSuggestionSource
 }
 
@@ -35,14 +36,15 @@ export function SearchBar({
   onClick,
   onSearchSubmit,
   expanded,
+  resetOnCollapse = false,
   suggestionSource = EMPTY_SUGGESTION_SOURCE,
 }: SearchBarProps) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [value, setValue] = useState(defaultValue ?? '')
+  const [value, setValue] = useState(resetOnCollapse ? '' : defaultValue ?? '')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isInputFocused, setIsInputFocused] = useState(false)
-  const label = defaultValue
+  const label = defaultValue && !resetOnCollapse
     ? `Buscar ${defaultValue}`
     : 'Busca por nombre, servicio o categoría...'
   const iconSize = size === 'hero' ? 34 : 21
@@ -57,12 +59,12 @@ export function SearchBar({
     if (!query || suggestions.length === 0) return null
 
     const bestMatch = suggestions[0].label
-    if (bestMatch.length <= value.length) return null
-    if (!normalizeSearchText(bestMatch).startsWith(normalizeSearchText(value))) return null
+    const completion = getInlineCompletion(bestMatch, value)
+    if (!completion) return null
 
     return {
       label: bestMatch,
-      completion: bestMatch.slice(value.length),
+      completion,
     }
   }, [suggestions, value])
   const showSuggestions = expanded && value.trim().length > 0 && suggestions.length > 0
@@ -244,6 +246,26 @@ export function SearchBar({
       </button>
     </div>
   )
+}
+
+function getInlineCompletion(label: string, query: string): string | null {
+  const normalizedLabel = normalizeSearchText(label)
+  const normalizedQuery = normalizeSearchText(query)
+
+  if (!normalizedQuery || !normalizedLabel.startsWith(normalizedQuery)) return null
+
+  let normalizedPrefix = ''
+  let completionStartIndex = 0
+
+  for (const character of label) {
+    normalizedPrefix += normalizeSearchText(character)
+    completionStartIndex += character.length
+
+    if (normalizedPrefix.length >= normalizedQuery.length) break
+  }
+
+  const completion = label.slice(completionStartIndex)
+  return completion || null
 }
 
 function getSuggestionKindLabel(kind: SearchSuggestionKind): string {
