@@ -445,22 +445,63 @@ select {
   color: rgba(57, 17, 37, 0.66);
 }
 
-.sw-search-input--hero {
+.sw-search-input-field {
+  --sw-search-input-height: 64px;
+  --sw-search-input-size: 26px;
+  --sw-search-input-line: 1.24;
+  position: relative;
   flex: 1;
   min-width: 0;
-  height: auto;
-  min-height: 64px;
+  height: var(--sw-search-input-height);
+}
+
+.sw-search-input--hero {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: var(--sw-search-input-height);
   border: none;
   background: transparent;
   color: rgba(57, 17, 37, 0.82);
   font-family: var(--font-display), Georgia, serif;
-  font-size: 26px;
+  font-size: var(--sw-search-input-size);
   font-style: italic;
   font-weight: 400;
-  line-height: 1.24;
+  line-height: var(--sw-search-input-line);
   padding: 0;
   outline: none;
   transition: color 160ms var(--ease-out);
+}
+
+.sw-search-inline-suggestion {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  overflow: hidden;
+  color: rgba(57, 17, 37, 0.82);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--sw-search-input-size);
+  font-style: italic;
+  font-weight: 400;
+  line-height: var(--sw-search-input-line);
+  padding: 0;
+  white-space: pre;
+}
+
+.sw-search-inline-current {
+  visibility: hidden;
+}
+
+.sw-search-inline-completion {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(57, 17, 37, 0.30);
+  text-overflow: ellipsis;
 }
 
 .sw-search-input--hero::placeholder {
@@ -501,13 +542,13 @@ select {
 .sw-search-suggestions {
   display: grid;
   width: min(760px, 100%);
-  gap: 16px;
-  padding: 4px 0 10px 48px;
+  gap: 14px;
+  padding: 8px 0 10px 48px;
 }
 
 .sw-search-suggestion-section {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .sw-search-suggestion-header {
@@ -531,54 +572,66 @@ select {
 }
 
 .sw-search-suggestion-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  gap: 7px;
 }
 
 .sw-search-suggestion-option,
 .sw-search-recent-row {
-  min-height: 34px;
+  min-height: 42px;
   border: 1px solid rgba(130, 22, 65, 0.13);
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(255, 252, 249, 0.72);
   color: rgba(57, 17, 37, 0.82);
 }
 
 .sw-search-suggestion-option {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  font-size: 12px;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 0 14px;
+  text-align: left;
+  font-size: 13px;
   font-weight: 650;
 }
 
 .sw-search-suggestion-option span:last-child {
+  flex: 0 0 auto;
   color: rgba(57, 17, 37, 0.48);
   font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .sw-search-recent-row {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   overflow: hidden;
 }
 
 .sw-search-recent-row button {
-  min-height: 32px;
+  min-height: 40px;
   border: 0;
   background: transparent;
   color: inherit;
-  padding: 0 10px;
-  font-size: 12px;
+  padding: 0 14px;
+  text-align: left;
+  font-size: 13px;
   font-weight: 650;
+}
+
+.sw-search-recent-row button:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
 .sw-search-recent-row button:last-child {
   display: inline-grid;
-  width: 32px;
+  width: 40px;
   place-items: center;
   padding: 0;
   color: rgba(57, 17, 37, 0.54);
@@ -604,8 +657,8 @@ select {
     font-size: 32px;
   }
 
-  .sw-search-input--hero {
-    font-size: 32px;
+  .sw-search-input-field {
+    --sw-search-input-size: 32px;
   }
 }
 
@@ -615,9 +668,9 @@ select {
     gap: 10px;
   }
 
-  .sw-search-input--hero {
-    min-height: 50px;
-    font-size: 23px;
+  .sw-search-input-field {
+    --sw-search-input-height: 50px;
+    --sw-search-input-size: 23px;
   }
 
   .sw-search-suggestions {
@@ -630,8 +683,8 @@ select {
     font-size: 38px;
   }
 
-  .sw-search-input--hero {
-    font-size: 38px;
+  .sw-search-input-field {
+    --sw-search-input-size: 38px;
   }
 }
 

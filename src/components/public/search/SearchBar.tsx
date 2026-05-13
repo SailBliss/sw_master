@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { CloseIcon, SearchIcon } from '@components/icons/ui'
+import { normalizeSearchText } from '@src/shared/utils/searchText'
 import {
   clearRecentSearches,
   readRecentSearches,
@@ -51,6 +52,19 @@ export function SearchBar({
     () => getSearchSuggestions(value, suggestionSource),
     [suggestionSource, value]
   )
+  const inlineSuggestion = useMemo(() => {
+    const query = value.trim()
+    if (!query || suggestions.length === 0) return null
+
+    const bestMatch = suggestions[0].label
+    if (bestMatch.length <= value.length) return null
+    if (!normalizeSearchText(bestMatch).startsWith(normalizeSearchText(value))) return null
+
+    return {
+      label: bestMatch,
+      completion: bestMatch.slice(value.length),
+    }
+  }, [suggestions, value])
   const showSuggestions = expanded && value.trim().length > 0 && suggestions.length > 0
   const showRecentSearches =
     expanded && isInputFocused && value.trim().length === 0 && recentSearches.length > 0
@@ -84,29 +98,50 @@ export function SearchBar({
     inputRef.current?.focus()
   }
 
+  function acceptInlineSuggestion() {
+    if (!inlineSuggestion) return false
+
+    setValue(inlineSuggestion.label)
+    window.requestAnimationFrame(() => inputRef.current?.focus())
+    return true
+  }
+
   if (size === 'hero') {
     return (
       <form className={suiteClassName} role="search" onSubmit={handleSubmit}>
         <div className="sw-search-input-wrapper">
           <SearchIcon size={iconSize} />
-          <input
-            ref={inputRef}
-            type="text"
-            className="sw-search-input--hero"
-            placeholder={label}
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            onFocus={() => {
-              setIsInputFocused(true)
-              setRecentSearches(readRecentSearches())
-            }}
-            disabled={!expanded}
-            role="combobox"
-            aria-label="Buscar en el directorio"
-            aria-autocomplete="list"
-            aria-expanded={showSuggestions || showRecentSearches}
-            aria-controls="sw-search-suggestions"
-          />
+          <div className="sw-search-input-field">
+            {inlineSuggestion ? (
+              <div className="sw-search-inline-suggestion" aria-hidden="true">
+                <span className="sw-search-inline-current">{value}</span>
+                <span className="sw-search-inline-completion">{inlineSuggestion.completion}</span>
+              </div>
+            ) : null}
+            <input
+              ref={inputRef}
+              type="text"
+              className="sw-search-input--hero"
+              placeholder={label}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              onKeyDown={(event) => {
+                if ((event.key === 'Tab' || event.key === 'ArrowRight') && acceptInlineSuggestion()) {
+                  event.preventDefault()
+                }
+              }}
+              onFocus={() => {
+                setIsInputFocused(true)
+                setRecentSearches(readRecentSearches())
+              }}
+              disabled={!expanded}
+              role="combobox"
+              aria-label="Buscar en el directorio"
+              aria-autocomplete="both"
+              aria-expanded={showSuggestions || showRecentSearches}
+              aria-controls="sw-search-suggestions"
+            />
+          </div>
           {value ? (
             <button
               type="button"

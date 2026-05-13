@@ -46,16 +46,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         searchSuggestionSource={searchSuggestionSource}
       />
 
-      <SectionShell eyebrow="Directorio" title="Listado publico en blanco">
-        <div className="grid gap-4">
-          <PagePlaceholder
-            title="Pagina principal del directorio"
-            description="Aqui ira el listado y filtrado de negocios. Esta rama deja el espacio preparado sin definir la UI final."
-            backendNote={`Conexion backend conservada: profilesService.findAll() devolvio ${profiles.length} perfiles para los filtros actuales.`}
-          />
-        </div>
-      </SectionShell>
-
       <SectionShell eyebrow="Salida temporal" title="Vista minima de perfiles conectados">
         {profiles.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
