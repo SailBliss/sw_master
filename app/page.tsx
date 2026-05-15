@@ -31,6 +31,15 @@ const directoryCategories: DirectoryFilterCategory[] = [
   { label: 'Otros', value: 'Otro' },
 ]
 
+const temporaryDirectoryPhotos = [
+  '/temp-directory-photos/photo-1.jpg',
+  '/temp-directory-photos/photo-2.jpg',
+  '/temp-directory-photos/photo-3.jpg',
+  '/temp-directory-photos/photo-4.jpg',
+  '/temp-directory-photos/photo-5.jpg',
+  '/temp-directory-photos/photo-6.jpg',
+]
+
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
   const q = params.q?.trim() ?? ''
@@ -71,14 +80,17 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           {profiles.length > 0 ? (
             <div className="sw-directory-grid">
               <DirectoryMiaCard />
-              {profiles.map((profile) => (
+              {profiles.map((profile, index) => (
                 <BusinessCard
                   key={profile.id}
                   name={profile.business_name}
                   category={profile.category ?? undefined}
                   city={profile.city ?? undefined}
                   description={profile.description ?? undefined}
-                  imageUrl={profile.directory_image_path ?? undefined}
+                  imageUrl={
+                    profile.directory_image_path ??
+                    temporaryDirectoryPhotos[index % temporaryDirectoryPhotos.length]
+                  }
                   slug={profile.slug}
                   isVerified={profile.is_verified}
                   offersDiscount={profile.offers_discount}

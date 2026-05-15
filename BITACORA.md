@@ -14,8 +14,6 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Decisiones tomadas:** se mantiene `SearchBar` como componente universal, sin variantes ni estilos dependientes de navbar; se elimina el `CloseIcon` creado durante la exploracion porque ya no se usa.
 **Como probarlo:** ejecutar `npm run lint`; abrir `/` y verificar que la zona de busqueda muestre solo la lupa.
 
----
-
 ## Documentacion rama chatbot
 
 **Que hace:** documenta los cambios de la rama `chatbot` contra `master`: widget de chat, API, Gemini, embeddings, RPC SQL, setup y riesgos.
@@ -1193,5 +1191,27 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Decisiones tomadas:** el indice usa solo `business_name`, `description`, `category`, `city` y `discount_details`; categorias, negocios y sinonimos no se recortan por el limite aplicado a keywords/frases generadas.
 **Como probarlo:** ejecutar `npm run lint`; abrir `/`, escribir en la busqueda y verificar sugerencias locales sin cambio de URL hasta Enter o boton Buscar.
 **Riesgos:** la calidad de frases depende de la calidad de las descripciones publicas; mas adelante puede migrarse a indice persistido con full-text search.
+
+---
+
+## Limpieza de reglas de validacion y visibilidad
+
+**Que hace:** ajusta reglas de contexto para que Codex valide proporcionalmente y elimina referencias a `profile_reviews.status` como condicion de visibilidad publica.
+**Por que existe:** las tareas pequenas no deben disparar lint/build/browser/screenshots por defecto, y la visibilidad publica debe depender solo de membresia activa no vencida y solicitud aprobada.
+**Archivos creados o modificados:**
+- `AGENTS.md`
+- `context/04_TECH_ARCHITECTURE.md`
+- `context/09_AGENT_PROMPTS.md`
+- `.agents/skills/accessibility/SKILL.md`
+- `.agents/skills/frontend-design/SKILL.md`
+- `.agents/skills/glassmorphism-ui-system/SKILL.md`
+- `.agents/skills/impeccable/SKILL.md`
+- `.agents/skills/motion-performance-audit/SKILL.md`
+- `docs/context/DirectorioSW_PRD.md`
+- `docs/context/plan_maestro_directorio_sw_implementacion.md`
+- `docs/archive/03_DOMAIN_RULES.md`
+- `BITACORA.md`
+**Decisiones tomadas:** la validacion pesada queda condicionada a riesgo real o pedido explicito; `profile_reviews` queda documentado solo para importaciones/revision editorial, no para publicacion en el directorio.
+**Como probarlo:** revisar que las reglas de visibilidad mencionen `memberships.status = 'active'`, `memberships.end_at > now()` y `applications.status = 'aprobado'`, y que los prompts de validacion no pidan lint/build/browser por defecto.
 
 ---
