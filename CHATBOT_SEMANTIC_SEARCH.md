@@ -33,7 +33,7 @@ Archivos principales:
 7. Supabase ejecuta la RPC `match_businesses_gemini`.
 8. La API filtra resultados por tema, ordena por similitud y limita a 3 negocios.
 9. Gemini redacta una respuesta corta usando los resultados encontrados.
-10. El frontend muestra la respuesta y tarjetas enlazadas a `/directorio/[slug]`.
+10. El frontend muestra la respuesta y tarjetas enlazadas a `/[slug]`.
 
 ## Requisitos de entorno
 
@@ -172,9 +172,9 @@ Cuando Gemini falla por cuota o rate limit, la API intenta devolver una respuest
 Actualmente el widget se importa en:
 
 - `app/layout.tsx`
-- `app/directorio/page.tsx`
+- `app/page.tsx`
 
-Esto puede renderizar dos instancias en `/directorio`. Si se quiere el chat global, deberia quedar solo en `app/layout.tsx`. Si se quiere solo en el directorio, deberia quitarse del layout.
+Esto puede renderizar dos instancias en `/`. Si se quiere el chat global, deberia quedar solo en `app/layout.tsx`. Si se quiere solo en la pagina principal, deberia quitarse del layout.
 
 ## Dependencias nuevas
 
@@ -211,7 +211,7 @@ npm run sync:embeddings
 npm run dev
 ```
 
-6. Abrir `/directorio` o cualquier pagina si el chat queda global.
+6. Abrir `/` o cualquier pagina si el chat queda global.
 7. Probar consultas como:
 
 ```text
@@ -222,7 +222,7 @@ Buscame marcas de ropa con descuento
 
 ## Riesgos y pendientes encontrados
 
-- Posible duplicacion del widget en `/directorio` por estar en `layout` y en la pagina.
+- Posible duplicacion del widget en `/` por estar en `layout` y en la pagina.
 - `app/api/chat/route.ts` contiene bastante logica de negocio directamente en el route handler; el patron del repo prefiere servicios bajo `src/features`.
 - Hay texto mojibake en algunos strings con tildes, por ejemplo `alimentaciÃ³n`; conviene normalizar encoding antes de tocar copy visible.
 - `scripts/list-gemini-models.ts` existe, pero no tiene script npm asociado.

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { ebGaramond, montserrat } from './fonts'
 import './globals.css'
-import ChatBubble from '@/components/directorio/ChatBubble'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://swmujeres.com'
 
@@ -44,7 +43,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-body">
         {children}
-        <ChatBubble />
       </body>
     </html>
   )

@@ -107,7 +107,7 @@ async function updateProfileAction(formData: FormData) {
   })
 
   revalidatePath('/admin/perfiles')
-  revalidatePath('/directorio')
+  revalidatePath('/')
   redirect(`/admin/perfiles/${entrepreneurId}`)
 }
 
@@ -119,7 +119,7 @@ async function toggleMembershipAction(formData: FormData) {
   await membershipsService.toggle(entrepreneurId, newStatus)
 
   revalidatePath('/admin/perfiles')
-  revalidatePath('/directorio')
+  revalidatePath('/')
   redirect(`/admin/perfiles/${entrepreneurId}`)
 }
 

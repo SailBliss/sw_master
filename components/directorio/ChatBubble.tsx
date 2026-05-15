@@ -68,6 +68,17 @@ export default function ChatBubble() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    function handleOpenChat() {
+      setIsOpen(true)
+      window.setTimeout(() => inputRef.current?.focus(), 80)
+    }
+
+    window.addEventListener('sw:open-chat', handleOpenChat)
+    return () => window.removeEventListener('sw:open-chat', handleOpenChat)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
@@ -157,16 +168,6 @@ export default function ChatBubble() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen((value) => !value)}
-        className="sw-chat-launcher"
-        aria-label={isOpen ? 'Cerrar chat de busqueda' : 'Abrir chat de busqueda'}
-      >
-        <span className="sw-chat-launcher-dot" aria-hidden="true" />
-        <span className="sw-chat-launcher-text">Buscar con IA</span>
-      </button>
-
       {isOpen && (
         <section className="sw-chat-panel" aria-label="Asistente de SW Mujeres">
           <header className="sw-chat-header">
@@ -208,7 +209,7 @@ export default function ChatBubble() {
                 <div className="sw-chat-results-title">Resultados encontrados</div>
                 <div className="sw-chat-results-list">
                   {matches.map((match) => (
-                    <Link key={match.id} href={`/directorio/${match.slug}`} className="sw-chat-result-card">
+                    <Link key={match.id} href={`/${match.slug}`} className="sw-chat-result-card">
                       <div className="sw-chat-result-media">
                         {match.directory_image_path ? (
                           <Image
@@ -245,6 +246,7 @@ export default function ChatBubble() {
             }}
           >
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder="Ej. joyeria artesanal en Medellin"
