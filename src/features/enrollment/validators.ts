@@ -39,4 +39,7 @@ export const step3Schema = z.object({
   consent_accepted: z.literal(true, { error: () => 'Debes aceptar los términos.' }),
 })
 
-export const enrollmentSchema = step1Schema.merge(step2Schema).merge(step3Schema)
+export const enrollmentSchema = step2Schema.safeExtend({
+  ...step1Schema.shape,
+  ...step3Schema.shape,
+})

@@ -1,6 +1,7 @@
 import { supabasePublic } from '@src/shared/lib/supabase'
 import { slugify } from '@src/shared/utils/slugify'
 import { getPublicImageUrl } from '@src/shared/utils/getPublicImageUrl'
+import { isCloseSearchMatch, normalizeSearchText } from '@src/shared/utils/searchText'
 import type { DirectoryProfile, ProfileFilters } from '../types'
 
 type BusinessProfileRow = {
@@ -32,6 +33,10 @@ type EntrepreneurRow = {
   business_profiles: BusinessProfileRow | BusinessProfileRow[] | null
   memberships: MembershipRow | MembershipRow[] | null
   applications: ApplicationRow | ApplicationRow[] | null
+}
+
+function sanitizeSupabaseSearchTerm(term: string): string {
+  return term.trim().replace(/[%,()]/g, ' ').replace(/\s+/g, ' ')
 }
 
 function isVisibleProfile(row: EntrepreneurRow, nowIso: string): boolean {
@@ -86,7 +91,36 @@ function mapToDirectoryProfile(row: EntrepreneurRow): DirectoryProfile | null {
   }
 }
 
-export async function getProfiles(filters?: ProfileFilters): Promise<DirectoryProfile[]> {
+function matchesLocalSearch(profile: DirectoryProfile, query: string): boolean {
+  const normalizedQuery = normalizeSearchText(query)
+  if (!normalizedQuery) return true
+
+  const fields = [
+    profile.business_name,
+    profile.description,
+    profile.category,
+    profile.city,
+    profile.full_name,
+  ].filter((field): field is string => Boolean(field?.trim()))
+
+  const normalizedFields = fields.map(normalizeSearchText)
+  if (normalizedFields.some((field) => field.includes(normalizedQuery))) return true
+
+  const queryWords = normalizedQuery.split(' ').filter((word) => word.length >= 3)
+  if (
+    queryWords.length > 1 &&
+    normalizedFields.some((field) => queryWords.every((word) => field.includes(word)))
+  ) {
+    return true
+  }
+
+  const fieldWords = normalizedFields.flatMap((field) => field.split(' '))
+  return queryWords.some((queryWord) =>
+    fieldWords.some((fieldWord) => fieldWord.length >= 4 && isCloseSearchMatch(queryWord, fieldWord))
+  )
+}
+
+async function fetchProfileRows(filters?: ProfileFilters, useTextSearch = true): Promise<EntrepreneurRow[]> {
   try {
     let query = supabasePublic.from('entrepreneurs').select(`
       full_name,
@@ -108,8 +142,8 @@ export async function getProfiles(filters?: ProfileFilters): Promise<DirectoryPr
       applications ( status )
     `)
 
-    if (filters?.q) {
-      const term = filters.q.trim()
+    if (useTextSearch && filters?.q) {
+      const term = sanitizeSupabaseSearchTerm(filters.q)
       if (term) {
         query = query.or(`business_name.ilike.%${term}%,description.ilike.%${term}%`, {
           foreignTable: 'business_profiles',
@@ -139,21 +173,45 @@ export async function getProfiles(filters?: ProfileFilters): Promise<DirectoryPr
 
     if (!data || data.length === 0) return []
 
-    const nowIso = new Date().toISOString()
-    const rows = data as EntrepreneurRow[]
-
-    const visibleProfiles: DirectoryProfile[] = []
-
-    for (const row of rows) {
-      if (!row || !isVisibleProfile(row, nowIso)) continue
-
-      const mapped = mapToDirectoryProfile(row)
-      if (!mapped) continue
-
-      visibleProfiles.push(mapped)
+    return data as EntrepreneurRow[]
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`fetchProfileRows failed: ${error.message}`)
     }
 
-    return visibleProfiles
+    throw new Error('fetchProfileRows failed: unknown error')
+  }
+}
+
+function getVisibleProfilesFromRows(rows: EntrepreneurRow[]): DirectoryProfile[] {
+  const nowIso = new Date().toISOString()
+  const visibleProfiles: DirectoryProfile[] = []
+
+  for (const row of rows) {
+    if (!row || !isVisibleProfile(row, nowIso)) continue
+
+    const mapped = mapToDirectoryProfile(row)
+    if (!mapped) continue
+
+    visibleProfiles.push(mapped)
+  }
+
+  return visibleProfiles
+}
+
+export async function getProfiles(filters?: ProfileFilters): Promise<DirectoryProfile[]> {
+  try {
+    const rows = await fetchProfileRows(filters)
+    const visibleProfiles = getVisibleProfilesFromRows(rows)
+
+    if (visibleProfiles.length > 0 || !filters?.q?.trim()) {
+      return visibleProfiles
+    }
+
+    const fallbackRows = await fetchProfileRows(filters, false)
+    return getVisibleProfilesFromRows(fallbackRows).filter((profile) =>
+      matchesLocalSearch(profile, filters.q ?? '')
+    )
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`getProfiles failed: ${error.message}`)
