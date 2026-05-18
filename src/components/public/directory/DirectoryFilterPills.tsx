@@ -1,7 +1,9 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronDownIcon, SlidersIcon } from '@components/icons/ui'
+import { SlidersIcon } from '@components/icons/ui'
+import { SearchBar } from '../search/SearchBar'
+import type { SearchSuggestionSource } from '../search/searchSuggestions'
 
 export type DirectoryFilterCategory = {
   label: string
@@ -19,55 +21,78 @@ type DirectoryFilterPillsProps = {
   onFiltersClick?: () => void
   filterLabel?: string
   sortLabel?: string
-}
-
-const SORT_LABELS: Record<DirectorySortValue, string> = {
-  recent: 'Mas recientes',
-  name: 'Nombre',
+  searchDefaultValue?: string
+  searchSuggestionSource?: SearchSuggestionSource
 }
 
 export function DirectoryFilterPills({
   categories,
   selectedCategory = '',
   onCategoryChange,
-  sort = 'recent',
-  onSortChange,
   onFiltersClick,
   filterLabel = 'Filtros',
-  sortLabel,
+  searchDefaultValue,
+  searchSuggestionSource,
 }: DirectoryFilterPillsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  function updateCategory(category: string) {
-    onCategoryChange?.(category)
-
-    if (onCategoryChange) return
-
+  function updateDirectoryParams(updates: { category?: string }) {
     const params = new URLSearchParams(searchParams.toString())
 
-    if (category) {
-      params.set('categoria', category)
-    } else {
-      params.delete('categoria')
+    if (updates.category !== undefined) {
+      if (updates.category) {
+        params.set('categoria', updates.category)
+      } else {
+        params.delete('categoria')
+      }
     }
 
     const queryString = params.toString()
     router.push(queryString ? `/?${queryString}` : '/')
   }
 
+  function updateCategory(category: string) {
+    onCategoryChange?.(category)
+
+    if (onCategoryChange) return
+
+    updateDirectoryParams({ category })
+  }
+
   return (
     <div className="sw-directory-filters">
+      <div className="sw-directory-filter-actions">
+        <div className="sw-directory-filter-search">
+          <SearchBar
+            defaultValue={searchDefaultValue}
+            size="compact"
+            suggestionSource={searchSuggestionSource}
+          />
+        </div>
+
+        {onFiltersClick ? (
+          <button
+            type="button"
+            className="sw-directory-filter-button"
+            onClick={onFiltersClick}
+          >
+            <SlidersIcon size={16} />
+            <span>{filterLabel}</span>
+          </button>
+        ) : null}
+      </div>
+
       <div
         className="sw-directory-filter-scroll"
         aria-label="Categorias del directorio"
       >
-        {categories.map((category) => {
+        {categories.slice(1).map((category) => {
           const isActive = category.value === selectedCategory
 
           return (
             <button
-              key={category.value || 'all'}
+              key={category.value}
               type="button"
               className={isActive ? 'sw-directory-pill sw-directory-pill-active' : 'sw-directory-pill'}
               aria-pressed={isActive}
@@ -77,31 +102,6 @@ export function DirectoryFilterPills({
             </button>
           )
         })}
-      </div>
-
-      <div className="sw-directory-filter-actions">
-        <button
-          type="button"
-          className="sw-directory-filter-button"
-          onClick={onFiltersClick}
-        >
-          <SlidersIcon size={16} />
-          <span>{filterLabel}</span>
-        </button>
-
-        <label className="sw-directory-sort">
-          <span className="sr-only">Ordenar resultados</span>
-          <select
-            value={sort}
-            onChange={(event) => onSortChange?.(event.target.value as DirectorySortValue)}
-          >
-            <option value="recent">{sortLabel ?? SORT_LABELS.recent}</option>
-            <option value="name">{SORT_LABELS.name}</option>
-          </select>
-          <span aria-hidden="true">
-            <ChevronDownIcon size={16} />
-          </span>
-        </label>
       </div>
     </div>
   )

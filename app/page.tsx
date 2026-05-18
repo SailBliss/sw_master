@@ -67,12 +67,17 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         activePath="/"
         searchDefaultValue={q}
         searchSuggestionSource={searchSuggestionSource}
+        categories={directoryCategories}
+        selectedCategory={categoria}
+        sort="recent"
       />
 
       <DirectoryFilterPills
         categories={directoryCategories}
         selectedCategory={categoria}
         sort="recent"
+        searchDefaultValue={q}
+        searchSuggestionSource={searchSuggestionSource}
       />
 
       <section className="sw-directory-content" aria-label="Directorio SW Mujeres">
