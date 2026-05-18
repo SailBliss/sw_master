@@ -2,6 +2,7 @@ export {
   sendEmail,
   notifyAdminNewApplication,
   notifyEntrepreneurApproved,
+  notifyEntrepreneurPaymentAvailable,
   sendMagicLinkEmail,
   sendOtpEmail,
   notifyEntrepreneurRejected,

@@ -121,6 +121,52 @@ export async function notifyEntrepreneurApproved(data: {
   await sendEmail(data.to, subject, html)
 }
 
+export async function notifyEntrepreneurPaymentAvailable(data: {
+  to: string
+  entrepreneurName: string
+  businessName: string
+  paymentUrl: string
+  expiresAt: string
+}): Promise<void> {
+  const expiresDate = new Date(data.expiresAt).toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+  const subject = `Tu link de pago para SW Mujeres esta disponible`
+
+  const html = `
+    <div style="font-family: sans-serif; color: #333; max-width: 600px;">
+      <h2 style="color: #7c3aed;">Hola, ${data.entrepreneurName}</h2>
+      <p>
+        Revisamos la solicitud de <strong>${data.businessName}</strong> y ya puedes completar
+        el pago de tu plan en Wompi.
+      </p>
+      <p>
+        Este paso habilita el pago, pero tu perfil solo queda aprobado y visible cuando Wompi
+        confirme la transaccion automaticamente.
+      </p>
+      <div style="margin: 28px 0; text-align: center;">
+        <a
+          href="${data.paymentUrl}"
+          style="background-color: #7c3aed; color: #fff; padding: 14px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;"
+        >
+          Pagar con Wompi
+        </a>
+      </div>
+      <p style="font-size: 13px; color: #888;">
+        Este link vence el ${expiresDate}. Si vence, escribenos para generar uno nuevo.
+      </p>
+      <p style="font-size: 13px; color: #aaa;">
+        O copia y pega esta URL en tu navegador:<br />
+        <a href="${data.paymentUrl}" style="color: #7c3aed;">${data.paymentUrl}</a>
+      </p>
+    </div>
+  `
+
+  await sendEmail(data.to, subject, html)
+}
+
 export async function sendMagicLinkEmail(data: {
   to: string
   magicLinkUrl: string
