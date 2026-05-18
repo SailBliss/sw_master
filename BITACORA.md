@@ -2,6 +2,29 @@
 
 Registro cronológico de decisiones, implementaciones y resultados por módulo y tarea.
 
+---
+
+## Acople Wompi y reinscripcion por cedula
+
+**Que hace:** alinea enrollment, aprobacion admin y pagos Wompi con la base actual preparada para reinscripcion y pagos en dos etapas.
+**Por que existe:** los planes pagos no deben activar membresia desde aprobacion admin; solo el webhook/backend de Wompi confirma pago, aprueba la solicitud y habilita visibilidad.
+**Archivos creados o modificados:**
+- `src/features/enrollment/*`
+- `src/features/admin/*`
+- `src/features/payments/*`
+- `app/api/payments/wompi/*`
+- `app/inscripcion/*`
+- `app/pago/[token]/*`
+- `lib/email.ts`
+- `context/07_CURRENT_STATE.md`
+- `context/10_WOMPI_INTEGRATION.md`
+- `context/11_WOMPI_SQL_TARGET.md`
+- `tsconfig.json`
+**Decisiones tomadas:** la UI no hace lookup publico por cedula; si la cedula existe, el backend reutiliza identidad/perfil sin actualizar datos publicos antes de aprobacion. El token publico de pago es `payment_transactions.id`, no `applicationId`.
+**Como probarlo:** ejecutar `npm run build`; validar solicitud gratis, solicitud paga, reinscripcion, bloqueo, aprobacion gratis, aprobacion paga, reenvio de link y webhook Wompi repetido.
+
+---
+
 ## SearchBar reducida a icono
 
 **Que hace:** elimina la barra de texto, panel desplegable, sugerencias y comportamiento client de `SearchBar`, dejando solo un boton visual con la lupa reusable.
