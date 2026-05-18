@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
-import type { AdminApplication, ExistingReview } from '../types'
+import type { AdminApplication, AdminApplicationStatus, ExistingReview } from '../types'
 import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
 
 // ---------------------------------------------------------------------------
@@ -51,12 +51,12 @@ type RawProduct = {
 
 type RawApplication = {
   id: string
-  status: 'pendiente' | 'aprobado' | 'rechazado'
+  status: AdminApplicationStatus
   amount_cop: number
   submitted_at: string
   reviewed_at: string | null
   notes: string | null
-  receipt_path: string
+  receipt_path: string | null
   post_screenshot_path: string | null
   entrepreneur_id: string
   description_editorial_status: ApplicationEditorialStatus | null
@@ -71,7 +71,7 @@ type RawApplication = {
 // ---------------------------------------------------------------------------
 
 export async function listApplications(
-  status?: 'pendiente' | 'aprobado' | 'rechazado'
+  status?: AdminApplicationStatus
 ): Promise<AdminApplication[]> {
   let query = supabaseAdmin
     .from('applications')
@@ -283,9 +283,7 @@ export async function getApplicationById(id: string): Promise<AdminApplication |
 // ---------------------------------------------------------------------------
 
 export async function approveApplication(
-  applicationId: string,
-  _entrepreneurId: string,
-  _durationDays: number
+  applicationId: string
 ): Promise<void> {
   const now = new Date().toISOString()
 
@@ -293,8 +291,21 @@ export async function approveApplication(
     .from('applications')
     .update({ status: 'aprobado', reviewed_at: now })
     .eq('id', applicationId)
+    .eq('status', 'pendiente')
 
   if (appError) throw new Error(`Error al aprobar solicitud: ${appError.message}`)
+}
+
+export async function enableApplicationForPayment(applicationId: string): Promise<void> {
+  const now = new Date().toISOString()
+
+  const { error } = await supabaseAdmin
+    .from('applications')
+    .update({ status: 'habilitado_para_pago', reviewed_at: now })
+    .eq('id', applicationId)
+    .eq('status', 'pendiente')
+
+  if (error) throw new Error(`Error al habilitar pago: ${error.message}`)
 }
 
 // ---------------------------------------------------------------------------

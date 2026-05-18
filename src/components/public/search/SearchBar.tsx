@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { CloseIcon, SearchIcon } from '@components/icons/ui'
@@ -20,7 +20,7 @@ import {
 
 type SearchBarProps = {
   defaultValue?: string
-  size?: 'icon' | 'hero' | 'inline'
+  size?: 'icon' | 'hero' | 'inline' | 'compact'
   onClick?: () => void
   onSearchSubmit?: () => void
   expanded?: boolean
@@ -42,6 +42,7 @@ export function SearchBar({
   suggestionSource = EMPTY_SUGGESTION_SOURCE,
 }: SearchBarProps) {
   const router = useRouter()
+  const suggestionsId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState(resetOnCollapse ? '' : defaultValue ?? '')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
@@ -49,12 +50,14 @@ export function SearchBar({
   const label = defaultValue && !resetOnCollapse
     ? `Buscar ${defaultValue}`
     : 'Buscar por negocio, categoria o necesidad...'
-  const isTextInputSearch = size === 'hero' || size === 'inline'
-  const isExpanded = size === 'inline' ? true : Boolean(expanded)
+  const isTextInputSearch = size === 'hero' || size === 'inline' || size === 'compact'
+  const isExpanded = size === 'inline' || size === 'compact' ? true : Boolean(expanded)
   const iconSize = size === 'hero' ? 34 : 21
   const suiteClassName =
     size === 'hero'
       ? 'sw-search-suite--hero'
+      : size === 'compact'
+      ? 'sw-search-suite--compact'
       : size === 'inline'
       ? 'sw-search-suite--inline'
       : 'sw-search-suite'
@@ -86,6 +89,12 @@ export function SearchBar({
       inputRef.current.focus()
     }
   }, [expanded, size])
+
+  useEffect(() => {
+    if (!resetOnCollapse) {
+      setValue(defaultValue ?? '')
+    }
+  }, [defaultValue, resetOnCollapse])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -162,7 +171,7 @@ export function SearchBar({
               aria-label="Buscar en el directorio"
               aria-autocomplete="both"
               aria-expanded={showSuggestions || showRecentSearches}
-              aria-controls="sw-search-suggestions"
+              aria-controls={suggestionsId}
             />
           </div>
           {value ? (
@@ -179,7 +188,7 @@ export function SearchBar({
         </div>
 
         {(showSuggestions || showRecentSearches) && (
-          <div id="sw-search-suggestions" className="sw-search-suggestions" role="listbox">
+          <div id={suggestionsId} className="sw-search-suggestions" role="listbox">
             {showRecentSearches && (
               <div className="sw-search-suggestion-section">
                 <div className="sw-search-suggestion-header">

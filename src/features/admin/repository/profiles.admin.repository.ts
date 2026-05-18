@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
-import type { AdminProfile, UpdateProfileData } from '../types'
+import type { AdminApplicationStatus, AdminProfile, UpdateProfileData } from '../types'
 
 // ---------------------------------------------------------------------------
 // Helpers internos
@@ -92,11 +92,11 @@ export async function getAdminProfiles(search?: string): Promise<AdminProfile[]>
     .select('entrepreneur_id, status, submitted_at')
     .in('entrepreneur_id', entrepreneurIds)
     .order('submitted_at', { ascending: false })
-    .returns<{ entrepreneur_id: string; status: 'pendiente' | 'aprobado' | 'rechazado'; submitted_at: string }[]>()
+    .returns<{ entrepreneur_id: string; status: AdminApplicationStatus; submitted_at: string }[]>()
 
   if (appsError) throw new Error(appsError.message)
 
-  const appStatusMap = new Map<string, 'pendiente' | 'aprobado' | 'rechazado'>()
+  const appStatusMap = new Map<string, AdminApplicationStatus>()
   for (const a of latestApps ?? []) {
     if (!appStatusMap.has(a.entrepreneur_id)) {
       appStatusMap.set(a.entrepreneur_id, a.status)
@@ -171,7 +171,7 @@ export async function getAdminProfileById(entrepreneurId: string): Promise<Admin
     .eq('entrepreneur_id', entrepreneurId)
     .order('submitted_at', { ascending: false })
     .limit(1)
-    .single<{ status: 'pendiente' | 'aprobado' | 'rechazado' }>()
+    .single<{ status: AdminApplicationStatus }>()
 
   if (appError && appError.code !== 'PGRST116') throw new Error(appError.message)
 

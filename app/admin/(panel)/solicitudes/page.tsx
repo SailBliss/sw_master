@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { applicationsService } from '@src/features/admin/services/applications.service'
-import type { AdminApplication } from '@src/features/admin/types'
+import type { AdminApplication, AdminApplicationStatus } from '@src/features/admin/types'
 
-type StatusFilter = 'pendiente' | 'aprobado' | 'rechazado'
+type StatusFilter = AdminApplicationStatus
 
 function isValidStatus(s: string | undefined): s is StatusFilter {
-  return s === 'pendiente' || s === 'aprobado' || s === 'rechazado'
+  return s === 'pendiente' || s === 'habilitado_para_pago' || s === 'aprobado' || s === 'rechazado'
 }
 
 function formatDate(iso: string): string {
@@ -18,12 +18,14 @@ function formatDate(iso: string): string {
 
 const STATUS_LABELS: Record<StatusFilter, string> = {
   pendiente: 'Pendiente',
+  habilitado_para_pago: 'Esperando pago',
   aprobado: 'Aprobada',
   rechazado: 'Rechazada',
 }
 
 const STATUS_BADGE_STYLE: Record<StatusFilter, React.CSSProperties> = {
   pendiente: { background: 'var(--sw-rose-pale)', color: 'var(--accent)' },
+  habilitado_para_pago: { background: 'rgba(194,122,42,0.14)', color: '#8a5a14' },
   aprobado: { background: 'rgba(90,122,82,0.15)', color: '#3a6b35' },
   rechazado: { background: 'rgba(139,42,42,0.10)', color: '#8b2a2a' },
 }
@@ -53,15 +55,17 @@ export default async function AdminSolicitudesPage({
   const solicitudes = allSolicitudes
   const pendientesCount = pendientesSolicitudes.length
 
-  const tabs: { label: string; href: string; value: string | undefined }[] = [
+  const tabs: { label: string; href: string; value: StatusFilter | undefined }[] = [
     { label: 'Todas', href: '/admin/solicitudes', value: undefined },
     { label: 'Pendientes', href: '/admin/solicitudes?status=pendiente', value: 'pendiente' },
+    { label: 'Esperando pago', href: '/admin/solicitudes?status=habilitado_para_pago', value: 'habilitado_para_pago' },
     { label: 'Aprobadas', href: '/admin/solicitudes?status=aprobado', value: 'aprobado' },
     { label: 'Rechazadas', href: '/admin/solicitudes?status=rechazado', value: 'rechazado' },
   ]
 
   const emptyMessages: Record<string, string> = {
-    pendiente: 'No hay solicitudes pendientes de revisión.',
+    pendiente: 'No hay solicitudes pendientes de revision.',
+    habilitado_para_pago: 'No hay solicitudes esperando pago.',
     aprobado: 'No hay solicitudes aprobadas.',
     rechazado: 'No hay solicitudes rechazadas.',
     all: 'No hay solicitudes registradas.',
@@ -70,19 +74,17 @@ export default async function AdminSolicitudesPage({
 
   return (
     <div>
-      {/* AdminHeader */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, paddingBottom: 20, borderBottom: '1px solid var(--sw-line)' }}>
         <div>
           <div className="sw-eyebrow">Admin</div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 400, fontSize: 38, margin: '8px 0 4px', letterSpacing: '-0.005em', color: 'var(--fg)' }}>
             Solicitudes
           </h1>
-          <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>{pendientesCount} pendiente{pendientesCount !== 1 ? 's' : ''} de revisión</div>
+          <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>{pendientesCount} pendiente{pendientesCount !== 1 ? 's' : ''} de revision</div>
         </div>
       </div>
 
-      {/* Tabs de filtro */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--sw-line)', marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--sw-line)', marginBottom: 24, flexWrap: 'wrap' }}>
         {tabs.map((tab) => {
           const isActive = tab.value === activeFilter
           return (
@@ -108,7 +110,6 @@ export default async function AdminSolicitudesPage({
         })}
       </div>
 
-      {/* Tabla */}
       {solicitudes.length === 0 ? (
         <div style={{ padding: '64px 0', textAlign: 'center', color: 'var(--fg-3)', fontSize: 13 }}>{emptyMsg}</div>
       ) : (
@@ -116,7 +117,7 @@ export default async function AdminSolicitudesPage({
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--bg-alt)', color: 'var(--fg-2)', textAlign: 'left' }}>
-                {['Empresaria', 'Negocio', 'Categoría', 'Enviada', 'Estado', ''].map(h => (
+                {['Empresaria', 'Negocio', 'Categoria', 'Enviada', 'Estado', ''].map(h => (
                   <th key={h} style={{ padding: '14px 24px', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{h}</th>
                 ))}
               </tr>
@@ -124,13 +125,13 @@ export default async function AdminSolicitudesPage({
             <tbody>
               {solicitudes.map((s: AdminApplication) => (
                 <tr key={s.id} style={{ borderTop: '1px solid var(--sw-line)' }}>
-                  <td style={{ padding: '16px 24px', color: 'var(--fg)', fontWeight: 500 }}>{s.entrepreneur.full_name ?? '—'}</td>
-                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{s.business_profile.business_name ?? '—'}</td>
-                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{s.business_profile.category ?? '—'}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg)', fontWeight: 500 }}>{s.entrepreneur.full_name ?? '-'}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{s.business_profile.business_name ?? '-'}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{s.business_profile.category ?? '-'}</td>
                   <td style={{ padding: '16px 24px', color: 'var(--fg-2)' }}>{formatDate(s.submitted_at)}</td>
                   <td style={{ padding: '16px 24px' }}><StatusBadge status={s.status} /></td>
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    <Link href={`/admin/solicitudes/${s.id}`} style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none' }}>Ver →</Link>
+                    <Link href={`/admin/solicitudes/${s.id}`} style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none' }}>Ver</Link>
                   </td>
                 </tr>
               ))}
