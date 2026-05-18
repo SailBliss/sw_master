@@ -1,4 +1,4 @@
-import { checkDuplicate, getProduct, createAll } from '../repository/enrollment.repository'
+import { resolveEnrollmentIdentity, getProduct, createEnrollmentApplication } from '../repository/enrollment.repository'
 import { uploadReceipt, uploadPostScreenshot } from '@src/shared/lib/storage'
 import { notifyAdminNewApplication } from '@src/shared/lib/email'
 import { getReview, markUsed } from '@src/features/profile-editorial-review/repository'
@@ -31,41 +31,30 @@ type EnrollmentInput = {
 
 export const enrollmentService = {
   async submit(input: EnrollmentInput): Promise<SubmissionResult> {
-    const isDuplicate = await checkDuplicate(input.cedula)
-    if (isDuplicate) {
-      return {
-        success: false,
-        message: 'Ya existe una solicitud con esta cédula. Si crees que es un error, contáctanos.',
-      }
-    }
-
     const product = await getProduct(input.product_id)
     if (!product) {
-      return { success: false, message: 'El plan seleccionado no es válido.' }
+      return { success: false, message: 'El plan seleccionado no es valido.' }
+    }
+
+    const identity = await resolveEnrollmentIdentity(input.cedula)
+    if (identity.status === 'blocked') {
+      return { success: false, message: identity.message }
     }
 
     const isPaidPlan = product.price_cop > 0
-    if (isPaidPlan && (!input.receipt || input.receipt.size === 0)) {
-      return { success: false, message: 'El comprobante de pago es obligatorio para este plan.' }
-    }
-
-    const entrepreneurId = crypto.randomUUID()
-
-    let receiptPath = ''
-    if (isPaidPlan && input.receipt) {
-      receiptPath = await uploadReceipt(input.receipt, entrepreneurId)
+    let receiptPath: string | null = null
+    if (isPaidPlan && input.receipt && input.receipt.size > 0) {
+      receiptPath = await uploadReceipt(input.receipt, identity.entrepreneurId)
     }
 
     let postScreenshotPath: string | null = null
     if (input.post_screenshot && input.post_screenshot.size > 0) {
       try {
-        postScreenshotPath = await uploadPostScreenshot(input.post_screenshot, entrepreneurId)
+        postScreenshotPath = await uploadPostScreenshot(input.post_screenshot, identity.entrepreneurId)
       } catch {
-        // No es obligatorio — continuamos sin ella
+        // Optional legacy asset; do not block enrollment.
       }
     }
-
-    // ─── Verify editorial review fields ─────────────────────────────────────────
 
     let editorialStatus: ApplicationEditorialStatus = 'requiere_revision_manual'
     let verifiedReviewId: string | null = null
@@ -78,20 +67,18 @@ export const enrollmentService = {
         const review = await getReview(rawReviewId)
         if (review) {
           verifiedReviewId = rawReviewId
-          // Only elevate status when reviewId is verified server-side
           editorialStatus = rawStatus === 'ia_aceptada' ? 'ia_aceptada' : 'ia_sugerida'
         }
-        // review not found → stays requiere_revision_manual, verifiedReviewId stays null
       } catch {
-        // getReview failure → stays requiere_revision_manual
+        // Keep manual review if editorial lookup fails.
       }
     }
-    // UUID invalid or absent → stays requiere_revision_manual
 
     const descriptionReviewed = editorialStatus !== 'requiere_revision_manual'
 
-    const applicationId = await createAll({
-      entrepreneurId,
+    const applicationId = await createEnrollmentApplication({
+      identityStatus: identity.status,
+      entrepreneurId: identity.entrepreneurId,
       cedula: input.cedula,
       full_name: input.full_name,
       email: input.email,
@@ -119,7 +106,7 @@ export const enrollmentService = {
       try {
         await markUsed(verifiedReviewId)
       } catch {
-        // markUsed failure is non-blocking
+        // markUsed failure is non-blocking.
       }
     }
 
@@ -130,12 +117,12 @@ export const enrollmentService = {
         category: input.category,
       })
     } catch {
-      // El email falla silenciosamente — la solicitud ya está guardada
+      // Email failure must not undo a persisted application.
     }
 
     return {
       success: true,
-      message: '¡Tu solicitud fue enviada! Revisaremos tu información y te contactaremos pronto.',
+      message: 'Tu solicitud fue enviada. Revisaremos tu informacion y te contactaremos pronto.',
       applicationId,
     }
   },

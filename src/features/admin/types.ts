@@ -1,5 +1,7 @@
 import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
 
+export type AdminApplicationStatus = 'pendiente' | 'habilitado_para_pago' | 'aprobado' | 'rechazado'
+
 export type ExistingReview = {
   suggested_text: string | null
   seo_tags: string[]
@@ -10,12 +12,12 @@ export type ExistingReview = {
 
 export type AdminApplication = {
   id: string
-  status: 'pendiente' | 'aprobado' | 'rechazado'
+  status: AdminApplicationStatus
   amount_cop: number
   submitted_at: string
   reviewed_at: string | null
   notes: string | null
-  receipt_path: string
+  receipt_path: string | null
   post_screenshot_path: string | null
   description_editorial_status: ApplicationEditorialStatus | null
   description_reviewed: boolean
@@ -73,7 +75,7 @@ export type AdminProfile = {
   membership_status: 'active' | 'inactive' | null
   membership_start: string | null
   membership_end: string | null
-  application_status: 'pendiente' | 'aprobado' | 'rechazado' | null
+  application_status: AdminApplicationStatus | null
   stats_token: string | null
 }
 

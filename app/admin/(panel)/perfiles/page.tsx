@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { adminProfilesService } from '@src/features/admin/services/profiles.admin.service'
-import type { AdminProfile } from '@src/features/admin/types'
+import type { AdminApplicationStatus, AdminProfile } from '@src/features/admin/types'
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
@@ -11,7 +11,7 @@ function formatDate(iso: string): string {
 }
 
 type MembershipStatus = 'active' | 'inactive' | null
-type AppStatus = 'pendiente' | 'aprobado' | 'rechazado' | null
+type AppStatus = AdminApplicationStatus | null
 
 function MembershipBadge({ status }: { status: MembershipStatus }) {
   if (status === 'active') {
@@ -22,11 +22,13 @@ function MembershipBadge({ status }: { status: MembershipStatus }) {
 
 const APP_STATUS_STYLE: Record<NonNullable<AppStatus>, React.CSSProperties> = {
   pendiente: { background: 'var(--sw-rose-pale)', color: 'var(--accent)' },
+  habilitado_para_pago: { background: 'rgba(194,122,42,0.14)', color: '#8a5a14' },
   aprobado: { background: 'rgba(90,122,82,0.15)', color: '#3a6b35' },
   rechazado: { background: 'rgba(139,42,42,0.10)', color: '#8b2a2a' },
 }
 const APP_STATUS_LABEL: Record<NonNullable<AppStatus>, string> = {
   pendiente: 'Pendiente',
+  habilitado_para_pago: 'Esperando pago',
   aprobado: 'Aprobada',
   rechazado: 'Rechazada',
 }

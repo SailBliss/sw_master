@@ -1,15 +1,34 @@
 import { supabaseAdmin } from '@src/shared/lib/supabase-admin'
 import type { ApplicationEditorialStatus } from '@src/features/profile-editorial-review/types'
 
-export async function checkDuplicate(cedula: string): Promise<boolean> {
+export type EnrollmentIdentity =
+  | { status: 'new'; entrepreneurId: string }
+  | { status: 'existing'; entrepreneurId: string }
+  | { status: 'blocked'; message: string }
+
+export async function resolveEnrollmentIdentity(cedula: string): Promise<EnrollmentIdentity> {
   const { data, error } = await supabaseAdmin
     .from('entrepreneurs')
-    .select('id')
+    .select('id, is_blocked, blocked_reason')
     .eq('cedula', cedula)
-    .maybeSingle()
+    .maybeSingle<{ id: string; is_blocked: boolean; blocked_reason: string | null }>()
 
-  if (error) throw new Error(`Error al verificar cédula duplicada: ${error.message}`)
-  return data !== null
+  if (error) throw new Error(`Error al verificar la cedula: ${error.message}`)
+
+  if (!data) {
+    return { status: 'new', entrepreneurId: crypto.randomUUID() }
+  }
+
+  if (data.is_blocked) {
+    return {
+      status: 'blocked',
+      message: data.blocked_reason
+        ? `No podemos recibir una nueva solicitud para esta cedula. Motivo: ${data.blocked_reason}`
+        : 'No podemos recibir una nueva solicitud para esta cedula. Contactanos para revisar tu caso.',
+    }
+  }
+
+  return { status: 'existing', entrepreneurId: data.id }
 }
 
 export async function getProduct(
@@ -26,7 +45,8 @@ export async function getProduct(
   return data
 }
 
-type CreateAllParams = {
+type CreateEnrollmentParams = {
+  identityStatus: 'new' | 'existing'
   entrepreneurId: string
   cedula: string
   full_name: string
@@ -44,93 +64,118 @@ type CreateAllParams = {
   discount_details: string | null
   product_id: string
   amount_cop: number
-  receipt_path: string
+  receipt_path: string | null
   post_screenshot_path: string | null
   description_editorial_status: ApplicationEditorialStatus
   description_review_id: string | null
   description_reviewed: boolean
 }
 
-export async function createAll(params: CreateAllParams): Promise<string> {
-  const {
-    entrepreneurId,
-    cedula, full_name, email, phone, fb_profile_url,
-    business_name, description, category, business_phone,
-    instagram_handle, website_url, other_socials, offers_discount, discount_details,
-    product_id, amount_cop, receipt_path, post_screenshot_path,
-    description_editorial_status, description_review_id, description_reviewed,
-  } = params
-
-  // a) entrepreneurs
-  const { error: errEnt } = await supabaseAdmin.from('entrepreneurs').insert({
-    id: entrepreneurId,
-    cedula, full_name, email, phone, fb_profile_url,
-    consent_accepted: true,
-    consent_accepted_at: new Date().toISOString(),
-  })
-  if (errEnt) throw new Error(`Error al insertar emprendedora: ${errEnt.message}`)
-
-  // b) business_profiles
+async function createBusinessProfile(params: CreateEnrollmentParams): Promise<void> {
   const profileInsert: Record<string, unknown> = {
-    entrepreneur_id: entrepreneurId,
-    business_name, description, category, business_phone,
-    offers_discount, wants_directory: true, directory_image_path: null,
-    stats_token: crypto.randomUUID(), // token único para la página privada de estadísticas
-  }
-  if (instagram_handle) profileInsert.instagram_handle = instagram_handle
-  if (website_url) profileInsert.website_url = website_url
-  if (other_socials) profileInsert.other_socials = other_socials
-  if (discount_details) profileInsert.discount_details = discount_details
-
-  const { error: errProfile } = await supabaseAdmin.from('business_profiles').insert(profileInsert)
-  if (errProfile) {
-    await supabaseAdmin.from('entrepreneurs').delete().eq('id', entrepreneurId)
-    throw new Error(`Error al insertar perfil: ${errProfile.message}`)
+    entrepreneur_id: params.entrepreneurId,
+    business_name: params.business_name,
+    description: params.description,
+    category: params.category,
+    business_phone: params.business_phone,
+    offers_discount: params.offers_discount,
+    wants_directory: true,
+    directory_image_path: null,
+    stats_token: crypto.randomUUID(),
   }
 
-  // c) applications
-  const { data: application, error: errApp } = await supabaseAdmin
-    .from('applications')
-    .insert({
-      entrepreneur_id: entrepreneurId, product_id,
-      status: 'pendiente', amount_cop, receipt_path, post_screenshot_path,
-      description_editorial_status, description_review_id, description_reviewed,
-    })
+  if (params.instagram_handle) profileInsert.instagram_handle = params.instagram_handle
+  if (params.website_url) profileInsert.website_url = params.website_url
+  if (params.other_socials) profileInsert.other_socials = params.other_socials
+  if (params.discount_details) profileInsert.discount_details = params.discount_details
+
+  const { error } = await supabaseAdmin.from('business_profiles').insert(profileInsert)
+  if (error) throw new Error(`Error al insertar perfil: ${error.message}`)
+}
+
+async function ensureMembership(entrepreneurId: string, applicationId: string, identityStatus: 'new' | 'existing'): Promise<void> {
+  if (identityStatus === 'new') {
+    const { error } = await supabaseAdmin
+      .from('memberships')
+      .insert({ entrepreneur_id: entrepreneurId, status: 'inactive', last_application_id: applicationId })
+
+    if (error) throw new Error(`Error al crear membresia: ${error.message}`)
+    return
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('memberships')
+    .update({ last_application_id: applicationId })
+    .eq('entrepreneur_id', entrepreneurId)
     .select('id')
-    .single()
+    .maybeSingle<{ id: string }>()
 
-  if (errApp || !application) {
-    await supabaseAdmin.from('business_profiles').delete().eq('entrepreneur_id', entrepreneurId)
-    await supabaseAdmin.from('entrepreneurs').delete().eq('id', entrepreneurId)
-    throw new Error(`Error al insertar solicitud: ${errApp?.message}`)
-  }
+  if (error) throw new Error(`Error al actualizar membresia: ${error.message}`)
+  if (data) return
 
-  const applicationId = application.id as string
-
-  // d) profile_reviews
-  const { error: errReview } = await supabaseAdmin
-    .from('profile_reviews')
-    .insert({ entrepreneur_id: entrepreneurId, status: 'pendiente' })
-
-  if (errReview) {
-    await supabaseAdmin.from('applications').delete().eq('id', applicationId)
-    await supabaseAdmin.from('business_profiles').delete().eq('entrepreneur_id', entrepreneurId)
-    await supabaseAdmin.from('entrepreneurs').delete().eq('id', entrepreneurId)
-    throw new Error(`Error al insertar revisión: ${errReview.message}`)
-  }
-
-  // e) memberships
-  const { error: errMem } = await supabaseAdmin
+  const { error: insertError } = await supabaseAdmin
     .from('memberships')
     .insert({ entrepreneur_id: entrepreneurId, status: 'inactive', last_application_id: applicationId })
 
-  if (errMem) {
-    await supabaseAdmin.from('profile_reviews').delete().eq('entrepreneur_id', entrepreneurId)
-    await supabaseAdmin.from('applications').delete().eq('id', applicationId)
-    await supabaseAdmin.from('business_profiles').delete().eq('entrepreneur_id', entrepreneurId)
-    await supabaseAdmin.from('entrepreneurs').delete().eq('id', entrepreneurId)
-    throw new Error(`Error al crear membresía: ${errMem.message}`)
+  if (insertError) throw new Error(`Error al crear membresia: ${insertError.message}`)
+}
+
+export async function createEnrollmentApplication(params: CreateEnrollmentParams): Promise<string> {
+  const createdNewIdentity = params.identityStatus === 'new'
+
+  if (createdNewIdentity) {
+    const { error } = await supabaseAdmin.from('entrepreneurs').insert({
+      id: params.entrepreneurId,
+      cedula: params.cedula,
+      full_name: params.full_name,
+      email: params.email,
+      phone: params.phone,
+      fb_profile_url: params.fb_profile_url,
+      consent_accepted: true,
+      consent_accepted_at: new Date().toISOString(),
+    })
+
+    if (error) throw new Error(`Error al insertar emprendedora: ${error.message}`)
   }
 
-  return applicationId
+  try {
+    if (createdNewIdentity) {
+      await createBusinessProfile(params)
+    }
+
+    const { data: application, error: appError } = await supabaseAdmin
+      .from('applications')
+      .insert({
+        entrepreneur_id: params.entrepreneurId,
+        product_id: params.product_id,
+        status: 'pendiente',
+        amount_cop: params.amount_cop,
+        receipt_path: params.receipt_path,
+        post_screenshot_path: params.post_screenshot_path,
+        description_editorial_status: params.description_editorial_status,
+        description_review_id: params.description_review_id,
+        description_reviewed: params.description_reviewed,
+      })
+      .select('id')
+      .single<{ id: string }>()
+
+    if (appError || !application) {
+      throw new Error(`Error al insertar solicitud: ${appError?.message ?? 'sin datos'}`)
+    }
+
+    try {
+      await ensureMembership(params.entrepreneurId, application.id, params.identityStatus)
+    } catch (membershipError) {
+      await supabaseAdmin.from('applications').delete().eq('id', application.id)
+      throw membershipError
+    }
+
+    return application.id
+  } catch (error) {
+    if (createdNewIdentity) {
+      await supabaseAdmin.from('business_profiles').delete().eq('entrepreneur_id', params.entrepreneurId)
+      await supabaseAdmin.from('entrepreneurs').delete().eq('id', params.entrepreneurId)
+    }
+    throw error
+  }
 }

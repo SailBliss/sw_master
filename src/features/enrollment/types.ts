@@ -21,7 +21,7 @@ export type ApplicationFormStep2 = {
 
 export type ApplicationFormStep3 = {
   product_id: string
-  receipt: File
+  receipt: File | null
   post_screenshot: File | null
   consent_accepted: boolean
 }

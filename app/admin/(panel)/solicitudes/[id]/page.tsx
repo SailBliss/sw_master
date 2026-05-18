@@ -16,6 +16,7 @@ async function approveApplicationAction(formData: FormData) {
   const applicationId = formData.get('applicationId') as string
   const entrepreneurId = formData.get('entrepreneurId') as string
   const durationDays = Number(formData.get('durationDays') ?? '90')
+  const productPriceCop = Number(formData.get('productPriceCop') ?? '0')
   const entrepreneurEmail = formData.get('entrepreneurEmail') as string
   const entrepreneurName = formData.get('entrepreneurName') as string
   const businessName = formData.get('businessName') as string
@@ -27,8 +28,19 @@ async function approveApplicationAction(formData: FormData) {
     .maybeSingle()
   const statsToken = (bp?.stats_token as string | null) ?? undefined
 
-  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName, statsToken)
+  await applicationsService.approve(applicationId, entrepreneurId, durationDays, entrepreneurEmail, entrepreneurName, businessName, productPriceCop, statsToken)
   redirect('/admin/solicitudes')
+}
+
+async function resendPaymentLinkAction(formData: FormData) {
+  'use server'
+  const applicationId = formData.get('applicationId') as string
+  const entrepreneurEmail = formData.get('entrepreneurEmail') as string
+  const entrepreneurName = formData.get('entrepreneurName') as string
+  const businessName = formData.get('businessName') as string
+
+  await applicationsService.resendPaymentLink(applicationId, entrepreneurEmail, entrepreneurName, businessName)
+  redirect(`/admin/solicitudes/${applicationId}`)
 }
 
 async function rejectApplicationAction(formData: FormData) {
@@ -103,14 +115,16 @@ function formatDate(iso: string): string {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
 }
 
-const STATUS_BADGE: Record<'pendiente' | 'aprobado' | 'rechazado', string> = {
+const STATUS_BADGE: Record<'pendiente' | 'habilitado_para_pago' | 'aprobado' | 'rechazado', string> = {
   pendiente: 'bg-yellow-100 text-yellow-800',
+  habilitado_para_pago: 'bg-amber-100 text-amber-800',
   aprobado: 'bg-green-100 text-green-800',
   rechazado: 'bg-red-100 text-red-800',
 }
 
-const STATUS_LABELS: Record<'pendiente' | 'aprobado' | 'rechazado', string> = {
+const STATUS_LABELS: Record<'pendiente' | 'habilitado_para_pago' | 'aprobado' | 'rechazado', string> = {
   pendiente: 'Pendiente',
+  habilitado_para_pago: 'Esperando pago',
   aprobado: 'Aprobada',
   rechazado: 'Rechazada',
 }
@@ -308,9 +322,11 @@ export default async function AdminSolicitudDetailPage({
   if (!solicitud) notFound()
 
   // Public URLs para los archivos de Storage
-  const receiptUrl = supabaseAdmin.storage
-    .from('recipts')
-    .getPublicUrl(solicitud.receipt_path).data.publicUrl
+  const receiptUrl = solicitud.receipt_path
+    ? supabaseAdmin.storage
+        .from('recipts')
+        .getPublicUrl(solicitud.receipt_path).data.publicUrl
+    : null
 
   const screenshotUrl = solicitud.post_screenshot_path
     ? supabaseAdmin.storage
@@ -429,14 +445,16 @@ export default async function AdminSolicitudDetailPage({
 
         {/* Archivos */}
         <div className="flex flex-wrap gap-3 pt-2">
-          <a
-            href={receiptUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md border border-sw-line bg-sw-paper px-3 py-2 text-sm font-medium text-sw-fg2 hover:bg-sw-cream transition-colors"
-          >
-            Ver comprobante de pago ↗
-          </a>
+          {receiptUrl && (
+            <a
+              href={receiptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-md border border-sw-line bg-sw-paper px-3 py-2 text-sm font-medium text-sw-fg2 hover:bg-sw-cream transition-colors"
+            >
+              Ver comprobante legacy
+            </a>
+          )}
           {screenshotUrl && (
             <a
               href={screenshotUrl}
@@ -460,12 +478,15 @@ export default async function AdminSolicitudDetailPage({
           {/* Aprobar */}
           <div>
             <p className="text-sm text-sw-fg2 mb-3">
-              Aprobar activa la membresía por {product.duration_days ?? 90} días y notifica a la empresaria por email.
+              {product.price_cop === 0
+                ? `Aprobar activa la membresia por ${product.duration_days ?? 90} dias y notifica a la empresaria por email.`
+                : 'Aprobar habilita el pago Wompi y envia el link de pago. La membresia no se activa hasta que Wompi confirme el pago.'}
             </p>
             <form action={approveApplicationAction}>
               <input type="hidden" name="applicationId" value={solicitud.id} />
               <input type="hidden" name="entrepreneurId" value={ent.id} />
               <input type="hidden" name="durationDays" value={String(product.duration_days ?? 90)} />
+              <input type="hidden" name="productPriceCop" value={String(product.price_cop)} />
               <input type="hidden" name="entrepreneurEmail" value={ent.email ?? ''} />
               <input type="hidden" name="entrepreneurName" value={ent.full_name ?? ''} />
               <input type="hidden" name="businessName" value={bp.business_name ?? ''} />
@@ -507,12 +528,26 @@ export default async function AdminSolicitudDetailPage({
       ) : (
         <section className="rounded-lg border border-sw-line bg-sw-paper p-6">
           <p className="text-sm text-sw-fg2">
-            Esta solicitud fue{' '}
-            <span className={`font-medium ${status === 'aprobado' ? 'text-green-700' : 'text-red-700'}`}>
+            Esta solicitud esta{' '}
+            <span className={`font-medium ${status === 'aprobado' ? 'text-green-700' : status === 'habilitado_para_pago' ? 'text-amber-700' : 'text-red-700'}`}>
               {STATUS_LABELS[status].toLowerCase()}
             </span>
             {solicitud.reviewed_at ? ` el ${formatDate(solicitud.reviewed_at)}` : ''}.
           </p>
+          {status === 'habilitado_para_pago' && (
+            <form action={resendPaymentLinkAction} className="mt-4">
+              <input type="hidden" name="applicationId" value={solicitud.id} />
+              <input type="hidden" name="entrepreneurEmail" value={ent.email ?? ''} />
+              <input type="hidden" name="entrepreneurName" value={ent.full_name ?? ''} />
+              <input type="hidden" name="businessName" value={bp.business_name ?? ''} />
+              <button
+                type="submit"
+                className="rounded-md bg-sw-burgundy px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+              >
+                Reenviar link de pago
+              </button>
+            </form>
+          )}
           {solicitud.notes && (
             <p className="mt-2 text-sm text-sw-fg2">
               <strong>Nota:</strong> {solicitud.notes}
