@@ -2,7 +2,7 @@
   "name": "sw_master",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "npm@11.6.3",
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:webpack": "next dev --webpack",
