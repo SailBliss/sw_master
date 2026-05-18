@@ -6,10 +6,18 @@ import { PublicNavbar, SectionShell } from '@src/components/public'
 import { supabasePublic } from '@src/shared/lib/supabase'
 import { CATEGORIES } from '@src/shared/utils/categories'
 import type { ProductOption } from '@src/features/enrollment/types'
+import { DescriptionReviewPanel } from '@src/features/profile-editorial-review/components/DescriptionReviewPanel'
+import type { AcceptedReview } from '@src/features/profile-editorial-review/components/DescriptionReviewPanel'
+import type { ApplicationEditorialStatus, ReviewResult } from '@src/features/profile-editorial-review/types'
 
 type SubmitState = {
   status: 'idle' | 'submitting' | 'success' | 'error'
   message: string | null
+}
+
+type EditorialReviewState = {
+  status: ApplicationEditorialStatus
+  reviewId: string
 }
 
 function FieldLabel({ htmlFor, children }: { htmlFor: string; children: ReactNode }) {
@@ -27,6 +35,8 @@ export default function InscripcionPage() {
   const [productsLoading, setProductsLoading] = useState(true)
   const [productsError, setProductsError] = useState<string | null>(null)
   const [offersDiscount, setOffersDiscount] = useState(false)
+  const [description, setDescription] = useState('')
+  const [editorialReview, setEditorialReview] = useState<EditorialReviewState>({ status: 'requiere_revision_manual', reviewId: '' })
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle', message: null })
 
   useEffect(() => {
@@ -60,6 +70,8 @@ export default function InscripcionPage() {
     const formData = new FormData(event.currentTarget)
     formData.set('offers_discount', offersDiscount ? 'true' : 'false')
     formData.set('consent_accepted', formData.get('consent_accepted') === 'on' ? 'true' : 'false')
+    formData.set('description_editorial_status', editorialReview.status)
+    formData.set('description_review_id', editorialReview.reviewId)
 
     try {
       const response = await fetch('/api/solicitudes', {
@@ -82,6 +94,8 @@ export default function InscripcionPage() {
 
       event.currentTarget.reset()
       setOffersDiscount(false)
+      setDescription('')
+      setEditorialReview({ status: 'requiere_revision_manual', reviewId: '' })
       setSubmitState({
         status: 'success',
         message: result.message ?? 'Tu solicitud fue enviada. Revisaremos tu informacion pronto.',
@@ -92,6 +106,20 @@ export default function InscripcionPage() {
         message: error instanceof Error ? error.message : 'No se pudo enviar la solicitud.',
       })
     }
+  }
+
+  function handleDescriptionChange(value: string) {
+    setDescription(value)
+    setEditorialReview({ status: 'requiere_revision_manual', reviewId: '' })
+  }
+
+  function handleReviewResult(result: ReviewResult) {
+    setEditorialReview({ status: 'ia_sugerida', reviewId: result.reviewId })
+  }
+
+  function handleReviewAccept(result: AcceptedReview) {
+    setDescription(result.acceptedText)
+    setEditorialReview({ status: 'ia_aceptada', reviewId: result.reviewId })
   }
 
   return (
@@ -158,7 +186,28 @@ export default function InscripcionPage() {
                 </div>
                 <div className="md:col-span-2">
                   <FieldLabel htmlFor="description">Descripcion</FieldLabel>
-                  <textarea id="description" name="description" required minLength={10} maxLength={300} rows={4} className={inputClass} />
+                  <textarea
+                    id="description"
+                    name="description"
+                    required
+                    minLength={10}
+                    maxLength={300}
+                    rows={4}
+                    value={description}
+                    onChange={(event) => handleDescriptionChange(event.target.value)}
+                    className={inputClass}
+                  />
+                  <input type="hidden" name="description_editorial_status" value={editorialReview.status} />
+                  <input type="hidden" name="description_review_id" value={editorialReview.reviewId} />
+                  <div className="mt-3">
+                    <DescriptionReviewPanel
+                      description={description}
+                      source="user_form"
+                      onResult={handleReviewResult}
+                      onAccept={handleReviewAccept}
+                      onDismiss={() => setEditorialReview({ status: 'requiere_revision_manual', reviewId: '' })}
+                    />
+                  </div>
                 </div>
                 <div>
                   <FieldLabel htmlFor="business_phone">WhatsApp del negocio</FieldLabel>
