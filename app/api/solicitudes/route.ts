@@ -68,27 +68,36 @@ export async function POST(request: NextRequest): Promise<NextResponse<Submissio
   const rawEditorialStatus = (formData.get('description_editorial_status') as string | null) ?? ''
   const rawReviewId = (formData.get('description_review_id') as string | null) ?? ''
 
-  const result = await enrollmentService.submit({
-    cedula: String(formData.get('cedula')).trim(),
-    full_name: String(formData.get('full_name')).trim(),
-    email: String(formData.get('email')).trim(),
-    phone: String(formData.get('phone')).trim(),
-    fb_profile_url: String(formData.get('fb_profile_url')).trim(),
-    business_name: String(formData.get('business_name')).trim(),
-    description: String(formData.get('description')).trim(),
-    category: String(formData.get('category')).trim(),
-    business_phone: String(formData.get('business_phone')).trim(),
-    instagram_handle: normalizedInstagram || null,
-    website_url: formData.get('website_url') ? String(formData.get('website_url')).trim() || null : null,
-    other_socials: formData.get('other_socials') ? String(formData.get('other_socials')).trim() || null : null,
-    discount_details: formData.get('discount_details') ? String(formData.get('discount_details')).trim() || null : null,
-    offers_discount: String(formData.get('offers_discount')).trim() === 'true',
-    product_id: String(formData.get('product_id')).trim(),
-    receipt: receiptFile instanceof File ? receiptFile : null,
-    post_screenshot: screenshotFile instanceof File && screenshotFile.size > 0 ? screenshotFile : null,
-    description_editorial_status: rawEditorialStatus,
-    description_review_id: rawReviewId,
-  })
+  let result: SubmissionResult
+  try {
+    result = await enrollmentService.submit({
+      cedula: String(formData.get('cedula')).trim(),
+      full_name: String(formData.get('full_name')).trim(),
+      email: String(formData.get('email')).trim(),
+      phone: String(formData.get('phone')).trim(),
+      fb_profile_url: String(formData.get('fb_profile_url')).trim(),
+      business_name: String(formData.get('business_name')).trim(),
+      description: String(formData.get('description')).trim(),
+      category: String(formData.get('category')).trim(),
+      business_phone: String(formData.get('business_phone')).trim(),
+      instagram_handle: normalizedInstagram || null,
+      website_url: formData.get('website_url') ? String(formData.get('website_url')).trim() || null : null,
+      other_socials: formData.get('other_socials') ? String(formData.get('other_socials')).trim() || null : null,
+      discount_details: formData.get('discount_details') ? String(formData.get('discount_details')).trim() || null : null,
+      offers_discount: String(formData.get('offers_discount')).trim() === 'true',
+      product_id: String(formData.get('product_id')).trim(),
+      receipt: receiptFile instanceof File ? receiptFile : null,
+      post_screenshot: screenshotFile instanceof File && screenshotFile.size > 0 ? screenshotFile : null,
+      description_editorial_status: rawEditorialStatus,
+      description_review_id: rawReviewId,
+    })
+  } catch (error) {
+    console.error('Enrollment submission failed', error)
+    return NextResponse.json(
+      { success: false, message: 'No pudimos guardar la solicitud. Intenta de nuevo o contacta a soporte.' },
+      { status: 500 }
+    )
+  }
 
   const statusCode = result.success ? 200 : result.message.toLowerCase().includes('cedula') ? 409 : 400
   return NextResponse.json(result, { status: statusCode })

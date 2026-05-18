@@ -66,7 +66,15 @@ export default function InscripcionPage() {
         method: 'POST',
         body: formData,
       })
-      const result = await response.json() as { success: boolean; message?: string }
+      const responseText = await response.text()
+      let result: { success: boolean; message?: string }
+      try {
+        result = responseText
+          ? JSON.parse(responseText) as { success: boolean; message?: string }
+          : { success: false, message: 'El servidor no devolvio una respuesta valida.' }
+      } catch {
+        result = { success: false, message: 'El servidor no devolvio una respuesta valida.' }
+      }
 
       if (!response.ok || !result.success) {
         throw new Error(result.message ?? 'No se pudo enviar la solicitud.')
