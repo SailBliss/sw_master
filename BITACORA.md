@@ -4,6 +4,18 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 
 ---
 
+## Wompi mode guard
+
+**Que hace:** valida que las llaves Wompi publicas y secretos de integracion pertenezcan al mismo modo `test` o `prod` antes de generar checkout o validar webhooks.
+**Por que existe:** evita links de pago con firma invalida cuando se mezclan variables de entorno de pruebas y produccion.
+**Archivos creados o modificados:**
+- `src/features/payments/services/wompi.service.ts`
+- `BITACORA.md`
+**Decisiones tomadas:** la validacion es defensiva y no expone secretos; solo compara el modo inferido por los prefijos `_test_` y `_prod_`.
+**Como probarlo:** `npx tsc --noEmit --pretty false` y revisar que las variables Wompi del ambiente usen todas `test` o todas `prod`.
+
+---
+
 ## Acople Wompi y reinscripcion por cedula
 
 **Que hace:** alinea enrollment, aprobacion admin y pagos Wompi con la base actual preparada para reinscripcion y pagos en dos etapas.

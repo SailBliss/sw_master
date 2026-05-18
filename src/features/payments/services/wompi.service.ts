@@ -30,8 +30,29 @@ function getSiteUrl(): string {
 
 function assertCheckoutConfig(): void {
   getSiteUrl()
-  if (!process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY?.trim()) {
+  const publicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY?.trim()
+  const integritySecret = process.env.WOMPI_INTEGRITY_SECRET?.trim()
+
+  if (!publicKey) {
     throw new Error('NEXT_PUBLIC_WOMPI_PUBLIC_KEY no esta configurada.')
+  }
+  if (integritySecret) {
+    assertMatchingWompiMode(publicKey, integritySecret, 'WOMPI_INTEGRITY_SECRET')
+  }
+}
+
+function getWompiMode(value: string): 'test' | 'prod' | null {
+  if (value.includes('_test_')) return 'test'
+  if (value.includes('_prod_')) return 'prod'
+  return null
+}
+
+function assertMatchingWompiMode(publicKey: string, secret: string, secretName: string): void {
+  const publicMode = getWompiMode(publicKey)
+  const secretMode = getWompiMode(secret)
+
+  if (publicMode && secretMode && publicMode !== secretMode) {
+    throw new Error(`${secretName} no coincide con NEXT_PUBLIC_WOMPI_PUBLIC_KEY: no mezcles llaves test y prod.`)
   }
 }
 
@@ -86,6 +107,7 @@ export function buildWompiCheckoutUrl(params: {
 
   const integritySecret = process.env.WOMPI_INTEGRITY_SECRET?.trim()
   if (integritySecret) {
+    assertMatchingWompiMode(publicKey, integritySecret, 'WOMPI_INTEGRITY_SECRET')
     url.searchParams.set(
       'signature:integrity',
       sha256(`${params.providerReference}${amountInCents}${CURRENCY}${integritySecret}`)
@@ -160,6 +182,10 @@ export async function getCheckoutForPaymentTransaction(paymentTransactionId: str
 export function verifyWompiEventChecksum(body: unknown, headerChecksum: string | null): boolean {
   const eventSecret = process.env.WOMPI_EVENTS_SECRET?.trim()
   if (!eventSecret) throw new Error('WOMPI_EVENTS_SECRET no esta configurada.')
+  const publicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY?.trim()
+  if (publicKey) {
+    assertMatchingWompiMode(publicKey, eventSecret, 'WOMPI_EVENTS_SECRET')
+  }
 
   const event = body as { signature?: { properties?: string[]; checksum?: string }; timestamp?: number; data?: unknown }
   const checksum = headerChecksum || event.signature?.checksum
