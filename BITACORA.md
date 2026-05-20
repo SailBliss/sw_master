@@ -4,6 +4,39 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 
 ---
 
+## Formulario de inscripcion editorial en dos pasos
+
+**Que hace:** transforma la pagina publica de inscripcion en un formulario editorial de dos pasos con panel de confianza, stepper, campos con iconos y acciones Volver/Continuar/Enviar.
+**Por que existe:** el formulario debe seguir la direccion visual premium de SW Mujeres y reducir carga cognitiva separando datos personales de informacion del negocio.
+**Archivos creados o modificados:**
+- `app/inscripcion/page.tsx`
+- `BITACORA.md`
+**Decisiones tomadas:** se mantienen los nombres de campos, el endpoint `/api/solicitudes`, la carga de planes, el flujo de revision IA y las validaciones existentes; el cambio es de UX/estructura visual, no de contrato backend.
+**Como probarlo:** ejecutar `npx tsc --noEmit --pretty false`; abrir `/inscripcion`, completar el paso personal, avanzar al paso de negocio y enviar una solicitud de prueba con un plan activo.
+
+---
+
+## Directorio en /directorio
+
+**Que hace:** mueve la experiencia principal del directorio de `/` a `/directorio` y deja `/` como una entrada minima con logo y boton.
+**Por que existe:** la home debe funcionar como puerta de marca, mientras el listado publico vuelve a vivir bajo la ruta explicita del directorio.
+**Archivos creados o modificados:**
+- `app/page.tsx`
+- `app/directorio/page.tsx`
+- `app/directorio/[slug]/page.tsx`
+- `app/sitemap.ts`
+- `app/globals.css`
+- `src/components/public/navigation/PublicNavbar.tsx`
+- `src/components/public/search/SearchBar.tsx`
+- `src/components/public/directory/DirectoryFilterPills.tsx`
+- `src/components/public/cards/BusinessCard.tsx`
+- `components/directorio/ChatBubble.tsx`
+- `components/directorio/PreviewCard.tsx`
+**Decisiones tomadas:** se conservan los perfiles legacy en `/:slug` para no romper enlaces existentes, pero las nuevas tarjetas, busquedas, chat y sitemap apuntan a `/directorio/[slug]`.
+**Como probarlo:** ejecutar `npm run build`; abrir `/` y `/directorio`.
+
+---
+
 ## Wompi mode guard
 
 **Que hace:** valida que las llaves Wompi publicas y secretos de integracion pertenezcan al mismo modo `test` o `prod` antes de generar checkout o validar webhooks.

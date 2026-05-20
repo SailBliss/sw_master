@@ -7,6 +7,9 @@ import { PublicNavbar } from '@src/components/public'
 
 type ViewStatus = 'loading' | 'confirmed' | 'pending' | 'error'
 
+const STATUS_POLL_ATTEMPTS = 8
+const STATUS_POLL_INTERVAL_MS = 2500
+
 function ConfirmationContent() {
   const searchParams = useSearchParams()
   const paymentTransactionId = searchParams.get('paymentTransactionId')
@@ -14,7 +17,10 @@ function ConfirmationContent() {
   const [message, setMessage] = useState('Consultando el estado de tu pago...')
 
   useEffect(() => {
-    async function loadStatus() {
+    let cancelled = false
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+    async function loadStatus(attempt = 1) {
       if (!paymentTransactionId) {
         setStatus('error')
         setMessage('No pudimos identificar la intencion de pago.')
@@ -35,20 +41,37 @@ function ConfirmationContent() {
         }
 
         if (result.paymentStatus === 'paid' && result.applicationStatus === 'aprobado') {
+          if (cancelled) return
           setStatus('confirmed')
           setMessage('Tu pago fue confirmado y la membresia quedo activa.')
           return
         }
 
+        if (attempt < STATUS_POLL_ATTEMPTS && result.paymentStatus === 'pending') {
+          if (!cancelled) {
+            setStatus('loading')
+            setMessage('Estamos esperando la confirmacion automatica de Wompi...')
+            timeoutId = setTimeout(() => loadStatus(attempt + 1), STATUS_POLL_INTERVAL_MS)
+          }
+          return
+        }
+
+        if (cancelled) return
         setStatus('pending')
         setMessage('Tu pago sigue pendiente de confirmacion. Wompi notificara automaticamente a SW Mujeres.')
       } catch (error) {
+        if (cancelled) return
         setStatus('error')
         setMessage(error instanceof Error ? error.message : 'No se pudo consultar el pago.')
       }
     }
 
     loadStatus()
+
+    return () => {
+      cancelled = true
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [paymentTransactionId])
 
   const title =
