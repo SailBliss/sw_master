@@ -51,6 +51,25 @@ const featuredCategories = [
   { label: 'Moda y diseno', value: 'Moda', icon: 'Moda' },
 ] as const
 
+const heroSearchPlaceholders = [
+  'Busca marcas verificadas...',
+  'Busca lo que necesitas...',
+  'Busca por categoria, nombre o recomendacion...',
+  'Encuentra calidad sin perder tiempo...',
+  'Busca una aliada de confianza...',
+  'Encuentra marcas y servicios en Medellin...',
+  'Busca belleza, bienestar, moda...',
+  'Encuentra a quien recomendarian...',
+  'Busca algo especial...',
+  'Encuentra profesionales y marcas cercanas...',
+  'Busca el detalle perfecto...',
+  'Busca una solucion con criterio...',
+  'Encuentra negocios verificados por SW...',
+  'Busca entre empresarias de la comunidad...',
+  'Encuentra lo que necesitas, sin perder tiempo...',
+  'Busca una marca, un servicio o una experiencia...',
+]
+
 export default async function DirectoryPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
   const q = params.q?.trim() ?? ''
@@ -87,7 +106,8 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
           <div className="sw-directory-hero-search">
             <SearchBar
               defaultValue={q}
-              placeholder="Busca boutiques..."
+              placeholder={heroSearchPlaceholders[0]}
+              placeholders={heroSearchPlaceholders}
               size="hero"
               expanded
               suggestionSource={searchSuggestionSource}

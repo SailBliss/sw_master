@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties, FormEvent, PointerEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { CloseIcon, SearchIcon } from '@components/icons/ui'
 import { normalizeSearchText } from '@src/shared/utils/searchText'
@@ -21,6 +21,7 @@ import {
 type SearchBarProps = {
   defaultValue?: string
   placeholder?: string
+  placeholders?: string[]
   size?: 'icon' | 'hero' | 'inline' | 'compact'
   onClick?: () => void
   onSearchSubmit?: () => void
@@ -36,6 +37,7 @@ const EMPTY_SUGGESTION_SOURCE: SearchSuggestionSource = {
 export function SearchBar({
   defaultValue,
   placeholder,
+  placeholders,
   size = 'icon',
   onClick,
   onSearchSubmit,
@@ -46,20 +48,27 @@ export function SearchBar({
   const router = useRouter()
   const suggestionsId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
+  const heroInputStableWidthRef = useRef(0)
   const [value, setValue] = useState(resetOnCollapse ? '' : defaultValue ?? '')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isInputFocused, setIsInputFocused] = useState(false)
-  const label = placeholder ?? (size === 'inline'
+  const [heroInputWidth, setHeroInputWidth] = useState<number | null>(null)
+  const fallbackLabel = placeholder ?? (size === 'inline'
     ? 'Search...'
     : defaultValue && !resetOnCollapse
     ? `Buscar ${defaultValue}`
     : 'Buscar por negocio, categoria o necesidad...')
+  const [dynamicPlaceholder, setDynamicPlaceholder] = useState(fallbackLabel)
+  const label = size === 'hero' ? dynamicPlaceholder : fallbackLabel
   const isTextInputSearch = size === 'hero' || size === 'inline' || size === 'compact'
   const isExpanded = size === 'inline' || size === 'compact' ? true : Boolean(expanded)
   const iconSize = size === 'hero' ? 34 : size === 'inline' ? 16 : 21
+  const hasValue = value.trim().length > 0
   const suiteClassName =
     size === 'hero'
-      ? 'sw-search-suite--hero'
+      ? hasValue
+        ? 'sw-search-suite--hero sw-search-suite--has-value'
+        : 'sw-search-suite--hero'
       : size === 'compact'
       ? 'sw-search-suite--compact'
       : size === 'inline'
@@ -84,9 +93,9 @@ export function SearchBar({
     }
   }, [suggestions, value])
   const showSuggestions =
-    isExpanded && isInputFocused && value.trim().length > 0 && suggestions.length > 0
+    size !== 'hero' && isExpanded && isInputFocused && value.trim().length > 0 && suggestions.length > 0
   const showRecentSearches =
-    isExpanded && isInputFocused && value.trim().length === 0 && recentSearches.length > 0
+    size !== 'hero' && isExpanded && isInputFocused && value.trim().length === 0 && recentSearches.length > 0
 
   useEffect(() => {
     if (size === 'hero' && expanded && inputRef.current) {
@@ -99,6 +108,87 @@ export function SearchBar({
       setValue(defaultValue ?? '')
     }
   }, [defaultValue, resetOnCollapse])
+
+  useLayoutEffect(() => {
+    if (size !== 'hero' || !placeholders?.length) {
+      setDynamicPlaceholder(fallbackLabel)
+      return
+    }
+
+    const input = inputRef.current
+    const hero = input?.closest('.sw-directory-hero-search')
+    const availableWidth = Math.floor(hero?.getBoundingClientRect().width ?? 0)
+    let eligiblePlaceholders = placeholders
+    let fallbackOptions = placeholders
+
+    if (input && availableWidth > 0) {
+      const styles = window.getComputedStyle(input)
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+
+      if (context) {
+        context.font = [
+          styles.fontStyle,
+          styles.fontVariant,
+          styles.fontWeight,
+          styles.fontSize,
+          styles.fontFamily,
+        ].join(' ')
+
+        const measuredOptions = placeholders
+          .map((option) => ({
+            option,
+            width: Math.ceil(context.measureText(option).width) + 6,
+          }))
+          .sort((a, b) => a.width - b.width)
+
+        eligiblePlaceholders = measuredOptions
+          .filter(({ width }) => width <= availableWidth)
+          .map(({ option }) => option)
+        fallbackOptions = measuredOptions.slice(0, 1).map(({ option }) => option)
+      }
+    }
+
+    const options = eligiblePlaceholders.length > 0 ? eligiblePlaceholders : fallbackOptions
+    const nextPlaceholder = options[Math.floor(Math.random() * options.length)]
+    setDynamicPlaceholder(nextPlaceholder ?? fallbackLabel)
+  }, [fallbackLabel, placeholders, size])
+
+  useLayoutEffect(() => {
+    if (size !== 'hero' || !inputRef.current) return
+
+    const input = inputRef.current
+    const field = input.parentElement
+
+    field?.style.removeProperty('--sw-search-content-width')
+
+    const styles = window.getComputedStyle(input)
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+
+    if (!context) return
+
+    context.font = [
+      styles.fontStyle,
+      styles.fontVariant,
+      styles.fontWeight,
+      styles.fontSize,
+      styles.fontFamily,
+    ].join(' ')
+
+    const hasQuery = value.trim().length > 0
+    const textToMeasure = inlineSuggestion?.label ?? (value || label)
+    const measuredWidth = Math.ceil(context.measureText(textToMeasure).width) + 18
+
+    if (hasQuery) {
+      heroInputStableWidthRef.current = Math.max(heroInputStableWidthRef.current, measuredWidth)
+      setHeroInputWidth(heroInputStableWidthRef.current)
+      return
+    }
+
+    heroInputStableWidthRef.current = 0
+    setHeroInputWidth(measuredWidth)
+  }, [inlineSuggestion, label, size, value])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -132,10 +222,49 @@ export function SearchBar({
     return true
   }
 
+  function placeHeroCaretAtStartIfEmpty() {
+    if (size !== 'hero' || value) return
+
+    window.requestAnimationFrame(() => {
+      inputRef.current?.setSelectionRange(0, 0)
+    })
+  }
+
+  function focusEmptyHeroAtStart(event: PointerEvent<HTMLInputElement>) {
+    if (size !== 'hero' || value) return
+
+    event.preventDefault()
+    inputRef.current?.focus()
+    inputRef.current?.setSelectionRange(0, 0)
+  }
+
+  function handleInputBlur() {
+    window.setTimeout(() => {
+      setIsInputFocused(false)
+
+      if (size === 'hero') {
+        setValue(defaultValue ?? '')
+      }
+    }, 120)
+  }
+
+  const inputWrapperStyle =
+    size === 'hero' && heroInputWidth
+      ? ({
+          '--sw-search-content-width': `${heroInputWidth}px`,
+          '--sw-search-submit-x': `${-(heroInputWidth / 2) - 58}px`,
+          '--sw-search-clear-x': `${heroInputWidth / 2 + 14}px`,
+        } as CSSProperties)
+      : undefined
+
+  const suiteStyle = size === 'hero' && heroInputWidth
+    ? ({ '--sw-search-content-width': `${heroInputWidth}px` } as CSSProperties)
+    : undefined
+
   if (isTextInputSearch) {
     return (
-      <form className={suiteClassName} role="search" onSubmit={handleSubmit}>
-        <div className="sw-search-input-wrapper">
+      <form className={suiteClassName} style={suiteStyle} role="search" onSubmit={handleSubmit}>
+        <div className="sw-search-input-wrapper" style={inputWrapperStyle}>
           <button
             type="submit"
             className="sw-search-submit-button"
@@ -158,6 +287,7 @@ export function SearchBar({
               placeholder={label}
               value={value}
               onChange={(event) => setValue(event.target.value)}
+              onPointerDown={focusEmptyHeroAtStart}
               onKeyDown={(event) => {
                 if ((event.key === 'Tab' || event.key === 'ArrowRight') && acceptInlineSuggestion()) {
                   event.preventDefault()
@@ -166,10 +296,12 @@ export function SearchBar({
               onFocus={() => {
                 setIsInputFocused(true)
                 setRecentSearches(readRecentSearches())
+                placeHeroCaretAtStartIfEmpty()
               }}
-              onBlur={() => {
-                window.setTimeout(() => setIsInputFocused(false), 120)
+              onMouseUp={() => {
+                placeHeroCaretAtStartIfEmpty()
               }}
+              onBlur={handleInputBlur}
               disabled={size === 'hero' && !expanded}
               role="combobox"
               aria-label="Buscar en el directorio"
@@ -190,6 +322,7 @@ export function SearchBar({
             </button>
           ) : null}
         </div>
+        {size === 'hero' ? <span className="sw-search-hero-line" aria-hidden="true" /> : null}
 
         {(showSuggestions || showRecentSearches) && (
           <div id={suggestionsId} className="sw-search-suggestions" role="listbox">
