@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent, PointerEvent } from 'react'
+import type { FormEvent, PointerEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { CloseIcon, SearchIcon } from '@components/icons/ui'
 import { normalizeSearchText } from '@src/shared/utils/searchText'
@@ -48,11 +48,9 @@ export function SearchBar({
   const router = useRouter()
   const suggestionsId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
-  const heroInputStableWidthRef = useRef(0)
   const [value, setValue] = useState(resetOnCollapse ? '' : defaultValue ?? '')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isInputFocused, setIsInputFocused] = useState(false)
-  const [heroInputWidth, setHeroInputWidth] = useState<number | null>(null)
   const fallbackLabel = placeholder ?? (size === 'inline'
     ? 'Search...'
     : defaultValue && !resetOnCollapse
@@ -63,6 +61,7 @@ export function SearchBar({
   const isTextInputSearch = size === 'hero' || size === 'inline' || size === 'compact'
   const isExpanded = size === 'inline' || size === 'compact' ? true : Boolean(expanded)
   const iconSize = size === 'hero' ? 34 : size === 'inline' ? 16 : 21
+  const clearIconSize = size === 'inline' ? 14 : size === 'compact' ? 12 : 24
   const hasValue = value.trim().length > 0
   const suiteClassName =
     size === 'hero'
@@ -154,42 +153,6 @@ export function SearchBar({
     setDynamicPlaceholder(nextPlaceholder ?? fallbackLabel)
   }, [fallbackLabel, placeholders, size])
 
-  useLayoutEffect(() => {
-    if (size !== 'hero' || !inputRef.current) return
-
-    const input = inputRef.current
-    const field = input.parentElement
-
-    field?.style.removeProperty('--sw-search-content-width')
-
-    const styles = window.getComputedStyle(input)
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
-
-    if (!context) return
-
-    context.font = [
-      styles.fontStyle,
-      styles.fontVariant,
-      styles.fontWeight,
-      styles.fontSize,
-      styles.fontFamily,
-    ].join(' ')
-
-    const hasQuery = value.trim().length > 0
-    const textToMeasure = inlineSuggestion?.label ?? (value || label)
-    const measuredWidth = Math.ceil(context.measureText(textToMeasure).width) + 18
-
-    if (hasQuery) {
-      heroInputStableWidthRef.current = Math.max(heroInputStableWidthRef.current, measuredWidth)
-      setHeroInputWidth(heroInputStableWidthRef.current)
-      return
-    }
-
-    heroInputStableWidthRef.current = 0
-    setHeroInputWidth(measuredWidth)
-  }, [inlineSuggestion, label, size, value])
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     submitSearch(value)
@@ -248,23 +211,10 @@ export function SearchBar({
     }, 120)
   }
 
-  const inputWrapperStyle =
-    size === 'hero' && heroInputWidth
-      ? ({
-          '--sw-search-content-width': `${heroInputWidth}px`,
-          '--sw-search-submit-x': `${-(heroInputWidth / 2) - 58}px`,
-          '--sw-search-clear-x': `${heroInputWidth / 2 + 14}px`,
-        } as CSSProperties)
-      : undefined
-
-  const suiteStyle = size === 'hero' && heroInputWidth
-    ? ({ '--sw-search-content-width': `${heroInputWidth}px` } as CSSProperties)
-    : undefined
-
   if (isTextInputSearch) {
     return (
-      <form className={suiteClassName} style={suiteStyle} role="search" onSubmit={handleSubmit}>
-        <div className="sw-search-input-wrapper" style={inputWrapperStyle}>
+      <form className={suiteClassName} role="search" onSubmit={handleSubmit}>
+        <div className="sw-search-input-wrapper">
           <button
             type="submit"
             className="sw-search-submit-button"
@@ -318,7 +268,7 @@ export function SearchBar({
               disabled={size === 'hero' && !expanded}
               onClick={() => submitSearch('')}
             >
-              <CloseIcon size={24} />
+              <CloseIcon size={clearIconSize} />
             </button>
           ) : null}
         </div>

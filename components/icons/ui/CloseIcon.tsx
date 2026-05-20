@@ -11,11 +11,11 @@ export default function CloseIcon({ size = 20 }: CloseIconProps) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.55}
+      strokeWidth={1.8}
       strokeLinecap="round"
     >
-      <path d="M6.8 6.8 17.2 17.2" />
-      <path d="M17.2 6.8 6.8 17.2" />
+      <path d="M7 7 17 17" />
+      <path d="M17 7 7 17" />
     </svg>
   )
 }

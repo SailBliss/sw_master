@@ -103,16 +103,18 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
 
       <section className="sw-directory-content" aria-label="Directorio SW Mujeres">
         <div className="sw-directory-hero">
-          <div className="sw-directory-hero-search">
-            <SearchBar
-              defaultValue={q}
-              placeholder={heroSearchPlaceholders[0]}
-              placeholders={heroSearchPlaceholders}
-              size="hero"
-              expanded
-              suggestionSource={searchSuggestionSource}
-            />
-          </div>
+          {!q ? (
+            <div className="sw-directory-hero-search">
+              <SearchBar
+                defaultValue={q}
+                placeholder={heroSearchPlaceholders[0]}
+                placeholders={heroSearchPlaceholders}
+                size="hero"
+                expanded
+                suggestionSource={searchSuggestionSource}
+              />
+            </div>
+          ) : null}
 
           <nav className="sw-directory-hero-categories" aria-label="Categorias destacadas">
             {featuredCategories.map((category) => {
@@ -138,11 +140,6 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
               )
             })}
           </nav>
-        </div>
-
-        <div className="sw-directory-section-kicker">
-          <span>Descubrimiento editorial</span>
-          <span aria-hidden="true">•••</span>
         </div>
 
         <div className="sw-directory-results">
