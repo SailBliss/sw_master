@@ -49,7 +49,7 @@ export function DirectoryFilterPills({
     }
 
     const queryString = params.toString()
-    router.push(queryString ? `/?${queryString}` : '/')
+    router.push(queryString ? `/directorio?${queryString}` : '/directorio')
   }
 
   function updateCategory(category: string) {

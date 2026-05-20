@@ -7,7 +7,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const profiles = await profilesService.findAll()
 
   const profileUrls: MetadataRoute.Sitemap = profiles.map((p) => ({
-    url: `${SITE_URL}/${p.slug}`,
+    url: `${SITE_URL}/directorio/${p.slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.8,
@@ -16,6 +16,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: SITE_URL,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/directorio`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1.0,

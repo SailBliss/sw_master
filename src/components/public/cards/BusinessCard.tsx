@@ -26,17 +26,15 @@ function getInitials(name: string): string {
 
 export function BusinessCard({
   name,
-  category,
   description,
   imageUrl,
   avatarUrl,
   slug,
-  offersDiscount = false,
-  discountDetails,
 }: BusinessCardProps) {
   const initials = getInitials(name)
-  const href = slug ? `/${slug}` : undefined
-  const summary = description || 'Negocio seleccionado por SW Mujeres.'
+  const href = slug ? `/directorio/${slug}` : undefined
+  const summary = description?.trim() || 'Negocio seleccionado por SW Mujeres para encontrar y contactar con confianza.'
+  const avatarSrc = avatarUrl ?? imageUrl
 
   const cardContent = (
     <article className="sw-business-card">
@@ -56,35 +54,34 @@ export function BusinessCard({
             </div>
           )}
         </div>
-
-        <span className="sw-business-card-owner-avatar" aria-hidden="true">
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="72px"
-            />
-          ) : (
-            <span>{initials}</span>
-          )}
-        </span>
-
-        {offersDiscount && (
-          <span className="sw-business-card-offer">
-            {discountDetails?.trim() ? 'Beneficio SW' : 'Descuento SW'}
-          </span>
-        )}
       </div>
 
       <div className="sw-business-card-body">
-        <div className="sw-business-card-heading">
-          <h3>{name}</h3>
-        </div>
+        <h3 className="sw-business-card-title">{name}</h3>
+        <p className="sw-business-card-description">{summary}</p>
 
-        <p>{summary}</p>
-        {category && <span className="sw-business-card-category">{category}</span>}
+        <div className="sw-business-card-footer">
+          <div className="sw-business-card-owner">
+            <span className="sw-business-card-owner-avatar" aria-hidden="true">
+              {avatarSrc ? (
+                <Image
+                  src={avatarSrc}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="48px"
+                />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </span>
+            <span className="sw-business-card-owner-name">{name}</span>
+          </div>
+
+          <span className="sw-business-card-action" aria-hidden="true">
+            Ver negocio
+          </span>
+        </div>
       </div>
     </article>
   )
@@ -97,7 +94,7 @@ export function BusinessCard({
     <Link
       href={href}
       className="sw-business-card-link"
-      aria-label={`Ver perfil de ${name}`}
+      aria-label={`Ver negocio de ${name}`}
     >
       {cardContent}
     </Link>

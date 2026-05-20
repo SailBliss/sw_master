@@ -70,7 +70,7 @@ export default function PreviewCard({ profile, idx, videoSrc, descMaxLen = 72 }:
   return (
     <Link
         ref={cardRef}
-        href={`/${profile.slug}`}
+        href={`/directorio/${profile.slug}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={videoSrc ? 'swpc swpc-has-video' : 'swpc'}

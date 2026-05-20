@@ -20,6 +20,7 @@ import {
 
 type SearchBarProps = {
   defaultValue?: string
+  placeholder?: string
   size?: 'icon' | 'hero' | 'inline' | 'compact'
   onClick?: () => void
   onSearchSubmit?: () => void
@@ -34,6 +35,7 @@ const EMPTY_SUGGESTION_SOURCE: SearchSuggestionSource = {
 
 export function SearchBar({
   defaultValue,
+  placeholder,
   size = 'icon',
   onClick,
   onSearchSubmit,
@@ -47,12 +49,14 @@ export function SearchBar({
   const [value, setValue] = useState(resetOnCollapse ? '' : defaultValue ?? '')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isInputFocused, setIsInputFocused] = useState(false)
-  const label = defaultValue && !resetOnCollapse
+  const label = placeholder ?? (size === 'inline'
+    ? 'Search...'
+    : defaultValue && !resetOnCollapse
     ? `Buscar ${defaultValue}`
-    : 'Buscar por negocio, categoria o necesidad...'
+    : 'Buscar por negocio, categoria o necesidad...')
   const isTextInputSearch = size === 'hero' || size === 'inline' || size === 'compact'
   const isExpanded = size === 'inline' || size === 'compact' ? true : Boolean(expanded)
-  const iconSize = size === 'hero' ? 34 : 21
+  const iconSize = size === 'hero' ? 34 : size === 'inline' ? 16 : 21
   const suiteClassName =
     size === 'hero'
       ? 'sw-search-suite--hero'
@@ -117,7 +121,7 @@ export function SearchBar({
     const queryString = params.toString()
     setIsInputFocused(false)
     onSearchSubmit?.()
-    router.push(queryString ? `/?${queryString}` : '/')
+    router.push(queryString ? `/directorio?${queryString}` : '/directorio')
   }
 
   function acceptInlineSuggestion() {
