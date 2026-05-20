@@ -4,13 +4,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import ChatBubble from '@components/directorio/ChatBubble'
-import { SparkleIcon } from '@components/icons/ui'
 import type {
   DirectoryFilterCategory,
   DirectorySortValue,
 } from '../directory/DirectoryFilterPills'
 import { SearchBar } from '../search/SearchBar'
 import type { SearchSuggestionSource } from '../search/searchSuggestions'
+import { MiaRevealButton } from '../ui/MiaRevealButton'
 
 type PublicNavbarProps = {
   activePath?: string
@@ -97,14 +97,7 @@ function PublicNavbarContent({
             />
           </div>
 
-          <button
-            type="button"
-            className="sw-directory-navbar-action"
-            aria-label="Abrir MIA para buscar emprendimientos"
-            onClick={openSmartSearch}
-          >
-            <SparkleIcon size={22} />
-          </button>
+          <MiaRevealButton onClick={openSmartSearch} />
         </div>
       </header>
       <ChatBubble />

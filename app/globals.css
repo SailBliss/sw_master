@@ -387,31 +387,84 @@ select {
   justify-self: center;
 }
 
-.sw-directory-navbar-action {
-  display: inline-grid;
+.sw-mia-reveal-button {
+  display: inline-flex;
   width: 36px;
   height: 36px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   justify-self: end;
-  border: 1px solid rgba(57, 17, 37, 0.09);
+  overflow: visible;
+  border: 0;
   border-radius: 999px;
-  color: rgba(57, 17, 37, 0.72);
-  background: #ffffff;
+  background: transparent;
+  color: rgba(57, 17, 37, 0.78);
   cursor: pointer;
-  transition: border-color 180ms ease, color 180ms ease, background-color 180ms ease;
+  padding: 0;
+  box-shadow: none !important;
+  filter: none !important;
+  white-space: nowrap;
+  transition:
+    width 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 360ms var(--ease-out),
+    color 360ms var(--ease-out);
 }
 
-.sw-directory-navbar-action:hover,
-.sw-directory-navbar-action:focus-visible {
-  border-color: rgba(57, 17, 37, 0.18);
-  color: rgba(57, 17, 37, 0.92);
-  background: rgba(250, 244, 247, 0.82);
+.sw-mia-reveal-button:hover,
+.sw-mia-reveal-button:focus-visible,
+.sw-mia-reveal-button--intro-open {
+  width: clamp(150px, 12vw, 164px);
+  background: transparent;
+  color: rgba(57, 17, 37, 0.94);
+  box-shadow: none !important;
+  filter: none !important;
 }
 
-.sw-directory-navbar-action:focus-visible {
+.sw-mia-reveal-button:focus-visible {
   outline: 2px solid rgba(122, 40, 80, 0.32);
   outline-offset: 3px;
+}
+
+.sw-mia-reveal-icon {
+  display: grid;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  place-items: center;
+  color: rgba(91, 62, 79, 0.84);
+  transition:
+    color 360ms var(--ease-out),
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sw-mia-reveal-button:hover .sw-mia-reveal-icon,
+.sw-mia-reveal-button:focus-visible .sw-mia-reveal-icon,
+.sw-mia-reveal-button--intro-open .sw-mia-reveal-icon {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+.sw-mia-reveal-label {
+  display: inline-flex;
+  align-items: center;
+  max-width: 116px;
+  overflow: visible;
+  color: rgba(57, 17, 37, 0.92);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 360ms var(--ease-out) 90ms,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1) 80ms;
+}
+
+.sw-mia-reveal-button:hover .sw-mia-reveal-label,
+.sw-mia-reveal-button:focus-visible .sw-mia-reveal-label,
+.sw-mia-reveal-button--intro-open .sw-mia-reveal-label {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .sw-directory-nav-select {
@@ -3002,6 +3055,9 @@ body .sw-directory-hero-search .sw-search-clear-button {
   .sw-navbar-page-blur,
   .sw-search-trigger,
   .sw-search-trigger--hero,
+  .sw-mia-reveal-button,
+  .sw-mia-reveal-icon,
+  .sw-mia-reveal-label,
   .sw-smart-search-button,
   .sw-directory-pill,
   .sw-directory-mia-action,
