@@ -853,6 +853,7 @@ select {
 .sw-directory-hero-search {
   width: min(100%, 900px);
   padding-bottom: 20px;
+  position: relative;
   transform: translateX(0);
   transition: transform 420ms var(--ease-out);
   will-change: transform;
@@ -958,9 +959,64 @@ select {
 }
 
 .sw-directory-hero-search .sw-search-suggestions {
-  width: min(760px, 100%);
-  margin: 0 auto;
-  padding: 14px 0 0;
+  position: absolute;
+  top: -46px;
+  left: calc(58px + var(--sw-search-content-width, 158px) + 96px);
+  z-index: 20;
+  width: min(360px, calc(100vw - 32px));
+  margin: 0;
+  padding: 0;
+}
+
+.sw-directory-hero-search .sw-search-suggestions--hero {
+  gap: 22px;
+  color: rgba(57, 17, 37, 0.78);
+}
+
+.sw-directory-hero-search .sw-search-suggestions--hero .sw-search-suggestion-section {
+  gap: 10px;
+}
+
+.sw-search-hero-row {
+  display: flex;
+  width: 100%;
+  min-height: 22px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 11px;
+  border: 0;
+  background: transparent;
+  color: rgba(57, 17, 37, 0.82);
+  padding: 0;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.sw-search-hero-row svg {
+  flex: 0 0 auto;
+  color: rgba(137, 74, 107, 0.72);
+}
+
+.sw-search-hero-row-icon {
+  display: inline-grid;
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sw-search-hero-row:hover {
+  color: var(--accent);
+}
+
+.sw-search-hero-row:focus-visible {
+  outline: 2px solid rgba(130, 22, 65, 0.30);
+  outline-offset: 3px;
 }
 
 .sw-directory-hero-categories {
@@ -1872,6 +1928,24 @@ select {
 
   .sw-search-suggestions {
     padding-left: 34px;
+  }
+}
+
+@media (max-width: 720px) {
+  .sw-directory-hero-search:has(.sw-search-suite--has-value) {
+    transform: none;
+  }
+
+  .sw-directory-hero-search .sw-search-suggestions {
+    position: static;
+    width: min(100%, 360px);
+    margin: 14px auto 0;
+    padding: 0;
+  }
+
+  .sw-directory-hero-search .sw-search-suite--has-value .sw-search-hero-line {
+    max-width: calc(100% - 58px);
+    margin-left: 58px !important;
   }
 }
 

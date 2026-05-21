@@ -78,6 +78,10 @@ export function SearchBar({
     () => getSearchSuggestions(value, suggestionSource),
     [suggestionSource, value]
   )
+  const visibleHeroRecentSearches = recentSearches.length > 0
+    ? recentSearches.slice(0, 2)
+    : ['Boutiques sostenibles', 'Galerías de arte moderno']
+  const heroPanelSuggestions = ['Boutiques de cuero', 'Experiencias gastronómicas']
   const inlineSuggestion = useMemo(() => {
     const query = value.trim()
     if (!query || suggestions.length === 0) return null
@@ -95,6 +99,7 @@ export function SearchBar({
     size !== 'hero' && isExpanded && isInputFocused && value.trim().length > 0 && suggestions.length > 0
   const showRecentSearches =
     size !== 'hero' && isExpanded && isInputFocused && value.trim().length === 0 && recentSearches.length > 0
+  const showHeroPanel = size === 'hero' && isExpanded && isInputFocused && hasValue
 
   useEffect(() => {
     if (size === 'hero' && expanded && inputRef.current) {
@@ -104,12 +109,14 @@ export function SearchBar({
 
   useEffect(() => {
     if (!resetOnCollapse) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue(defaultValue ?? '')
     }
   }, [defaultValue, resetOnCollapse])
 
   useLayoutEffect(() => {
     if (size !== 'hero' || !placeholders?.length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDynamicPlaceholder(fallbackLabel)
       return
     }
@@ -256,7 +263,7 @@ export function SearchBar({
               role="combobox"
               aria-label="Buscar en el directorio"
               aria-autocomplete="both"
-              aria-expanded={showSuggestions || showRecentSearches}
+              aria-expanded={showHeroPanel || showSuggestions || showRecentSearches}
               aria-controls={suggestionsId}
             />
           </div>
@@ -274,12 +281,73 @@ export function SearchBar({
         </div>
         {size === 'hero' ? <span className="sw-search-hero-line" aria-hidden="true" /> : null}
 
+        {showHeroPanel && (
+          <div id={suggestionsId} className="sw-search-suggestions sw-search-suggestions--hero" role="listbox">
+            <div className="sw-search-suggestion-section">
+              <div className="sw-search-suggestion-header">
+                <span>BÚSQUEDAS RECIENTES</span>
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => setRecentSearches(clearRecentSearches())}
+                >
+                  Limpiar
+                </button>
+              </div>
+              <div className="sw-search-suggestion-list">
+                {visibleHeroRecentSearches.map((recent) => {
+                  const visibleRecent = decodeVisibleSearchText(recent)
+
+                  return (
+                    <button
+                      key={recent}
+                      type="button"
+                      role="option"
+                      aria-selected="false"
+                      className="sw-search-hero-row"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => submitSearch(visibleRecent)}
+                    >
+                      <HistoryIcon />
+                      <span>{visibleRecent}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="sw-search-suggestion-section">
+              <div className="sw-search-suggestion-header">
+                <span>SUGERENCIAS PARA TI</span>
+              </div>
+              <div className="sw-search-suggestion-list">
+                {heroPanelSuggestions.map((suggestion, index) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    role="option"
+                    aria-selected="false"
+                    className="sw-search-hero-row"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => submitSearch(suggestion)}
+                  >
+                    <span className="sw-search-hero-row-icon" aria-hidden="true">
+                      {index === 0 ? <ShoppingBagIcon /> : <UtensilsIcon />}
+                    </span>
+                    <span>{decodeVisibleSearchText(suggestion)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {(showSuggestions || showRecentSearches) && (
           <div id={suggestionsId} className="sw-search-suggestions" role="listbox">
             {showRecentSearches && (
               <div className="sw-search-suggestion-section">
                 <div className="sw-search-suggestion-header">
-                  <span>Busquedas recientes</span>
+                  <span>BÚSQUEDAS RECIENTES</span>
                   <button
                     type="button"
                     onMouseDown={(event) => event.preventDefault()}
@@ -289,27 +357,31 @@ export function SearchBar({
                   </button>
                 </div>
                 <div className="sw-search-suggestion-list">
-                  {recentSearches.map((recent) => (
-                    <div key={recent} className="sw-search-recent-row">
-                      <button
-                        type="button"
-                        role="option"
-                        aria-selected="false"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => submitSearch(recent)}
-                      >
-                        {recent}
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Eliminar busqueda reciente ${recent}`}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => setRecentSearches(removeRecentSearch(recent))}
-                      >
-                        <CloseIcon size={16} />
-                      </button>
-                    </div>
-                  ))}
+                  {recentSearches.map((recent) => {
+                    const visibleRecent = decodeVisibleSearchText(recent)
+
+                    return (
+                      <div key={recent} className="sw-search-recent-row">
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected="false"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => submitSearch(visibleRecent)}
+                        >
+                          {visibleRecent}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Eliminar busqueda reciente ${visibleRecent}`}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => setRecentSearches(removeRecentSearch(recent))}
+                        >
+                          <CloseIcon size={16} />
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -317,23 +389,27 @@ export function SearchBar({
             {showSuggestions && (
               <div className="sw-search-suggestion-section">
                 <div className="sw-search-suggestion-header">
-                  <span>Sugerencias</span>
+                  <span>SUGERENCIAS</span>
                 </div>
                 <div className="sw-search-suggestion-list">
-                  {suggestions.map((suggestion) => (
-                    <button
-                      key={`${suggestion.kind}-${suggestion.label}`}
-                      type="button"
-                      role="option"
-                      aria-selected="false"
-                      className="sw-search-suggestion-option"
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => submitSearch(suggestion.label)}
-                    >
-                      <span>{suggestion.label}</span>
-                      <span>{getSuggestionKindLabel(suggestion.kind)}</span>
-                    </button>
-                  ))}
+                  {suggestions.map((suggestion) => {
+                    const visibleSuggestion = decodeVisibleSearchText(suggestion.label)
+
+                    return (
+                      <button
+                        key={`${suggestion.kind}-${suggestion.label}`}
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        className="sw-search-suggestion-option"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => submitSearch(visibleSuggestion)}
+                      >
+                        <span>{visibleSuggestion}</span>
+                        <span>{getSuggestionKindLabel(suggestion.kind)}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -379,6 +455,29 @@ function getInlineCompletion(label: string, query: string): string | null {
   return completion || null
 }
 
+function decodeVisibleSearchText(text: string): string {
+  const decodedUriText = text.includes('%')
+    ? safeDecodeURIComponent(text)
+    : text
+
+  if (!decodedUriText.includes('\u00C3')) return decodedUriText
+
+  try {
+    const bytes = Uint8Array.from(decodedUriText, (character) => character.charCodeAt(0) & 0xff)
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch {
+    return decodedUriText
+  }
+}
+
+function safeDecodeURIComponent(text: string): string {
+  try {
+    return decodeURIComponent(text)
+  } catch {
+    return text
+  }
+}
+
 function getSuggestionKindLabel(kind: SearchSuggestionKind): string {
   if (kind === 'category') return 'Categoria'
   if (kind === 'business') return 'Negocio'
@@ -387,4 +486,36 @@ function getSuggestionKindLabel(kind: SearchSuggestionKind): string {
   if (kind === 'phrase') return 'Servicio'
   if (kind === 'keyword') return 'Servicio'
   return 'Servicio'
+}
+
+function HistoryIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 3v6h6" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  )
+}
+
+function ShoppingBagIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 8h12l-1 12H7L6 8Z" />
+      <path d="M9 8a3 3 0 0 1 6 0" />
+    </svg>
+  )
+}
+
+function UtensilsIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 3v7" />
+      <path d="M8 3v7" />
+      <path d="M4 7h4" />
+      <path d="M6 10v11" />
+      <path d="M17 3v18" />
+      <path d="M14 3c0 4 1 6 3 7" />
+    </svg>
+  )
 }

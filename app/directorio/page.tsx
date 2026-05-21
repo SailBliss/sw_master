@@ -44,15 +44,15 @@ const temporaryDirectoryPhotos = [
 const directoryAvatarPreview = '/directory-avatar-preview.png'
 
 const featuredCategories = [
-  { label: 'Belleza', value: 'Belleza y bienestar', icon: 'Belleza' },
-  { label: 'Gastronomia', value: CATEGORIES[2], icon: 'Alimentacion' },
-  { label: 'Experiencias', value: 'Eventos', icon: 'Eventos' },
-  { label: 'Bienestar', value: CATEGORIES[1], icon: 'Bienestar' },
-  { label: 'Moda y diseno', value: 'Moda', icon: 'Moda' },
+  { label: 'Boutiques', value: 'Belleza y bienestar', icon: 'Belleza' },
+  { label: 'Gastronomy', value: CATEGORIES[2], icon: 'Alimentacion' },
+  { label: 'Experiences', value: 'Eventos', icon: 'Eventos' },
+  { label: 'Wellness', value: CATEGORIES[1], icon: 'Bienestar' },
+  { label: 'Art & Design', value: 'Moda', icon: 'Moda' },
 ] as const
 
 const heroSearchPlaceholders = [
-  'Busca marcas verificadas...',
+  'Busca boutiques...',
   'Busca lo que necesitas...',
   'Busca por categoria, nombre o recomendacion...',
   'Encuentra calidad sin perder tiempo...',
