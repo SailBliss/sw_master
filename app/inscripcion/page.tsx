@@ -117,17 +117,18 @@ export default function InscripcionPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const form = event.currentTarget
 
     if (currentStep === 1) {
       goToBusinessStep()
       return
     }
 
-    if (!event.currentTarget.reportValidity()) return
+    if (!form.reportValidity()) return
 
     setSubmitState({ status: 'submitting', message: null })
 
-    const formData = new FormData(event.currentTarget)
+    const formData = new FormData(form)
     formData.set('offers_discount', offersDiscount ? 'true' : 'false')
     formData.set('consent_accepted', formData.get('consent_accepted') === 'on' ? 'true' : 'false')
     formData.set('description_editorial_status', editorialReview.status)
@@ -152,14 +153,13 @@ export default function InscripcionPage() {
         throw new Error(result.message ?? 'No se pudo enviar la solicitud.')
       }
 
-      event.currentTarget.reset()
+      form.reset()
       setOffersDiscount(false)
       setDescription('')
       setEditorialReview({ status: 'requiere_revision_manual', reviewId: '' })
-      setCurrentStep(1)
       setSubmitState({
         status: 'success',
-        message: result.message ?? 'Tu solicitud fue enviada. Revisaremos tu informacion pronto.',
+        message: result.message ?? 'Enviado',
       })
     } catch (error) {
       setSubmitState({
@@ -195,6 +195,32 @@ export default function InscripcionPage() {
 
     setCurrentStep(2)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (submitState.status === 'success') {
+    return (
+      <main className="min-h-screen bg-[#e4d7d6] text-[--fg]">
+        <Suspense fallback={null}>
+          <PublicNavbar activePath="/inscripcion" />
+        </Suspense>
+
+        <section className="relative grid min-h-[calc(100vh-80px)] place-items-center overflow-hidden px-6 py-16 text-center" aria-labelledby="sent-title">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.09]"
+            style={{ backgroundImage: 'radial-gradient(#5e162c 0.7px, transparent 0.7px)', backgroundSize: '24px 24px' }}
+          />
+          <div className="relative z-10">
+            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#fff0f0] text-[--accent] shadow-[0_16px_36px_rgba(94,22,44,0.14)]">
+              <FormIcon type="check" />
+            </span>
+            <h1 id="sent-title" className="mt-6 font-[var(--font-display)] text-5xl font-medium leading-tight text-[--accent] md:text-7xl">
+              Enviado
+            </h1>
+          </div>
+        </section>
+      </main>
+    )
   }
 
   return (

@@ -156,7 +156,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  const embedding = await generateTextEmbedding(message)
+  let embedding: number[]
+  try {
+    embedding = await generateTextEmbedding(message)
+  } catch (embeddingError) {
+    const errorMsg = embeddingError instanceof Error ? embeddingError.message : 'Error desconocido'
+    console.error('Error generating chat embedding:', errorMsg)
+
+    return NextResponse.json(
+      {
+        error: 'No se pudo generar el embedding para la busqueda. Revisa GEMINI_API_KEY en el entorno de produccion.',
+      },
+      { status: 500 }
+    )
+  }
 
   if (embedding.length === 0) {
     return NextResponse.json({ error: 'No se pudo generar el embedding' }, { status: 500 })

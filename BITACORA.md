@@ -1283,3 +1283,15 @@ Registro cronológico de decisiones, implementaciones y resultados por módulo y
 **Como probarlo:** revisar que las reglas de visibilidad mencionen `memberships.status = 'active'`, `memberships.end_at > now()` y `applications.status = 'aprobado'`, y que los prompts de validacion no pidan lint/build/browser por defecto.
 
 ---
+
+## Manejo de error en embeddings del chat
+
+**Que hace:** Captura fallos al generar embeddings en `/api/chat` y devuelve una respuesta JSON en vez de dejar que la funcion falle con 500 vacio.
+**Por que existe:** En Vercel una busqueda del asistente podia devolver cuerpo vacio y el cliente mostraba "JSON invalido", ocultando que el problema real venia del entorno de IA.
+**Archivos creados o modificados:**
+- `app/api/chat/route.ts`
+- `BITACORA.md`
+**Decisiones tomadas:** Se mantiene el endpoint actual y solo se envuelve `generateTextEmbedding` con un `try/catch` especifico para diagnosticar configuracion de `GEMINI_API_KEY` en produccion.
+**Como probarlo:** Hacer `POST /api/chat` con una consulta de busqueda; si Gemini falla, la respuesta debe seguir siendo JSON.
+
+---
