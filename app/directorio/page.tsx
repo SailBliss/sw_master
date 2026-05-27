@@ -96,6 +96,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
         activePath="/directorio"
         searchDefaultValue={q}
         searchSuggestionSource={searchSuggestionSource}
+        hideSearchWhenHeroVisible={!q}
         categories={directoryCategories}
         selectedCategory={categoria}
         sort="recent"

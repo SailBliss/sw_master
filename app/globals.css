@@ -388,19 +388,40 @@ select {
 
 .sw-directory-navbar-logo {
   display: inline-flex;
+  grid-column: 1;
   min-width: 0;
   align-items: center;
   justify-self: start;
 }
 
 .sw-directory-navbar-search {
+  grid-column: 2;
   min-width: 0;
   width: 100%;
   justify-self: center;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 520ms var(--ease-out),
+    transform 820ms var(--ease-out),
+    visibility 0s linear 0s;
+  will-change: transform, opacity;
+}
+
+.sw-directory-navbar-search--hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-140%);
+  visibility: hidden;
+  transition:
+    opacity 620ms var(--ease-out),
+    transform 860ms var(--ease-out),
+    visibility 0s linear 860ms;
 }
 
 .sw-mia-reveal-button {
   display: inline-flex;
+  grid-column: 3;
   width: 36px;
   height: 36px;
   align-items: center;

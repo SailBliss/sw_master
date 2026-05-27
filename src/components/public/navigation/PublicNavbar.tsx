@@ -16,6 +16,8 @@ type PublicNavbarProps = {
   activePath?: string
   searchDefaultValue?: string
   searchSuggestionSource?: SearchSuggestionSource
+  showSearch?: boolean
+  hideSearchWhenHeroVisible?: boolean
   categories?: DirectoryFilterCategory[]
   selectedCategory?: string
   sort?: DirectorySortValue
@@ -26,12 +28,16 @@ type PublicNavbarProps = {
 export function PublicNavbar({
   searchDefaultValue,
   searchSuggestionSource,
+  showSearch = true,
+  hideSearchWhenHeroVisible = false,
 }: PublicNavbarProps) {
   return (
     <Suspense fallback={<PublicNavbarShell />}>
       <PublicNavbarContent
         searchDefaultValue={searchDefaultValue}
         searchSuggestionSource={searchSuggestionSource}
+        showSearch={showSearch}
+        hideSearchWhenHeroVisible={hideSearchWhenHeroVisible}
       />
     </Suspense>
   )
@@ -64,11 +70,15 @@ function PublicNavbarShell() {
 function PublicNavbarContent({
   searchDefaultValue,
   searchSuggestionSource,
+  showSearch = true,
+  hideSearchWhenHeroVisible = false,
 }: PublicNavbarProps) {
   const hideActivationOffset = 72
   const lastScrollYRef = useRef(0)
   const lastTouchYRef = useRef<number | null>(null)
   const [isHidden, setIsHidden] = useState(false)
+  const [isHeroSearchVisible, setIsHeroSearchVisible] = useState(false)
+  const shouldShowSearch = showSearch && !(hideSearchWhenHeroVisible && isHeroSearchVisible)
 
   useEffect(() => {
     lastScrollYRef.current = window.scrollY
@@ -133,6 +143,39 @@ function PublicNavbarContent({
     }
   }, [])
 
+  useEffect(() => {
+    if (!hideSearchWhenHeroVisible) {
+      return
+    }
+
+    const heroSearch = document.querySelector('.sw-directory-hero-search')
+
+    if (!heroSearch) {
+      return
+    }
+
+    const updateHeroSearchVisibility = () => {
+      const rect = heroSearch.getBoundingClientRect()
+      setIsHeroSearchVisible(rect.bottom > 0 && rect.top < window.innerHeight)
+    }
+
+    const initialFrame = window.requestAnimationFrame(updateHeroSearchVisibility)
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeroSearchVisible(Boolean(entry?.isIntersecting)),
+      { threshold: 0.01 },
+    )
+
+    observer.observe(heroSearch)
+    window.addEventListener('resize', updateHeroSearchVisibility)
+
+    return () => {
+      window.cancelAnimationFrame(initialFrame)
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeroSearchVisibility)
+    }
+  }, [hideSearchWhenHeroVisible])
+
   function openSmartSearch() {
     window.dispatchEvent(new CustomEvent('sw:open-chat'))
   }
@@ -157,12 +200,17 @@ function PublicNavbarContent({
             />
           </Link>
 
-          <div className="sw-directory-navbar-search">
-            <SearchBar
-              defaultValue={searchDefaultValue}
-              size="inline"
-              suggestionSource={searchSuggestionSource}
-            />
+          <div
+            className={shouldShowSearch ? 'sw-directory-navbar-search' : 'sw-directory-navbar-search sw-directory-navbar-search--hidden'}
+            aria-hidden={!shouldShowSearch}
+          >
+            {showSearch ? (
+              <SearchBar
+                defaultValue={searchDefaultValue}
+                size="inline"
+                suggestionSource={searchSuggestionSource}
+              />
+            ) : null}
           </div>
 
           <MiaRevealButton onClick={openSmartSearch} />
